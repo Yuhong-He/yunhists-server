@@ -23,6 +23,12 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- springboot starter web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
         <!-- springboot devtools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -78,18 +84,6 @@
             <version>8.0.32</version>
         </dependency>
 
-        <!-- swagger -->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-
         <!-- fastjson -->
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
@@ -101,6 +95,17 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-gson</artifactId>
             <version>0.11.5</version>
         </dependency>
 

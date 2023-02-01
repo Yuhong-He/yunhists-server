@@ -25,7 +25,7 @@ public class UserServiceImplTest {
     @Autowired
     UserService userService;
 
-    User testUser = new User("test", "test", "test@gmail.com");
+    User testUser = new User("test", "test", "test@gmail.com", 0);
 
     @Order(1)
     @Test
