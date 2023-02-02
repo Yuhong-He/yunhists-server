@@ -20,7 +20,7 @@ public class JwtHelper {
                 .compact();
     }
 
-    public static Long getUserId(String token) {
+    public static Long getUserId(String token) throws Exception {
         if(StringUtils.isEmpty(token)) return null;
         Jws<Claims> claimsJws = Jwts.parser().setSigningKey(tokenSignKey).parseClaimsJws(token);
         Claims claims = claimsJws.getBody();

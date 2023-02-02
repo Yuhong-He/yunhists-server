@@ -31,6 +31,10 @@ public class Result<T> {
         return build(data, ResultCodeEnum.SUCCESS);
     }
 
+    public static<T> Result<T> ok(){
+        return build(null, ResultCodeEnum.SUCCESS);
+    }
+
     public static<T> Result<T> error(ResultCodeEnum e){
         return build(null, e);
     }
