@@ -5,14 +5,14 @@ import lombok.Getter;
 @Getter
 public enum ResultCodeEnum {
 
-    SUCCESS(200,"成功"),
-    FAIL(202, "失败"),
-    LOGIN_AUTH(203, "未登陆"),
-    PERMISSION(204, "没有权限"),
-    LOGIN_ERROR(207, "密码错误"),
-    EMAIL_NOT_REGISTERED(208, "邮箱未注册"),
-    REGISTERED_WITH_GOOGLE(209, "谷歌注册用户"),
-    TOKEN_ERROR(224,"Token无效!")
+    SUCCESS(200,"Success"),
+    FAIL(202, "Fail"),
+    LOGIN_AUTH(203, "Not Login"),
+    PERMISSION(204, "No Authentication"),
+    WRONG_PWD(207, "Wrong Password"),
+    EMAIL_NOT_REGISTERED(208, "Email Not Registered"),
+    REGISTERED_WITH_GOOGLE(209, "Google Registered Account"),
+    TOKEN_ERROR(224,"Invalid Token")
     ;
 
     private final Integer code;

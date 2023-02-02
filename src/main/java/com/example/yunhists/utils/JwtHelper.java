@@ -24,8 +24,8 @@ public class JwtHelper {
         if(StringUtils.isEmpty(token)) return null;
         Jws<Claims> claimsJws = Jwts.parser().setSigningKey(tokenSignKey).parseClaimsJws(token);
         Claims claims = claimsJws.getBody();
-        Integer userId = (Integer)claims.get("userId");
-        return userId.longValue();
+        Double userIdDouble = (Double) claims.get("userId");
+        return userIdDouble.longValue();
     }
 
     public static Integer getUserRights(String token) {
@@ -33,12 +33,12 @@ public class JwtHelper {
         Jws<Claims> claimsJws
                 = Jwts.parser().setSigningKey(tokenSignKey).parseClaimsJws(token);
         Claims claims = claimsJws.getBody();
-        return (Integer)(claims.get("userRights"));
+        Double userRightsDouble = (Double) claims.get("userRights");
+        return userRightsDouble.intValue();
     }
 
     public static boolean isExpiration(String token) {
         try {
-            //没有过期，有效，返回false
             return Jwts.parser()
                     .setSigningKey(tokenSignKey)
                     .parseClaimsJws(token)
@@ -47,19 +47,5 @@ public class JwtHelper {
         } catch(Exception e) {
             return true;
         }
-    }
-
-    public String refreshToken(String token) {
-        String refreshedToken;
-        try {
-            final Claims claims = Jwts.parser()
-                    .setSigningKey(tokenSignKey)
-                    .parseClaimsJws(token)
-                    .getBody();
-            refreshedToken = JwtHelper.createToken(getUserId(token), getUserRights(token));
-        } catch (Exception e) {
-            refreshedToken = null;
-        }
-        return refreshedToken;
     }
 }
