@@ -17,7 +17,7 @@ public interface UserService extends IService<User> {
     int updateUsername(Integer id, String username);
     int updatePassword(Integer id, String password);
     int updateUserRights(Integer id, Integer userRights);
-    int updateLang(Integer id, Integer lang);
+    int updateLang(Integer id, String lang);
     int addPoints(Integer id);
 
     // Delete

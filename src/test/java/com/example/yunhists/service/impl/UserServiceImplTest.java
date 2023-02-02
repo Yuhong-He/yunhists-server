@@ -25,7 +25,7 @@ public class UserServiceImplTest {
     @Autowired
     UserService userService;
 
-    User testUser = new User("test", "test", "test@gmail.com", 0);
+    User testUser = new User("test", "test", "test@gmail.com", "zh", 0);
 
     @Order(1)
     @Test
@@ -126,9 +126,9 @@ public class UserServiceImplTest {
     @Order(14)
     @Test
     public void updateLang_userExist_success() {
-        int row = userService.updateLang(userService.getUserByEmail(testUser.getEmail()).getId(), 1);
+        int row = userService.updateLang(userService.getUserByEmail(testUser.getEmail()).getId(), "en");
         assertEquals(1, row);
-        assertNotEquals(0, userService.getUserByEmail(testUser.getEmail()).getLang());
+        assertNotEquals("zh", userService.getUserByEmail(testUser.getEmail()).getLang());
     }
 
     @Order(15)

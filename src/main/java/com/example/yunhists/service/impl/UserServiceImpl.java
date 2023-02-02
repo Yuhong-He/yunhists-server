@@ -66,7 +66,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public int updateLang(Integer id, Integer lang) {
+    public int updateLang(Integer id, String lang) {
         User user = this.getUserById(id);
         user.setLang(lang);
         return baseMapper.updateById(user);

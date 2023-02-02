@@ -28,7 +28,7 @@ public class User {
     private Integer userRights;
 
     @TableField("lang")
-    private Integer lang;
+    private String lang;
 
     @TableField("points")
     private Integer points;
@@ -36,10 +36,11 @@ public class User {
     @TableField("register_type")
     private Integer registerType;
 
-    public User(String username, String password, String email, int registerType) {
+    public User(String username, String password, String email, String lang, int registerType) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.lang = lang;
         this.registerType = registerType;
     }
 }

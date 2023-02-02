@@ -6,14 +6,12 @@ import com.example.yunhists.service.UserService;
 import com.example.yunhists.utils.JwtHelper;
 import com.example.yunhists.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -21,9 +19,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/login/{email}/{password}")
-    public Result<Object> login(@PathVariable("email") String email,
-                                @PathVariable("password") String password) {
+    @PostMapping("/login")
+    public Result<Object> login(@RequestParam("email") String email,
+                                @RequestParam("password") String password) {
 
         try {
             // 1. Check user exist
