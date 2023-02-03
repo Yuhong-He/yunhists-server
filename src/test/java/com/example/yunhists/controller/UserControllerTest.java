@@ -1,6 +1,8 @@
 package com.example.yunhists.controller;
 
 import com.example.yunhists.YunhistsServerApplication;
+import com.example.yunhists.service.UserService;
+import com.example.yunhists.utils.JwtHelper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,11 @@ public class UserControllerTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
     private MockMvc mockMvc;
+
+    @Autowired
+    UserService userService;
 
     @BeforeEach
     public void setUp() {
@@ -115,6 +121,66 @@ public class UserControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         assertTrue(responseString.startsWith("{\"code\":208"));
+    }
+
+    @Order(6)
+    @Test
+    public void updateLang_validUser_200success() throws Exception {
+        String lang = "en";
+        int userId = 3;
+        String token = JwtHelper.createToken((long) userId);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("lang", Collections.singletonList(lang));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/updateLang")
+                        .header("token", token)
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":200"));
+        assertEquals(lang, userService.getUserById(userId).getLang());
+    }
+
+    @Order(7)
+    @Test
+    public void updateLang_invalidUserId_205NoUser() throws Exception {
+        String lang = "en";
+        int userId = 114514;
+        String token = JwtHelper.createToken((long) userId);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("lang", Collections.singletonList(lang));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/updateLang")
+                        .header("token", token)
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":205"));
+    }
+
+    @Order(8)
+    @Test
+    public void updateLang_invalidToken_224InvalidToken() throws Exception {
+        String lang = "en";
+        String token = "huivodnbpgbvineslnfsvneapurvmoirfteinfojuitodsbhsbv";
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("lang", Collections.singletonList(lang));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/updateLang")
+                        .header("token", token)
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":224"));
     }
 
 }

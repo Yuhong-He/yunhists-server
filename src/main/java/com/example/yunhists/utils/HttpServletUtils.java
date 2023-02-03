@@ -11,7 +11,6 @@ public class HttpServletUtils {
         while (headerNames.hasMoreElements()) {
             String key = headerNames.nextElement();
             if(key.equals("token")) {
-                System.out.println(token);
                 token = request.getHeader(key);
                 break;
             }
