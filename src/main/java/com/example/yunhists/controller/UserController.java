@@ -61,7 +61,8 @@ public class UserController {
                 userService.updateLang(id, lang);
                 return Result.ok();
             } else {
-                return Result.error(ResultCodeEnum.NO_USER);
+                obj = Result.error(ResultCodeEnum.NO_USER);
+                throw new Exception();
             }
         } catch (Exception e) {
             return (Result<Object>) obj;
