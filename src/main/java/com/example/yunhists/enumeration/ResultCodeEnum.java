@@ -13,6 +13,7 @@ public enum ResultCodeEnum {
     WRONG_PWD(207, "Wrong Password"),
     EMAIL_NOT_REGISTERED(208, "Email Not Registered"),
     REGISTERED_WITH_GOOGLE(209, "Google Registered Account"),
+    TOKEN_EXPIRED(223,"Token Expired"),
     TOKEN_ERROR(224,"Invalid Token"),
     MISS_TOKEN(225,"Bad Request: Token Missing")
     ;

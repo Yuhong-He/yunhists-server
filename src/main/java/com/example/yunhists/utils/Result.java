@@ -28,8 +28,8 @@ public class Result<T> {
 
     private static <T> Result<T> build(T body, ResultCodeEnum resultCodeEnum) {
         Result<T> result = build(body);
-        result.setCode(ResultCodeEnum.SUCCESS.getCode());
-        result.setMessage(ResultCodeEnum.SUCCESS.getMessage());
+        result.setCode(resultCodeEnum.getCode());
+        result.setMessage(resultCodeEnum.getMessage());
         return result;
     }
 

@@ -59,7 +59,9 @@ public class UserController {
             Integer id = (Integer) obj;
             if(userService.getUserById(id) != null) {
                 userService.updateLang(id, lang);
-                return Result.ok();
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("token", JwtHelper.createToken(Long.valueOf(id)));
+                return Result.ok(map);
             } else {
                 obj = Result.error(ResultCodeEnum.NO_USER);
                 throw new Exception();
