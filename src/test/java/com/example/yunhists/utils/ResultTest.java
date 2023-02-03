@@ -2,12 +2,9 @@ package com.example.yunhists.utils;
 
 import com.example.yunhists.enumeration.ResultCodeEnum;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
 public class ResultTest {
 
 //    @Test
