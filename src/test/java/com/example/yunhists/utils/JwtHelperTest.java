@@ -1,6 +1,9 @@
 package com.example.yunhists.utils;
 
+import io.jsonwebtoken.CompressionCodecs;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -8,8 +11,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Date;
 import java.util.Objects;
 
+import static com.example.yunhists.utils.JwtHelper.tokenSignKey;
+import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
@@ -45,6 +51,36 @@ public class JwtHelperTest {
     @Test
     public void isExpiration_validToken_success() {
         assertFalse(JwtHelper.isExpiration(testToken));
+    }
+
+    @Order(5)
+    @Test
+    public void isExpiration_expiration2SecondsSleep1Seconds_expirationIsFalse() throws InterruptedException {
+        long tokenExpiration = 2000;
+        String token = Jwts.builder()
+                .setSubject("YYGH-USER")
+                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
+                .claim("userId", userId)
+                .signWith(SignatureAlgorithm.HS512, tokenSignKey)
+                .compressWith(CompressionCodecs.GZIP)
+                .compact();
+        sleep(1000);
+        assertFalse(JwtHelper.isExpiration(token));
+    }
+
+    @Order(6)
+    @Test
+    public void isExpiration_expiration1SecondsSleep2Seconds_expirationIsTrue() throws InterruptedException {
+        long tokenExpiration = 1000;
+        String token = Jwts.builder()
+                .setSubject("YYGH-USER")
+                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
+                .claim("userId", userId)
+                .signWith(SignatureAlgorithm.HS512, tokenSignKey)
+                .compressWith(CompressionCodecs.GZIP)
+                .compact();
+        sleep(2000);
+        assertTrue(JwtHelper.isExpiration(token));
     }
 
 }
