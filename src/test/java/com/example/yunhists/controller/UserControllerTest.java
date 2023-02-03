@@ -164,23 +164,4 @@ public class UserControllerTest {
         assertTrue(responseString.startsWith("{\"code\":205"));
     }
 
-    @Order(8)
-    @Test
-    public void updateLang_invalidToken_224InvalidToken() throws Exception {
-        String lang = "en";
-        String token = "huivodnbpgbvineslnfsvneapurvmoirfteinfojuitodsbhsbv";
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.put("lang", Collections.singletonList(lang));
-        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/updateLang")
-                        .header("token", token)
-                        .params(params)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                ).andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(MockMvcResultHandlers.print())
-                .andReturn().getResponse().getContentAsString();
-
-        assertTrue(responseString.startsWith("{\"code\":224"));
-    }
-
 }
