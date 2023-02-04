@@ -30,8 +30,8 @@ public class UserServiceImplTest {
     @Order(1)
     @Test
     public void register_validEmail_success() {
-        int id = userService.register(testUser);
-        assertEquals(1, id);
+        int result = userService.register(testUser);
+        assertEquals(1, result);
     }
 
     @Order(2)
