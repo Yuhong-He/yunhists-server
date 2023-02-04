@@ -5,7 +5,7 @@ import com.example.yunhists.entity.EmailVerification;
 import java.util.Date;
 import java.util.Random;
 
-public class EVUtils {
+public class EmailVerificationUtils {
 
     public static EmailVerification createVerification(String email) {
         Random random = new Random();
@@ -24,6 +24,12 @@ public class EVUtils {
 
     public static boolean compareVerification(String verificationCode, EmailVerification ev) {
         return verificationCode.equals(ev.getVerificationCode());
+    }
+
+    public static boolean repeatEmail(EmailVerification ev) {
+        long currentTime = new Date().getTime();
+        long oneMinute = 60 * 1000;
+        return ev.getTimestamp().getTime() + oneMinute > currentTime;
     }
 
 }

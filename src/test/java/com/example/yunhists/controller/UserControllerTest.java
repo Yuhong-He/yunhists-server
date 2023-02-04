@@ -86,7 +86,7 @@ public class UserControllerTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn().getResponse().getContentAsString();
 
-        assertTrue(responseString.startsWith("{\"code\":207"));
+        assertTrue(responseString.startsWith("{\"code\":206"));
     }
 
     @Order(4)

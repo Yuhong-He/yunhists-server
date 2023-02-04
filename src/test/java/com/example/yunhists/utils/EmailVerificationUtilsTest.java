@@ -16,11 +16,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class EVUtilsTest {
+public class EmailVerificationUtilsTest {
 
     @Test
     public void createVerification_email_success() {
-        EmailVerification ev = EVUtils.createVerification("test@gmail.com");
+        EmailVerification ev = EmailVerificationUtils.createVerification("test@gmail.com");
         assertEquals("test@gmail.com", ev.getEmail());
         assertEquals(6, ev.getVerificationCode().length());
     }
@@ -32,7 +32,7 @@ public class EVUtilsTest {
         Timestamp timestamp = new Timestamp(parsedDate.getTime());
         EmailVerification ev = mock(EmailVerification.class);
         when(ev.getTimestamp()).thenReturn(timestamp);
-        assertTrue(EVUtils.isExpiration(ev));
+        assertTrue(EmailVerificationUtils.isExpiration(ev));
     }
 
     @Test
@@ -42,7 +42,7 @@ public class EVUtilsTest {
         Timestamp timestamp = new Timestamp(date.getTime());
         EmailVerification ev = mock(EmailVerification.class);
         when(ev.getTimestamp()).thenReturn(timestamp);
-        assertFalse(EVUtils.isExpiration(ev));
+        assertFalse(EmailVerificationUtils.isExpiration(ev));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class EVUtilsTest {
         String verificationCode = "114514";
         EmailVerification ev = mock(EmailVerification.class);
         when(ev.getVerificationCode()).thenReturn(verificationCode);
-        assertTrue(EVUtils.compareVerification(verificationCode, ev));
+        assertTrue(EmailVerificationUtils.compareVerification(verificationCode, ev));
     }
 
 }
