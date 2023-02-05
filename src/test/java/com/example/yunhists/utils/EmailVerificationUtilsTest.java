@@ -53,14 +53,4 @@ public class EmailVerificationUtilsTest {
         assertTrue(EmailVerificationUtils.compareVerification(verificationCode, ev));
     }
 
-    @Test
-    public void repeatEmail_timeLessThanOneMinute_true() throws InterruptedException {
-        Date date = new Date();
-        sleep(1000);
-        Timestamp timestamp = new Timestamp(date.getTime());
-        EmailVerification ev = mock(EmailVerification.class);
-        when(ev.getTimestamp()).thenReturn(timestamp);
-        assertTrue(EmailVerificationUtils.repeatEmail(ev));
-    }
-
 }

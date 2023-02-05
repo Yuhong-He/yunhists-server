@@ -19,17 +19,11 @@ public class EmailVerificationUtils {
     public static boolean isExpiration(EmailVerification ev) {
         long currentTime = new Date().getTime();
         long fiveMinutes = 5 * 60 * 1000;
-        return ev.getTimestamp().getTime() + fiveMinutes < currentTime;
+        return currentTime - ev.getTimestamp().getTime() > fiveMinutes;
     }
 
     public static boolean compareVerification(String verificationCode, EmailVerification ev) {
         return verificationCode.equals(ev.getVerificationCode());
-    }
-
-    public static boolean repeatEmail(EmailVerification ev) {
-        long currentTime = new Date().getTime();
-        long oneMinute = 60 * 1000;
-        return ev.getTimestamp().getTime() + oneMinute > currentTime;
     }
 
 }

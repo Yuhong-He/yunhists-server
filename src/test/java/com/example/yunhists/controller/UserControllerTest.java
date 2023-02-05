@@ -1,6 +1,7 @@
 package com.example.yunhists.controller;
 
 import com.example.yunhists.YunhistsServerApplication;
+import com.example.yunhists.service.EmailTimerService;
 import com.example.yunhists.service.EmailVerificationService;
 import com.example.yunhists.service.UserService;
 import com.example.yunhists.utils.JwtHelper;
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserControllerTest {
 
     @Autowired
@@ -40,6 +42,9 @@ public class UserControllerTest {
 
     @Autowired
     EmailVerificationService evService;
+
+    @Autowired
+    EmailTimerService etService;
 
     private final String testUsername = "test";
     private final String testEmail = "test@yunnanhistory.com";
@@ -324,7 +329,7 @@ public class UserControllerTest {
     public void login_wrongPwd_206IncorrectPwd() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("email", Collections.singletonList(testEmail));
-        params.put("password", Collections.singletonList("testtes"));
+        params.put("password", Collections.singletonList("testtes["));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/login")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -370,11 +375,91 @@ public class UserControllerTest {
         assertTrue(responseString.startsWith("{\"code\":208"));
     }
 
+    @Order(31)
+    @Test
+    public void resetPassword_validEmail_200success() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("email", Collections.singletonList(testEmail));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/resetPassword")
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":200"));
+    }
+
+    @Order(32)
+    @Test
+    public void resetPassword_sendAgain_211WaitOneMinute() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("email", Collections.singletonList(testEmail));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/resetPassword")
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":211"));
+    }
+
+    @Order(33)
+    @Test
+    public void resetPassword_inValidEmail_210InvalidEmailAddress() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("email", Collections.singletonList("test"));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/resetPassword")
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":210"));
+    }
+
+    @Order(34)
+    @Test
+    public void resetPassword_emailNotRegistered_208EmailNotRegistered() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("email", Collections.singletonList("example@yunnanhistory.com"));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/resetPassword")
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":208"));
+    }
+
+    @Order(35)
+    @Test
+    public void resetPassword_DMInternalError_212EmailFail() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("email", Collections.singletonList("test@yunnanhistory.c"));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/resetPassword")
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":212"));
+    }
+
     @Order(41)
     @Test
     public void updateLang_validUser_200success() throws Exception {
         String lang = "en";
-        int userId = 3;
+        int userId = userService.getUserByEmail(testEmail).getId();
         String token = JwtHelper.createToken((long) userId);
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList(lang));
@@ -409,6 +494,14 @@ public class UserControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         assertTrue(responseString.startsWith("{\"code\":205"));
+    }
+
+    @AfterAll
+    public void cleanUp() {
+        userService.deleteUserById(userService.getUserByEmail(testEmail).getId());
+        evService.delete(evService.read(testEmail).getId());
+        etService.delete(etService.read(testEmail, "verificationCode").getId());
+        etService.delete(etService.read(testEmail, "resetPwd").getId());
     }
 
 }

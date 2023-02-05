@@ -1,5 +1,6 @@
 package com.example.yunhists.utils;
 
+import java.util.Random;
 import java.util.regex.Pattern;
 
 public class UserUtils {
@@ -19,6 +20,17 @@ public class UserUtils {
 
     public static boolean validateConfirmPassword(String pwd, String pwd2) {
         return pwd.equals(pwd2);
+    }
+
+    public static String generateRandomPwd() {
+        String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuilder stringBuffer = new StringBuilder();
+        for (int i = 0; i < 10; i++) {
+            int number = random.nextInt(62);
+            stringBuffer.append(str.charAt(number));
+        }
+        return stringBuffer.toString();
     }
 
 }

@@ -1,8 +1,10 @@
 package com.example.yunhists.controller;
 
+import com.example.yunhists.entity.EmailTimer;
 import com.example.yunhists.entity.EmailVerification;
 import com.example.yunhists.entity.User;
 import com.example.yunhists.enumeration.ResultCodeEnum;
+import com.example.yunhists.service.EmailTimerService;
 import com.example.yunhists.service.EmailVerificationService;
 import com.example.yunhists.service.UserService;
 import com.example.yunhists.utils.*;
@@ -25,6 +27,9 @@ public class UserController {
     @Autowired
     private EmailVerificationService evService;
 
+    @Autowired
+    private EmailTimerService emailTimerService;
+
     @PostMapping("/login")
     public Result<Object> login(@RequestParam("email") String email,
                                 @RequestParam("password") String password) throws IOException {
@@ -35,15 +40,20 @@ public class UserController {
 
             // 2. Check user register type, only allow user who registered with email
             if(u.getRegisterType() == 0) {
-                Map<String, Object> map = new LinkedHashMap<>();
+
+                    // 3. check password
                     User user = userService.login(email, password);
                     if(user != null){
+
+                        Map<String, Object> map = new LinkedHashMap<>();
                         map.put("token", JwtHelper.createToken(user.getId().longValue()));
                         map.put("userId", user.getId());
                         map.put("username", user.getUsername());
                         map.put("userRights", user.getUserRights());
                         map.put("lang", user.getLang());
+
                         return Result.ok(map);
+
                     } else {
                         return Result.error(ResultCodeEnum.PASSWORD_INCORRECT);
                     }
@@ -112,6 +122,90 @@ public class UserController {
         }
     }
 
+    @PostMapping("/sendVerificationEmail")
+    public Result<Object> sendVerificationEmail(@RequestParam("lang") String lang,
+                                                @RequestParam("email") String email) {
+
+        // 1. check email format
+        if(UserUtils.validateEmail(email)) {
+
+            // 2. check that no emails have been sent within a minute
+            EmailTimer oldEmailTimer = emailTimerService.read(email, "verificationCode");
+            if(oldEmailTimer == null || !EmailTimerUtils.repeatEmail(oldEmailTimer)) {
+
+                try {
+                    // a. generate verification code
+                    EmailVerification emailVerification = EmailVerificationUtils.createVerification(email);
+
+                    // b. send email (may throw exception)
+                    DirectMailUtils.sendEmail(email, EmailContentHelper.getRegisterVerificationEmailSubject(lang), EmailContentHelper.getRegisterVerificationEmailBody(lang, emailVerification.getVerificationCode()));
+
+                    // c. record verification code
+                    evService.create(emailVerification);
+
+                    // d. record the action in email timer
+                    EmailTimer newEmailTimer = new EmailTimer(email, "verificationCode");
+                    emailTimerService.create(newEmailTimer);
+
+                    return Result.ok();
+
+                } catch (Exception e) {
+                    System.out.println("Email Error: " + e);
+                    return Result.error(ResultCodeEnum.EMAIL_FAIL);
+                }
+            } else {
+                return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
+            }
+        } else {
+            return Result.error(ResultCodeEnum.INVALID_EMAIL);
+        }
+    }
+
+    @PostMapping("/resetPassword")
+    public Result<Object> resetPassword(@RequestParam("email") String email) {
+
+        // 1. check email format
+        if(UserUtils.validateEmail(email)) {
+
+            // 2. check user exist
+            User user = userService.getUserByEmail(email);
+            if(user != null) {
+
+                // 3. check that no emails have been sent within a minute
+                EmailTimer oldEmailTimer = emailTimerService.read(email, "resetPwd");
+                if(oldEmailTimer == null || !EmailTimerUtils.repeatEmail(oldEmailTimer)) {
+
+                    try {
+                        // a. generate new password
+                        String pwd = UserUtils.generateRandomPwd();
+
+                        // b. send email (may throw exception)
+                        DirectMailUtils.sendEmail(email, EmailContentHelper.getResetPasswordEmailSubject(user.getLang()), EmailContentHelper.getResetPasswordEmailBody(user.getLang(), user.getUsername(), pwd));
+
+                        // c. update user password
+                        userService.updatePassword(user.getId(), pwd);
+
+                        // d. record the action in email timer
+                        EmailTimer newEmailTimer = new EmailTimer(email, "resetPwd");
+                        emailTimerService.create(newEmailTimer);
+
+                        return Result.ok();
+
+                    } catch (Exception e) {
+                        System.out.println("Email Error: " + e);
+                        return Result.error(ResultCodeEnum.EMAIL_FAIL);
+                    }
+                } else {
+                    return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
+                }
+            } else {
+                return Result.error(ResultCodeEnum.EMAIL_NOT_REGISTERED);
+            }
+        } else {
+            return Result.error(ResultCodeEnum.INVALID_EMAIL);
+        }
+    }
+
     @PostMapping("/updateLang")
     public Result<Object> updateLang(@RequestParam("lang") String lang,
                                      HttpServletRequest request) {
@@ -129,29 +223,6 @@ public class UserController {
             }
         } catch (Exception e) {
             return (Result<Object>) obj;
-        }
-    }
-
-    @PostMapping("/sendVerificationEmail")
-    public Result<Object> sendVerificationEmail(@RequestParam("lang") String lang,
-                                                @RequestParam("email") String email) {
-        if(UserUtils.validateEmail(email)) {
-            EmailVerification oldEv = evService.read(email);
-            if(oldEv == null || !EmailVerificationUtils.repeatEmail(oldEv)) {
-                try {
-                    EmailVerification newEv = EmailVerificationUtils.createVerification(email);
-                    DirectMailUtils.sendEmail(email, EmailContentHelper.getRegisterVerificationEmailSubject(lang), EmailContentHelper.getRegisterVerificationEmailBody(lang, newEv.getVerificationCode()));
-                    evService.create(newEv);
-                } catch (Exception e) {
-                    System.out.println("Email Error: " + e);
-                    return Result.error(ResultCodeEnum.EMAIL_FAIL);
-                }
-                return Result.ok();
-            } else {
-                return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
-            }
-        } else {
-            return Result.error(ResultCodeEnum.INVALID_EMAIL);
         }
     }
 }
