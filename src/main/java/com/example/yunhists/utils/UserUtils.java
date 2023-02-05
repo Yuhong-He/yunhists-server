@@ -1,5 +1,6 @@
 package com.example.yunhists.utils;
 
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -20,6 +21,11 @@ public class UserUtils {
 
     public static boolean validateConfirmPassword(String pwd, String pwd2) {
         return pwd.equals(pwd2);
+    }
+
+    public static boolean validateLang(String lang) {
+        List<String> langList = List.of("zh", "en");
+        return langList.contains(lang);
     }
 
     public static String generateRandomPwd() {

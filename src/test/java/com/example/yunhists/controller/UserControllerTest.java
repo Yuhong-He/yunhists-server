@@ -274,6 +274,28 @@ public class UserControllerTest {
 
     @Order(18)
     @Test
+    public void register_invalidLang_204LangNotSupport() throws Exception {
+        String code = evService.read(testEmail).getVerificationCode();
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("lang", Collections.singletonList("fr"));
+        params.put("email", Collections.singletonList(testEmail));
+        params.put("username", Collections.singletonList(testUsername));
+        params.put("password", Collections.singletonList(testPassword));
+        params.put("password2", Collections.singletonList(testPassword));
+        params.put("code", Collections.singletonList(code));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/register")
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":204"));
+    }
+
+    @Order(19)
+    @Test
     public void register_correctVerificationCode_200success() throws Exception {
         String code = evService.read(testEmail).getVerificationCode();
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -494,6 +516,26 @@ public class UserControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         assertTrue(responseString.startsWith("{\"code\":205"));
+    }
+
+    @Order(43)
+    @Test
+    public void updateLang_invalidLang_204LangNotSupport() throws Exception {
+        String lang = "fr";
+        int userId = userService.getUserByEmail(testEmail).getId();
+        String token = JwtHelper.createToken((long) userId);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("lang", Collections.singletonList(lang));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/updateLang")
+                        .header("token", token)
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":204"));
     }
 
     @AfterAll

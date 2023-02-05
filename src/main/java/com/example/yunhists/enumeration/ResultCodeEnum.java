@@ -9,6 +9,7 @@ public enum ResultCodeEnum {
     FAIL(201, "Fail"),
     LOGIN_AUTH(202, "Not Login"),
     NO_PERMISSION(203, "No Authentication"),
+    INVALID_LANG(204, "Language nor support"),
     NO_USER(205, "User Not Exist"),
     PASSWORD_INCORRECT(206, "Incorrect Password"),
     PASSWORD_NOT_MATCH(207, "Password not match"),

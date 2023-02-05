@@ -85,31 +85,37 @@ public class UserController {
                 // 3. check password matches
                 if (UserUtils.validateConfirmPassword(pwd, pwd2)) {
 
-                    // 4. check email registered
-                    if (userService.getUserByEmail(email) == null) {
+                    // 4. check lang valid
+                    if(UserUtils.validateLang(lang)) {
 
-                        // 5. check email verification code send before
-                        if(ev != null) {
+                        // 5. check email registered
+                        if (userService.getUserByEmail(email) == null) {
 
-                            // 6. check verification code expiration
-                            if (!EmailVerificationUtils.isExpiration(ev)) {
+                            // 6. check email verification code send before
+                            if(ev != null) {
 
-                                // 7. check verification code correct
-                                if (EmailVerificationUtils.compareVerification(code, ev)) {
-                                    User user = new User(username, pwd, email, lang, 0);
-                                    userService.register(user);
-                                    return Result.ok();
+                                // 7. check verification code expiration
+                                if (!EmailVerificationUtils.isExpiration(ev)) {
+
+                                    // 8. check verification code correct
+                                    if (EmailVerificationUtils.compareVerification(code, ev)) {
+                                        User user = new User(username, pwd, email, lang, 0);
+                                        userService.register(user);
+                                        return Result.ok();
+                                    } else {
+                                        return Result.error(ResultCodeEnum.VERIFY_CODE_INCORRECT);
+                                    }
                                 } else {
-                                    return Result.error(ResultCodeEnum.VERIFY_CODE_INCORRECT);
+                                    return Result.error(ResultCodeEnum.VERIFY_CODE_EXPIRED);
                                 }
                             } else {
-                                return Result.error(ResultCodeEnum.VERIFY_CODE_EXPIRED);
+                                return Result.error(ResultCodeEnum.NO_VERIFICATION_CODE);
                             }
                         } else {
-                            return Result.error(ResultCodeEnum.NO_VERIFICATION_CODE);
+                            return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
                         }
                     } else {
-                        return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
+                        return Result.error(ResultCodeEnum.INVALID_LANG);
                     }
                 } else {
                     return Result.error(ResultCodeEnum.PASSWORD_NOT_MATCH);
@@ -209,14 +215,27 @@ public class UserController {
     @PostMapping("/updateLang")
     public Result<Object> updateLang(@RequestParam("lang") String lang,
                                      HttpServletRequest request) {
+
+        // 1. get token
         Object obj = ControllerUtils.getUserIdFromToken(request);
         try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
             Integer id = (Integer) obj;
+
+            // 3. check user exist
             if(userService.getUserById(id) != null) {
-                userService.updateLang(id, lang);
-                Map<String, Object> map = new LinkedHashMap<>();
-                map.put("token", JwtHelper.createToken(Long.valueOf(id)));
-                return Result.ok(map);
+
+                // 4. check lang valid
+                if(UserUtils.validateLang(lang)) {
+                    userService.updateLang(id, lang);
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    map.put("token", JwtHelper.createToken(Long.valueOf(id)));
+                    return Result.ok(map);
+                } else {
+                    obj = Result.error(ResultCodeEnum.INVALID_LANG);
+                    throw new Exception();
+                }
             } else {
                 obj = Result.error(ResultCodeEnum.NO_USER);
                 throw new Exception();
