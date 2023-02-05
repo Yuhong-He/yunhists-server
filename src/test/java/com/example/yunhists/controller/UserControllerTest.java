@@ -41,6 +41,12 @@ public class UserControllerTest {
     @Autowired
     EmailVerificationService evService;
 
+    private final String testUsername = "test";
+    private final String testEmail = "test@yunnanhistory.com";
+    private final String testPassword = "testtest";
+    private final String shortPassword = "test";
+    private final String testCode = "114514";
+
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
@@ -51,7 +57,7 @@ public class UserControllerTest {
     public void sendVerificationEmail_validEmail_200success() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
-        params.put("email", Collections.singletonList("test@yunnanhistory.com"));
+        params.put("email", Collections.singletonList(testEmail));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendVerificationEmail")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -68,7 +74,7 @@ public class UserControllerTest {
     public void sendVerificationEmail_sendAgain_211WaitOneMinute() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
-        params.put("email", Collections.singletonList("test@yunnanhistory.com"));
+        params.put("email", Collections.singletonList(testEmail));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendVerificationEmail")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -119,11 +125,11 @@ public class UserControllerTest {
     public void register_usernameInvalid_216UsernameLength() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
-        params.put("email", Collections.singletonList("test@yunnanhistory.com"));
+        params.put("email", Collections.singletonList(testEmail));
         params.put("username", Collections.singletonList("t"));
-        params.put("password", Collections.singletonList("test"));
-        params.put("password2", Collections.singletonList("test"));
-        params.put("code", Collections.singletonList("test"));
+        params.put("password", Collections.singletonList(shortPassword));
+        params.put("password2", Collections.singletonList(shortPassword));
+        params.put("code", Collections.singletonList(testCode));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/register")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -140,11 +146,11 @@ public class UserControllerTest {
     public void register_passwordInvalid_217PasswordLength() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
-        params.put("email", Collections.singletonList("test@yunnanhistory.com"));
-        params.put("username", Collections.singletonList("test"));
-        params.put("password", Collections.singletonList("t"));
-        params.put("password2", Collections.singletonList("test"));
-        params.put("code", Collections.singletonList("test"));
+        params.put("email", Collections.singletonList(testEmail));
+        params.put("username", Collections.singletonList(testUsername));
+        params.put("password", Collections.singletonList(shortPassword));
+        params.put("password2", Collections.singletonList(shortPassword));
+        params.put("code", Collections.singletonList(testCode));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/register")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -161,11 +167,11 @@ public class UserControllerTest {
     public void register_passwordNotMatch_207PasswordNotMatch() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
-        params.put("email", Collections.singletonList("test@yunnanhistory.com"));
-        params.put("username", Collections.singletonList("test"));
-        params.put("password", Collections.singletonList("testtest"));
+        params.put("email", Collections.singletonList(testEmail));
+        params.put("username", Collections.singletonList(testUsername));
+        params.put("password", Collections.singletonList(testPassword));
         params.put("password2", Collections.singletonList("testtes"));
-        params.put("code", Collections.singletonList("test"));
+        params.put("code", Collections.singletonList(testCode));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/register")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -183,10 +189,10 @@ public class UserControllerTest {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
         params.put("email", Collections.singletonList("test0@yunnanhistory.com"));
-        params.put("username", Collections.singletonList("test"));
-        params.put("password", Collections.singletonList("testtest"));
-        params.put("password2", Collections.singletonList("testtest"));
-        params.put("code", Collections.singletonList("test"));
+        params.put("username", Collections.singletonList(testUsername));
+        params.put("password", Collections.singletonList(testPassword));
+        params.put("password2", Collections.singletonList(testPassword));
+        params.put("code", Collections.singletonList(testCode));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/register")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -204,10 +210,10 @@ public class UserControllerTest {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
         params.put("email", Collections.singletonList("admin@yunnanhistory.com"));
-        params.put("username", Collections.singletonList("test"));
-        params.put("password", Collections.singletonList("testtest"));
-        params.put("password2", Collections.singletonList("testtest"));
-        params.put("code", Collections.singletonList("test"));
+        params.put("username", Collections.singletonList(testUsername));
+        params.put("password", Collections.singletonList(testPassword));
+        params.put("password2", Collections.singletonList(testPassword));
+        params.put("code", Collections.singletonList(testCode));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/register")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -225,10 +231,10 @@ public class UserControllerTest {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
         params.put("email", Collections.singletonList("test1@yunnanhistory.com"));
-        params.put("username", Collections.singletonList("test"));
-        params.put("password", Collections.singletonList("testtest"));
-        params.put("password2", Collections.singletonList("testtest"));
-        params.put("code", Collections.singletonList("test"));
+        params.put("username", Collections.singletonList(testUsername));
+        params.put("password", Collections.singletonList(testPassword));
+        params.put("password2", Collections.singletonList(testPassword));
+        params.put("code", Collections.singletonList(testCode));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/register")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -245,11 +251,11 @@ public class UserControllerTest {
     public void register_incorrectVerificationCode_214VerificationCodeIncorrect() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
-        params.put("email", Collections.singletonList("test@yunnanhistory.com"));
-        params.put("username", Collections.singletonList("test"));
-        params.put("password", Collections.singletonList("testtest"));
-        params.put("password2", Collections.singletonList("testtest"));
-        params.put("code", Collections.singletonList("aaaaaa"));
+        params.put("email", Collections.singletonList(testEmail));
+        params.put("username", Collections.singletonList(testUsername));
+        params.put("password", Collections.singletonList(testPassword));
+        params.put("password2", Collections.singletonList(testPassword));
+        params.put("code", Collections.singletonList(testCode));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/register")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -264,13 +270,13 @@ public class UserControllerTest {
     @Order(18)
     @Test
     public void register_correctVerificationCode_200success() throws Exception {
-        String code = evService.read("test@yunnanhistory.com").getVerificationCode();
+        String code = evService.read(testEmail).getVerificationCode();
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
-        params.put("email", Collections.singletonList("test@yunnanhistory.com"));
-        params.put("username", Collections.singletonList("test"));
-        params.put("password", Collections.singletonList("testtest"));
-        params.put("password2", Collections.singletonList("testtest"));
+        params.put("email", Collections.singletonList(testEmail));
+        params.put("username", Collections.singletonList(testUsername));
+        params.put("password", Collections.singletonList(testPassword));
+        params.put("password2", Collections.singletonList(testPassword));
         params.put("code", Collections.singletonList(code));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/register")
                         .params(params)
@@ -300,8 +306,8 @@ public class UserControllerTest {
     @Test
     public void login_validUser_200Success() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.put("email", Collections.singletonList("yuhong@gmail.com"));
-        params.put("password", Collections.singletonList("123456"));
+        params.put("email", Collections.singletonList(testEmail));
+        params.put("password", Collections.singletonList(testPassword));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/login")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -317,8 +323,8 @@ public class UserControllerTest {
     @Test
     public void login_wrongPwd_206IncorrectPwd() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.put("email", Collections.singletonList("yuhong@gmail.com"));
-        params.put("password", Collections.singletonList("12345"));
+        params.put("email", Collections.singletonList(testEmail));
+        params.put("password", Collections.singletonList("testtes"));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/login")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -352,7 +358,7 @@ public class UserControllerTest {
     public void login_emailNotRegistered_208EmailNotRegistered() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("email", Collections.singletonList("test@gmail.com"));
-        params.put("password", Collections.singletonList("test"));
+        params.put("password", Collections.singletonList(testPassword));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/login")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
