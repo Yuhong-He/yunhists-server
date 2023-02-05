@@ -4,8 +4,6 @@ import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.dm.model.v20151123.SingleSendMailRequest;
 import com.aliyuncs.dm.model.v20151123.SingleSendMailResponse;
-import com.aliyuncs.exceptions.ClientException;
-import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.google.gson.Gson;
 
@@ -27,7 +25,7 @@ public class DirectMailUtils {
         request.setAccountName("no_reply@yunnanhistory.com");
         request.setFromAlias("滇史论辑 Yunhists");
         request.setAddressType(1);
-        request.setReplyToAddress(false);
+        request.setReplyToAddress(true);
         request.setToAddress(email);
         request.setSubject(subject);
         request.setHtmlBody(emailBody);
@@ -39,13 +37,13 @@ public class DirectMailUtils {
     private static String getAccessKey(String s) throws IOException {
         Properties props = new Properties();
         InputStreamReader inputStreamReader = new InputStreamReader(
-                Objects.requireNonNull(DirectMailUtils.class.getClassLoader().getResourceAsStream("aliyun.properties")),
+                Objects.requireNonNull(DirectMailUtils.class.getClassLoader().getResourceAsStream("securityKey.properties")),
                 StandardCharsets.UTF_8);
         props.load(inputStreamReader);
         if(s.equals("id")) {
-            return props.getProperty("directMail.accessKeyId");
+            return props.getProperty("aliyun.directMail.accessKeyId");
         } else {
-            return props.getProperty("directMail.secret");
+            return props.getProperty("aliyun.directMail.secret");
         }
     }
 

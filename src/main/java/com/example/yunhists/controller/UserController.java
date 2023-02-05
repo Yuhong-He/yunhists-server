@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ public class UserController {
 
     @PostMapping("/login")
     public Result<Object> login(@RequestParam("email") String email,
-                                @RequestParam("password") String password) {
+                                @RequestParam("password") String password) throws IOException {
 
         // 1. Check user exist
         User u = userService.getUserByEmail(email);
@@ -65,55 +66,49 @@ public class UserController {
 
         EmailVerification ev = evService.read(email);
 
-        // 1. check email verification code send before
-        if(ev != null) {
+        // 1. check username valid
+        if (UserUtils.validateUsername(username)) {
 
-            // 2. check verification code expiration
-            if (!EmailVerificationUtils.isExpiration(ev)) {
+            // 2. check password length
+            if (UserUtils.validatePassword(pwd)) {
 
-                // 3. check verification code correct
-                if (EmailVerificationUtils.compareVerification(code, ev)) {
+                // 3. check password matches
+                if (UserUtils.validateConfirmPassword(pwd, pwd2)) {
 
-                    // 4. check email valid
-                    if (UserUtils.validateEmail(email)) {
+                    // 4. check email registered
+                    if (userService.getUserByEmail(email) == null) {
 
-                        // 5. check email registered
-                        if (userService.getUserByEmail(email) == null) {
+                        // 5. check email verification code send before
+                        if(ev != null) {
 
-                            // 6. check username valid
-                            if (UserUtils.validateUsername(username)) {
+                            // 6. check verification code expiration
+                            if (!EmailVerificationUtils.isExpiration(ev)) {
 
-                                // 7. check password length
-                                if (UserUtils.validatePassword(pwd)) {
-
-                                    // 8. check password matches
-                                    if (UserUtils.validateConfirmPassword(pwd, pwd2)) {
-                                        User user = new User(username, pwd, email, lang, 0);
-                                        userService.register(user);
-                                        return Result.ok();
-                                    } else {
-                                        return Result.error(ResultCodeEnum.PASSWORD_NOT_MATCH);
-                                    }
+                                // 7. check verification code correct
+                                if (EmailVerificationUtils.compareVerification(code, ev)) {
+                                    User user = new User(username, pwd, email, lang, 0);
+                                    userService.register(user);
+                                    return Result.ok();
                                 } else {
-                                    return Result.error(ResultCodeEnum.PASSWORD_LENGTH);
+                                    return Result.error(ResultCodeEnum.VERIFY_CODE_INCORRECT);
                                 }
                             } else {
-                                return Result.error(ResultCodeEnum.USERNAME_LENGTH);
+                                return Result.error(ResultCodeEnum.VERIFY_CODE_EXPIRED);
                             }
                         } else {
-                            return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
+                            return Result.error(ResultCodeEnum.NO_VERIFICATION_CODE);
                         }
                     } else {
-                        return Result.error(ResultCodeEnum.INVALID_EMAIL);
+                        return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
                     }
                 } else {
-                    return Result.error(ResultCodeEnum.VERIFY_CODE_INCORRECT);
+                    return Result.error(ResultCodeEnum.PASSWORD_NOT_MATCH);
                 }
             } else {
-                return Result.error(ResultCodeEnum.VERIFY_CODE_EXPIRED);
+                return Result.error(ResultCodeEnum.PASSWORD_LENGTH);
             }
         } else {
-            return Result.error(ResultCodeEnum.NO_VERIFICATION_CODE);
+            return Result.error(ResultCodeEnum.USERNAME_LENGTH);
         }
     }
 
@@ -148,6 +143,7 @@ public class UserController {
                     DirectMailUtils.sendEmail(email, EmailContentHelper.getRegisterVerificationEmailSubject(lang), EmailContentHelper.getRegisterVerificationEmailBody(lang, newEv.getVerificationCode()));
                     evService.create(newEv);
                 } catch (Exception e) {
+                    System.out.println("Email Error: " + e);
                     return Result.error(ResultCodeEnum.EMAIL_FAIL);
                 }
                 return Result.ok();

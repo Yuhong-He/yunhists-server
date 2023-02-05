@@ -11,10 +11,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Objects;
 
-import static com.example.yunhists.utils.JwtHelper.tokenSignKey;
+import static com.example.yunhists.utils.JwtHelper.getSalt;
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,7 +28,7 @@ public class JwtHelperTest {
 
     @Order(1)
     @Test
-    public void createToken_anyData_success() {
+    public void createToken_anyData_success() throws IOException {
         String token = JwtHelper.createToken(userId);
         assertTrue(token.length() > 0);
         testToken = token;
@@ -35,7 +36,7 @@ public class JwtHelperTest {
 
     @Order(2)
     @Test
-    public void getUserId_validToken_success() {
+    public void getUserId_validToken_success() throws IOException {
         Long result = JwtHelper.getUserId(testToken);
         assertEquals(userId, result);
     }
@@ -55,13 +56,13 @@ public class JwtHelperTest {
 
     @Order(5)
     @Test
-    public void isExpiration_expiration2SecondsSleep1Seconds_expirationIsFalse() throws InterruptedException {
+    public void isExpiration_expiration2SecondsSleep1Seconds_expirationIsFalse() throws Exception {
         long tokenExpiration = 2000;
         String token = Jwts.builder()
                 .setSubject("YYGH-USER")
                 .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
                 .claim("userId", userId)
-                .signWith(SignatureAlgorithm.HS512, tokenSignKey)
+                .signWith(SignatureAlgorithm.HS512, getSalt())
                 .compressWith(CompressionCodecs.GZIP)
                 .compact();
         sleep(1000);
@@ -70,13 +71,13 @@ public class JwtHelperTest {
 
     @Order(6)
     @Test
-    public void isExpiration_expiration1SecondsSleep2Seconds_expirationIsTrue() throws InterruptedException {
+    public void isExpiration_expiration1SecondsSleep2Seconds_expirationIsTrue() throws Exception {
         long tokenExpiration = 1000;
         String token = Jwts.builder()
                 .setSubject("YYGH-USER")
                 .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
                 .claim("userId", userId)
-                .signWith(SignatureAlgorithm.HS512, tokenSignKey)
+                .signWith(SignatureAlgorithm.HS512, getSalt())
                 .compressWith(CompressionCodecs.GZIP)
                 .compact();
         sleep(2000);

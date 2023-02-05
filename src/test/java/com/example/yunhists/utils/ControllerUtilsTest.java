@@ -10,9 +10,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.*;
 
-import static com.example.yunhists.utils.JwtHelper.tokenSignKey;
+import static com.example.yunhists.utils.JwtHelper.getSalt;
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doAnswer;
@@ -25,7 +26,7 @@ public class ControllerUtilsTest {
     HttpServletRequest request;
 
     @Test
-    public void getUserIdFromToken_tokenWithValidUserId_returnUserId() {
+    public void getUserIdFromToken_tokenWithValidUserId_returnUserId() throws IOException {
         int userId = 1;
         String token = JwtHelper.createToken((long) userId);
         Map<String, String> headers = new HashMap<>();
@@ -41,7 +42,7 @@ public class ControllerUtilsTest {
     }
 
     @Test
-    public void getUserIdFromToken_tokenUserIdNull_224TokenError() {
+    public void getUserIdFromToken_tokenUserIdNull_224TokenError() throws IOException {
         Map<String, String> headers = new HashMap<>();
         String token = JwtHelper.createToken(null);
         headers.put("token", token);
@@ -57,13 +58,13 @@ public class ControllerUtilsTest {
     }
 
     @Test
-    public void getUserIdFromToken_expiredToken_223Expired() throws InterruptedException {
+    public void getUserIdFromToken_expiredToken_223Expired() throws Exception {
         long tokenExpiration = 1000;
         String token = Jwts.builder()
                 .setSubject("YYGH-USER")
                 .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
                 .claim("userId", 1L)
-                .signWith(SignatureAlgorithm.HS512, tokenSignKey)
+                .signWith(SignatureAlgorithm.HS512, getSalt())
                 .compressWith(CompressionCodecs.GZIP)
                 .compact();
         sleep(2000);
