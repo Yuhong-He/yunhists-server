@@ -51,6 +51,7 @@ public class UserControllerTest {
     private final String testPassword = "testtest";
     private final String shortPassword = "test";
     private final String testCode = "114514";
+    static int testUserId;
 
     @BeforeEach
     public void setUp() {
@@ -342,8 +343,8 @@ public class UserControllerTest {
                 ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn().getResponse().getContentAsString();
-
         assertTrue(responseString.startsWith("{\"code\":200"));
+        testUserId = userService.getUserByEmail(testEmail).getId();
     }
 
     @Order(23)
@@ -481,8 +482,7 @@ public class UserControllerTest {
     @Test
     public void updateLang_validUser_200success() throws Exception {
         String lang = "en";
-        int userId = userService.getUserByEmail(testEmail).getId();
-        String token = JwtHelper.createToken((long) userId);
+        String token = JwtHelper.createToken((long) testUserId);
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList(lang));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/updateLang")
@@ -495,7 +495,7 @@ public class UserControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         assertTrue(responseString.startsWith("{\"code\":200"));
-        assertEquals(lang, userService.getUserById(userId).getLang());
+        assertEquals(lang, userService.getUserById(testUserId).getLang());
     }
 
     @Order(42)
@@ -522,8 +522,7 @@ public class UserControllerTest {
     @Test
     public void updateLang_invalidLang_204LangNotSupport() throws Exception {
         String lang = "fr";
-        int userId = userService.getUserByEmail(testEmail).getId();
-        String token = JwtHelper.createToken((long) userId);
+        String token = JwtHelper.createToken((long) testUserId);
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList(lang));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/updateLang")
@@ -538,9 +537,40 @@ public class UserControllerTest {
         assertTrue(responseString.startsWith("{\"code\":204"));
     }
 
+    @Order(81)
+    @Test
+    public void delete_invalidUserId_205NoUser() throws Exception {
+        int userId = 114514;
+        String token = JwtHelper.createToken((long) userId);
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/delete")
+                        .header("token", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":205"));
+    }
+
+    @Order(82)
+    @Test
+    public void delete_validUser_200Success() throws Exception {
+        String token = JwtHelper.createToken((long) testUserId);
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/delete")
+                        .header("token", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":200"));
+    }
+
     @AfterAll
     public void cleanUp() {
-        userService.deleteUserById(userService.getUserByEmail(testEmail).getId());
+        userService.deleteUserById(testUserId);
         evService.delete(evService.read(testEmail).getId());
         etService.delete(etService.read(testEmail, "verificationCode").getId());
         etService.delete(etService.read(testEmail, "resetPwd").getId());

@@ -49,8 +49,10 @@ public class UserController {
                         map.put("token", JwtHelper.createToken(user.getId().longValue()));
                         map.put("userId", user.getId());
                         map.put("username", user.getUsername());
-                        map.put("userRights", user.getUserRights());
+                        map.put("email", user.getEmail());
                         map.put("lang", user.getLang());
+                        map.put("userRights", user.getUserRights());
+                        map.put("points", user.getPoints());
 
                         return Result.ok(map);
 
@@ -236,6 +238,31 @@ public class UserController {
                     obj = Result.error(ResultCodeEnum.INVALID_LANG);
                     throw new Exception();
                 }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_USER);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            return (Result<Object>) obj;
+        }
+    }
+
+    @PostMapping("/delete")
+    public Result<Object> delete(HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer id = (Integer) obj;
+
+            // 3. check user exist
+            if(userService.getUserById(id) != null) {
+
+                // 4. Delete user
+                userService.updateUserToDeletedUser(id);
+                return Result.ok();
             } else {
                 obj = Result.error(ResultCodeEnum.NO_USER);
                 throw new Exception();

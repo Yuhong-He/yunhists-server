@@ -80,6 +80,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public int updateUserToDeletedUser(Integer id) {
+        User user = this.getUserById(id);
+        user.setUsername("Deleted User");
+        user.setEmail("");
+        user.setPassword("");
+        return baseMapper.updateById(user);
+    }
+
+    @Override
     public int deleteUserById(Integer id) {
         return baseMapper.deleteById(id);
     }

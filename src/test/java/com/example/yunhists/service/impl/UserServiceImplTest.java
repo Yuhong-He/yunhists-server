@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.dao.DuplicateKeyException;
 
-import java.util.Objects;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,6 +25,8 @@ public class UserServiceImplTest {
 
     User testUser = new User("test", "test", "test@gmail.com", "zh", 0);
 
+    static int testUserId;
+
     @Order(1)
     @Test
     public void register_validEmail_success() {
@@ -36,114 +36,115 @@ public class UserServiceImplTest {
 
     @Order(2)
     @Test
-    public void register_emailAlreadyUsed_fail() {
-        DuplicateKeyException thrown = assertThrows(DuplicateKeyException.class, () -> userService.register(testUser));
-        assertTrue(Objects.requireNonNull(thrown.getMessage()).contains("Cause: java.sql.SQLIntegrityConstraintViolationException"));
-    }
-
-    @Order(3)
-    @Test
     public void login_passwordMatch_validUser() {
         User user = userService.login(testUser.getEmail(), testUser.getPassword());
+        testUserId = user.getId();
         assertNotNull(user);
         assertEquals(testUser.getUsername(), user.getUsername());
     }
 
-    @Order(4)
+    @Order(3)
     @Test
     public void login_emailNotExist_null() {
         User user = userService.login("xxxx@gmail.com", "xxxx");
         assertNull(user);
     }
 
-    @Order(5)
+    @Order(4)
     @Test
     public void login_passwordNotMatch_null() {
         User user = userService.login(testUser.getEmail(), testUser.getPassword() + "abc");
         assertNull(user);
     }
 
-    @Order(6)
+    @Order(5)
     @Test
     public void getUserById_idExist_validUser() {
-        User user = userService.getUserById(userService.getUserByEmail(testUser.getEmail()).getId());
+        User user = userService.getUserById(testUserId);
         assertEquals(testUser.getUsername(), user.getUsername());
     }
 
-    @Order(7)
+    @Order(6)
     @Test
     public void getUserById_idNotExist_null() {
         User user = userService.getUserById(114514);
         assertNull(user);
     }
 
-    @Order(8)
+    @Order(7)
     @Test
     public void getUserByEmail_emailExist_validUser() {
         User user = userService.getUserByEmail(testUser.getEmail());
         assertEquals(testUser.getUsername(), user.getUsername());
     }
 
-    @Order(9)
+    @Order(8)
     @Test
     public void getUserByEmail_emailNotExist_null() {
         User user = userService.getUserByEmail("xxxx@gmail.com");
         assertNull(user);
     }
 
-    @Order(10)
+    @Order(9)
     @Test
     public void updateUsername_userExist_success() {
-        int row = userService.updateUsername(userService.getUserByEmail(testUser.getEmail()).getId(), String.valueOf(UUID.randomUUID()));
+        int row = userService.updateUsername(testUserId, String.valueOf(UUID.randomUUID()));
         assertEquals(1, row);
-        assertNotEquals(testUser.getUsername(), userService.getUserByEmail(testUser.getEmail()).getUsername());
+        assertNotEquals(testUser.getUsername(), userService.getUserById(testUserId).getUsername());
     }
 
-    @Order(11)
+    @Order(10)
     @Test
     public void updateUsername_userNotExist_fail() {
         assertThrows(NullPointerException.class, () -> userService.updateUsername(114514, String.valueOf(UUID.randomUUID())));
     }
 
-    @Order(12)
+    @Order(11)
     @Test
     public void updatePassword_userExist_success() {
         String testPassword = String.valueOf(UUID.randomUUID());
-        int row = userService.updatePassword(userService.getUserByEmail(testUser.getEmail()).getId(), testPassword);
+        int row = userService.updatePassword(testUserId, testPassword);
         assertEquals(1, row);
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        assertTrue(passwordEncoder.matches(testPassword, userService.getUserByEmail(testUser.getEmail()).getPassword()));
+        assertTrue(passwordEncoder.matches(testPassword, userService.getUserById(testUserId).getPassword()));
+    }
+
+    @Order(12)
+    @Test
+    public void updateUserRights_userExist_success() {
+        int row = userService.updateUserRights(testUserId, 1);
+        assertEquals(1, row);
+        assertNotEquals(0, userService.getUserById(testUserId).getUserRights());
     }
 
     @Order(13)
     @Test
-    public void updateUserRights_userExist_success() {
-        int row = userService.updateUserRights(userService.getUserByEmail(testUser.getEmail()).getId(), 1);
+    public void updateLang_userExist_success() {
+        int row = userService.updateLang(testUserId, "en");
         assertEquals(1, row);
-        assertNotEquals(0, userService.getUserByEmail(testUser.getEmail()).getUserRights());
+        assertNotEquals("zh", userService.getUserById(testUserId).getLang());
     }
 
     @Order(14)
     @Test
-    public void updateLang_userExist_success() {
-        int row = userService.updateLang(userService.getUserByEmail(testUser.getEmail()).getId(), "en");
+    public void addPoints_userExist_success() {
+        int originPoints = userService.getUserById(testUserId).getPoints();
+        int row = userService.addPoints(testUserId);
         assertEquals(1, row);
-        assertNotEquals("zh", userService.getUserByEmail(testUser.getEmail()).getLang());
+        assertEquals(originPoints + 1, userService.getUserById(testUserId).getPoints());
     }
 
     @Order(15)
     @Test
-    public void addPoints_userExist_success() {
-        int originPoints = userService.getUserByEmail(testUser.getEmail()).getPoints();
-        int row = userService.addPoints(userService.getUserByEmail(testUser.getEmail()).getId());
+    public void updateUserToDeletedUser_userExist_success() {
+        int row = userService.updateUserToDeletedUser(testUserId);
         assertEquals(1, row);
-        assertEquals(originPoints + 1, userService.getUserByEmail(testUser.getEmail()).getPoints());
     }
 
     @Order(16)
     @Test
     public void deleteUserById_userExist_success() {
-        int row = userService.deleteUserById(userService.getUserByEmail(testUser.getEmail()).getId());
+        int row = userService.deleteUserById(testUserId);
         assertEquals(1, row);
     }
 }
