@@ -51,6 +51,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public int updateEmail(Integer id, String email) {
+        User user = this.getUserById(id);
+        user.setEmail(email);
+        return baseMapper.updateById(user);
+    }
+
+    @Override
     public int updatePassword(Integer id, String password) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User user = this.getUserById(id);

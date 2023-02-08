@@ -41,24 +41,24 @@ public class UserController {
             // 2. Check user register type, only allow user who registered with email
             if(u.getRegisterType() == 0) {
 
-                    // 3. check password
-                    User user = userService.login(email, password);
-                    if(user != null){
+                // 3. check password
+                User user = userService.login(email, password);
+                if(user != null){
 
-                        Map<String, Object> map = new LinkedHashMap<>();
-                        map.put("token", JwtHelper.createToken(user.getId().longValue()));
-                        map.put("userId", user.getId());
-                        map.put("username", user.getUsername());
-                        map.put("email", user.getEmail());
-                        map.put("lang", user.getLang());
-                        map.put("userRights", user.getUserRights());
-                        map.put("points", user.getPoints());
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    map.put("token", JwtHelper.createToken(user.getId().longValue()));
+                    map.put("userId", user.getId());
+                    map.put("username", user.getUsername());
+                    map.put("email", user.getEmail());
+                    map.put("lang", user.getLang());
+                    map.put("userRights", user.getUserRights());
+                    map.put("points", user.getPoints());
 
-                        return Result.ok(map);
+                    return Result.ok(map);
 
-                    } else {
-                        return Result.error(ResultCodeEnum.PASSWORD_INCORRECT);
-                    }
+                } else {
+                    return Result.error(ResultCodeEnum.PASSWORD_INCORRECT);
+                }
             } else {
                 return Result.error(ResultCodeEnum.REGISTERED_WITH_GOOGLE);
             }
@@ -130,8 +130,8 @@ public class UserController {
         }
     }
 
-    @PostMapping("/sendVerificationEmail")
-    public Result<Object> sendVerificationEmail(@RequestParam("lang") String lang,
+    @PostMapping("/sendRegisterEmail")
+    public Result<Object> sendRegisterEmail(@RequestParam("lang") String lang,
                                                 @RequestParam("email") String email) {
 
         // 1. check email format
@@ -263,6 +263,203 @@ public class UserController {
                 // 4. Delete user
                 userService.updateUserToDeletedUser(id);
                 return Result.ok();
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_USER);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            return (Result<Object>) obj;
+        }
+    }
+
+    @PostMapping("/updateUsername")
+    public Result<Object> updateUsername(@RequestParam("username") String username,
+                                     HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer id = (Integer) obj;
+
+            // 3. check user exist
+            if(userService.getUserById(id) != null) {
+
+                if(UserUtils.validateUsername(username)) {
+                    userService.updateUsername(id, username);
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    map.put("token", JwtHelper.createToken(Long.valueOf(id)));
+                    return Result.ok(map);
+                } else {
+                    return Result.error(ResultCodeEnum.USERNAME_LENGTH);
+                }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_USER);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            return (Result<Object>) obj;
+        }
+    }
+
+    @PostMapping("/sendChangeEmailEmail")
+    public Result<Object> sendChangeEmailEmail(@RequestParam("email") String email,
+                                            HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer id = (Integer) obj;
+
+            // 3. check user exist
+            User user = userService.getUserById(id);
+            if(user != null) {
+
+                // 4. check email format
+                if(UserUtils.validateEmail(email)) {
+
+                    // 5. check that no emails have been sent within a minute
+                    EmailTimer oldEmailTimer = emailTimerService.read(email, "verificationCode");
+                    if(oldEmailTimer == null || !EmailTimerUtils.repeatEmail(oldEmailTimer)) {
+
+                        try {
+                            // a. generate verification code
+                            EmailVerification emailVerification = EmailVerificationUtils.createVerification(email);
+
+                            // b. send email (may throw exception)
+                            DirectMailUtils.sendEmail(email, EmailContentHelper.getChangeEmailVerificationEmailSubject(user.getLang()), EmailContentHelper.getChangeEmailVerificationEmailBody(user.getLang(), user.getUsername(), emailVerification.getVerificationCode()));
+
+                            // c. record verification code
+                            evService.create(emailVerification);
+
+                            // d. record the action in email timer
+                            EmailTimer newEmailTimer = new EmailTimer(email, "verificationCode");
+                            emailTimerService.create(newEmailTimer);
+
+                            return Result.ok();
+
+                        } catch (Exception e) {
+                            System.out.println("Email Error: " + e);
+                            return Result.error(ResultCodeEnum.EMAIL_FAIL);
+                        }
+                    } else {
+                        return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
+                    }
+                } else {
+                    return Result.error(ResultCodeEnum.INVALID_EMAIL);
+                }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_USER);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            return (Result<Object>) obj;
+        }
+    }
+
+    @PostMapping("/updateEmail")
+    public Result<Object> updateEmail(@RequestParam("email") String email,
+                                      @RequestParam("password") String password,
+                                      @RequestParam("code") String code,
+                                      HttpServletRequest request) {
+
+        EmailVerification ev = evService.read(email);
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer id = (Integer) obj;
+
+            // 3. check user exist
+            User user = userService.getUserById(id);
+            if(user != null) {
+
+                // 4. check user registered with email
+                if(user.getRegisterType() == 0) {
+
+                    // 5. check user password
+                    if(userService.login(user.getEmail(), password) != null) {
+
+                        // 6. check email verification code send before
+                        if(ev != null) {
+
+                            // 7. check verification code expiration
+                            if (!EmailVerificationUtils.isExpiration(ev)) {
+
+                                // 8. check verification code correct
+                                if (EmailVerificationUtils.compareVerification(code, ev)) {
+
+                                    userService.updateEmail(id, email);
+                                    Map<String, Object> map = new LinkedHashMap<>();
+                                    map.put("token", JwtHelper.createToken(Long.valueOf(id)));
+                                    return Result.ok(map);
+                                } else {
+                                    return Result.error(ResultCodeEnum.VERIFY_CODE_INCORRECT);
+                                }
+                            } else {
+                                return Result.error(ResultCodeEnum.VERIFY_CODE_EXPIRED);
+                            }
+                        } else {
+                            return Result.error(ResultCodeEnum.NO_VERIFICATION_CODE);
+                        }
+                    } else {
+                        return Result.error(ResultCodeEnum.PASSWORD_INCORRECT);
+                    }
+                } else {
+                    return Result.error(ResultCodeEnum.REGISTERED_WITH_GOOGLE);
+                }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_USER);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            return (Result<Object>) obj;
+        }
+    }
+
+    @PostMapping("/updatePassword")
+    public Result<Object> updatePassword(@RequestParam("oldPwd") String oldPwd,
+                                      @RequestParam("newPwd") String newPwd,
+                                      @RequestParam("newPwd2") String newPwd2,
+                                      HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer id = (Integer) obj;
+
+            // 3. check user exist
+            User user = userService.getUserById(id);
+            if(user != null) {
+
+                // 4. check old password correct
+                if(userService.login(user.getEmail(), oldPwd) != null) {
+
+                    // 5. check new password
+                    if(UserUtils.validatePassword(newPwd)) {
+
+                        // 6. check confirm password
+                        if(UserUtils.validateConfirmPassword(newPwd, newPwd2)) {
+                            userService.updatePassword(id, newPwd);
+                            Map<String, Object> map = new LinkedHashMap<>();
+                            map.put("token", JwtHelper.createToken(Long.valueOf(id)));
+                            return Result.ok(map);
+                        } else {
+                            return Result.error(ResultCodeEnum.PASSWORD_NOT_MATCH);
+                        }
+                    } else {
+                        return Result.error(ResultCodeEnum.PASSWORD_LENGTH);
+                    }
+                } else {
+                    return Result.error(ResultCodeEnum.PASSWORD_INCORRECT);
+                }
             } else {
                 obj = Result.error(ResultCodeEnum.NO_USER);
                 throw new Exception();

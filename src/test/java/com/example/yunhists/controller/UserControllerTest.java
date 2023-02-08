@@ -60,11 +60,11 @@ public class UserControllerTest {
 
     @Order(1)
     @Test
-    public void sendVerificationEmail_validEmail_200success() throws Exception {
+    public void sendRegisterEmail_validEmail_200success() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
         params.put("email", Collections.singletonList(testEmail));
-        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendVerificationEmail")
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendRegisterEmail")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -77,11 +77,11 @@ public class UserControllerTest {
 
     @Order(2)
     @Test
-    public void sendVerificationEmail_sendAgain_211WaitOneMinute() throws Exception {
+    public void sendRegisterEmail_sendAgain_211WaitOneMinute() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
         params.put("email", Collections.singletonList(testEmail));
-        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendVerificationEmail")
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendRegisterEmail")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -94,11 +94,11 @@ public class UserControllerTest {
 
     @Order(3)
     @Test
-    public void sendVerificationEmail_DMInternalError_212EmailFail() throws Exception {
+    public void sendRegisterEmail_DMInternalError_212EmailFail() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
         params.put("email", Collections.singletonList("test@yunnanhistory.c"));
-        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendVerificationEmail")
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendRegisterEmail")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -111,11 +111,11 @@ public class UserControllerTest {
 
     @Order(4)
     @Test
-    public void sendVerificationEmail_invalidEmail_210InvalidEmail() throws Exception {
+    public void sendRegisterEmail_invalidEmail_210InvalidEmail() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
         params.put("email", Collections.singletonList("test"));
-        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendVerificationEmail")
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendRegisterEmail")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -535,6 +535,46 @@ public class UserControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         assertTrue(responseString.startsWith("{\"code\":204"));
+    }
+
+    @Order(51)
+    @Test
+    public void updateUsername_validUser_200success() throws Exception {
+        String username = "newUsername";
+        String token = JwtHelper.createToken((long) testUserId);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("username", Collections.singletonList(username));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/updateUsername")
+                        .header("token", token)
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":200"));
+        assertEquals(username, userService.getUserById(testUserId).getUsername());
+    }
+
+    @Order(52)
+    @Test
+    public void updateUsername_InvalidUserId_205NoUser() throws Exception {
+        String username = "newUsername";
+        int userId = 114514;
+        String token = JwtHelper.createToken((long) userId);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("username", Collections.singletonList(username));
+        String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/updateUsername")
+                        .header("token", token)
+                        .params(params)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(responseString.startsWith("{\"code\":205"));
     }
 
     @Order(81)
