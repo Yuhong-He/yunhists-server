@@ -23,7 +23,7 @@ public class UserServiceImplTest {
     @Autowired
     UserService userService;
 
-    User testUser = new User("test", "test", "test@gmail.com", "zh", 0);
+    User testUser = new User("implTest", "implTest", "impl@gmail.com", "zh", 0);
 
     static int testUserId;
 
@@ -136,12 +136,20 @@ public class UserServiceImplTest {
 
     @Order(15)
     @Test
+    public void updateEmail_userExist_success() {
+        int row = userService.updateEmail(testUserId, "test@yunnanhistory.com");
+        assertEquals(1, row);
+        assertEquals("test@yunnanhistory.com", userService.getUserById(testUserId).getEmail());
+    }
+
+    @Order(16)
+    @Test
     public void updateUserToDeletedUser_userExist_success() {
         int row = userService.updateUserToDeletedUser(testUserId);
         assertEquals(1, row);
     }
 
-    @Order(16)
+    @Order(17)
     @Test
     public void deleteUserById_userExist_success() {
         int row = userService.deleteUserById(testUserId);
