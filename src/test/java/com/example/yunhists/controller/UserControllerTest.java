@@ -49,7 +49,11 @@ public class UserControllerTest {
     private final String testUsername = "test";
     private final String testEmail = "test@yunnanhistory.com";
     private final String testEmail2 = "test2@yunnanhistory.com";
-    private final String expiredEmail = "test1@yunnanhistory.com";
+    private final String already_registered_email = "email_already_registered@yunnanhistory.com"; // in database
+    private final String expiredEmail = "expired_verification_code@yunnanhistory.com"; // in database
+    private final String googleAccountEmail = "google_registered@yunnanhistory.com"; // in database
+    private final int googleAccountId = 2; // in database
+    private final String invalidEmail = "invalid_email@yunnanhistory.c"; // in database
     private final String testPassword = "testtest";
     private final String newTestPassword = "testtesttest";
     private final String shortPassword = "test";
@@ -100,7 +104,7 @@ public class UserControllerTest {
     public void sendRegisterEmail_DMInternalError_212EmailFail() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
-        params.put("email", Collections.singletonList("test@yunnanhistory.c"));
+        params.put("email", Collections.singletonList(invalidEmail));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendRegisterEmail")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -197,7 +201,7 @@ public class UserControllerTest {
     public void register_emailRegistered_215EmailAlreadyRegistered() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("lang", Collections.singletonList("zh"));
-        params.put("email", Collections.singletonList("test0@yunnanhistory.com"));
+        params.put("email", Collections.singletonList(already_registered_email));
         params.put("username", Collections.singletonList(testUsername));
         params.put("password", Collections.singletonList(testPassword));
         params.put("password2", Collections.singletonList(testPassword));
@@ -371,7 +375,7 @@ public class UserControllerTest {
     @Test
     public void login_googleAccount_209GoogleAccount() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.put("email", Collections.singletonList("test@gmail.com"));
+        params.put("email", Collections.singletonList(googleAccountEmail));
         params.put("password", Collections.singletonList(""));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/login")
                         .params(params)
@@ -559,7 +563,7 @@ public class UserControllerTest {
     @Test
     public void sendChangeEmailEmail_DMInternalError_212EmailFail() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.put("email", Collections.singletonList("test@yunnanhistory.c"));
+        params.put("email", Collections.singletonList(invalidEmail));
         String token = JwtHelper.createToken((long) testUserId);
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/sendChangeEmailEmail")
                         .header("token", token)
@@ -656,9 +660,9 @@ public class UserControllerTest {
     public void updateEmail_emailVerificationExpired_213VerificationCodeExpired() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("email", Collections.singletonList(expiredEmail));
-        params.put("password", Collections.singletonList("123456"));
+        params.put("password", Collections.singletonList(testPassword));
         params.put("code", Collections.singletonList(testCode));
-        String token = JwtHelper.createToken((long) 2);
+        String token = JwtHelper.createToken((long) testUserId);
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/updateEmail")
                         .header("token", token)
                         .params(params)
@@ -715,12 +719,12 @@ public class UserControllerTest {
     @Order(66)
     @Test
     public void updateEmail_googleRegisteredAccount_209RegisterWithGoogle() throws Exception {
-        String code = evService.read(testEmail2).getVerificationCode();
+        String code = evService.read(testEmail).getVerificationCode();
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.put("email", Collections.singletonList(testEmail2));
+        params.put("email", Collections.singletonList(googleAccountEmail));
         params.put("password", Collections.singletonList("123456"));
         params.put("code", Collections.singletonList(code));
-        String token = JwtHelper.createToken((long) 3);
+        String token = JwtHelper.createToken((long) googleAccountId);
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/updateEmail")
                         .header("token", token)
                         .params(params)
@@ -923,7 +927,7 @@ public class UserControllerTest {
     @Test
     public void resetPassword_DMInternalError_212EmailFail() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.put("email", Collections.singletonList("test@yunnanhistory.c"));
+        params.put("email", Collections.singletonList(invalidEmail));
         String responseString = mockMvc.perform(MockMvcRequestBuilders.post("/api/user/resetPassword")
                         .params(params)
                         .contentType(MediaType.APPLICATION_JSON)
