@@ -7,6 +7,8 @@ public enum ResultCodeEnum {
 
     SUCCESS(200,"Success"),
     FAIL(201, "Fail"),
+
+    // User
     LOGIN_AUTH(202, "Not Login"),
     NO_PERMISSION(203, "No Authentication"),
     INVALID_LANG(204, "Language nor support"),
@@ -26,7 +28,13 @@ public enum ResultCodeEnum {
     NO_VERIFICATION_CODE(218, "Verification code does not send before"),
     TOKEN_EXPIRED(223,"Token Expired"),
     TOKEN_ERROR(224,"Invalid Token"),
-    MISS_TOKEN(225,"Bad Request: Token Missing")
+    MISS_TOKEN(225,"Bad Request: Token Missing"),
+
+    // Category
+    REPEAT_ZH_NAME(301,"Category Chinese name exist"),
+    REPEAT_EN_NAME(302,"Category English name exist"),
+    PARENT_CAT_NOT_EXIST(303, "One of parent category not exist"),
+    EMPTY_SEARCH(304, "Empty Search"),
     ;
 
     private final Integer code;

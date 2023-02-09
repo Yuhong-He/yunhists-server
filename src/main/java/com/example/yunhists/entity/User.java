@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 @Data
 @NoArgsConstructor
 @TableName("user")
@@ -35,6 +37,9 @@ public class User {
 
     @TableField("register_type")
     private Integer registerType;
+
+    @TableField("created_at")
+    private Timestamp created_at;
 
     public User(String username, String password, String email, String lang, int registerType) {
         this.username = username;
