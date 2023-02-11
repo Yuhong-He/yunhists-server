@@ -1,6 +1,8 @@
 package com.example.yunhists.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.yunhists.entity.Category;
 import com.example.yunhists.mapper.CategoryMapper;
@@ -31,6 +33,30 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public Category getCategoryById(int id) {
         return baseMapper.selectById(id);
+    }
+
+    @Override
+    public List<Category> getCategoriesByBatchId(List<Integer> ids) {
+        return baseMapper.selectBatchIds(ids);
+    }
+
+    @Override
+    public IPage<Category> getCategoryByNameLike(Page<Category> page, String name,
+                                                 String lang, String sortCol, String sortOrder) {
+        QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
+        if(!name.isEmpty()){
+            if(lang.equals("zh")) {
+                queryWrapper.like("zh_name", name);
+            } else {
+                queryWrapper.like("en_name", name);
+            }
+        }
+        if(!sortCol.isEmpty() && !sortOrder.isEmpty()) {
+            queryWrapper.last(" ORDER BY " + sortCol + " " + sortOrder);
+        } else {
+            queryWrapper.orderByDesc("created_at");
+        }
+        return baseMapper.selectPage(page, queryWrapper);
     }
 
     @Override

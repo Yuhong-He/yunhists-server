@@ -33,7 +33,7 @@ public class Category {
     private int operator;
 
     @TableField("created_at")
-    private Timestamp created_at;
+    private Timestamp createdAt;
 
     public Category(String zhName, String enName, int operator) {
         this.zhName = zhName;
