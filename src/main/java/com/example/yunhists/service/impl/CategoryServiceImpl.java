@@ -56,6 +56,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         } else {
             queryWrapper.orderByDesc("created_at");
         }
+        queryWrapper.select(Category.class, info -> !info.getColumn().equals("operator")
+                && !info.getColumn().equals("created_at"));
         return baseMapper.selectPage(page, queryWrapper);
     }
 

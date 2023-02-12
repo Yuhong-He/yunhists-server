@@ -254,7 +254,11 @@ public class CategoryController {
         }
         List<Category> categories = categoryService.getCategoriesByBatchId(list);
         if(categories != null) {
-            return Result.ok(categories);
+            List<CategoryName> categoryNames = new ArrayList<>();
+            for(Category c : categories) {
+                categoryNames.add(new CategoryName(c.getId(), c.getZhName(), c.getEnName()));
+            }
+            return Result.ok(categoryNames);
         } else {
             return Result.error(ResultCodeEnum.FAIL);
         }

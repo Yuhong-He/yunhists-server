@@ -36,7 +36,7 @@ public class CategoryLink {
     private int operator;
 
     @TableField("created_at")
-    private Timestamp created_at;
+    private Timestamp createdAt;
 
     public CategoryLink(int catFrom, int catTo, String catToZhName, String catToEnName, int catType, int operator) {
         this.catFrom = catFrom;
