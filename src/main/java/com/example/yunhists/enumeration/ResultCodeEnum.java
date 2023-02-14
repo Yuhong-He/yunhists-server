@@ -35,6 +35,14 @@ public enum ResultCodeEnum {
     REPEAT_EN_NAME(302,"Category English name exist"),
     PARENT_CAT_NOT_EXIST(303, "One of parent category not exist"),
     EMPTY_SEARCH(304, "Empty Search"),
+
+    // Thesis
+    NO_TITLE(401, "Title missing"),
+    INVALID_TYPE(402, "Invalid type"),
+    INVALID_COPYRIGHT(403, "Invalid copyright"),
+    NO_FILE(404, "Missing file"),
+    UPLOADER_NOT_EXIST(405, "Uploader not exist"),
+    THESIS_EXIST(406, "Thesis exist")
     ;
 
     private final Integer code;

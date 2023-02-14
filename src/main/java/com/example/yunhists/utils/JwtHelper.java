@@ -1,7 +1,6 @@
 package com.example.yunhists.utils;
 
 import io.jsonwebtoken.*;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,7 +12,7 @@ import java.util.Properties;
 public class JwtHelper {
 
     public static String createToken(Long userId) throws IOException {
-        long tokenExpiration = 24 * 60 * 60 * 1000;
+        long tokenExpiration = 60 * 60 * 1000; // 1 hour
         return Jwts.builder()
                 .setSubject("YYGH-USER")
                 .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
@@ -24,7 +23,7 @@ public class JwtHelper {
     }
 
     public static Long getUserId(String token) throws IOException {
-        if(StringUtils.isEmpty(token)) return null;
+        if(token.isEmpty()) return null;
         Jws<Claims> claimsJws = Jwts.parser().setSigningKey(getSalt()).parseClaimsJws(token);
         Claims claims = claimsJws.getBody();
         Double userIdDouble = (Double) claims.get("userId");

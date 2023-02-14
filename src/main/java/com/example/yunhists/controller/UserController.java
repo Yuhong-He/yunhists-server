@@ -53,6 +53,7 @@ public class UserController {
                     map.put("lang", user.getLang());
                     map.put("userRights", user.getUserRights());
                     map.put("points", user.getPoints());
+                    map.put("sts", STSUtils.getSTS(user.getId()));
 
                     return Result.ok(map);
 
@@ -288,9 +289,7 @@ public class UserController {
 
                 if(UserUtils.validateUsername(username)) {
                     userService.updateUsername(id, username);
-                    Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("token", JwtHelper.createToken(Long.valueOf(id)));
-                    return Result.ok(map);
+                    return Result.ok();
                 } else {
                     return Result.error(ResultCodeEnum.USERNAME_LENGTH);
                 }
@@ -395,9 +394,7 @@ public class UserController {
                                 if (EmailVerificationUtils.compareVerification(code, ev)) {
 
                                     userService.updateEmail(id, email);
-                                    Map<String, Object> map = new LinkedHashMap<>();
-                                    map.put("token", JwtHelper.createToken(Long.valueOf(id)));
-                                    return Result.ok(map);
+                                    return Result.ok();
                                 } else {
                                     return Result.error(ResultCodeEnum.VERIFY_CODE_INCORRECT);
                                 }
@@ -448,9 +445,7 @@ public class UserController {
                         // 6. check confirm password
                         if(UserUtils.validateConfirmPassword(newPwd, newPwd2)) {
                             userService.updatePassword(id, newPwd);
-                            Map<String, Object> map = new LinkedHashMap<>();
-                            map.put("token", JwtHelper.createToken(Long.valueOf(id)));
-                            return Result.ok(map);
+                            return Result.ok();
                         } else {
                             return Result.error(ResultCodeEnum.PASSWORD_NOT_MATCH);
                         }
@@ -466,6 +461,21 @@ public class UserController {
             }
         } catch (Exception e) {
             return (Result<Object>) obj;
+        }
+    }
+
+    @GetMapping("/validateToken")
+    public Result<Object> validateToken(HttpServletRequest request) {
+
+        String token = HttpServletUtils.getToken(request);
+        if(!token.equals("")) {
+            if(JwtHelper.isExpiration(token)) {
+                return Result.error(ResultCodeEnum.TOKEN_EXPIRED);
+            } else {
+                return Result.ok();
+            }
+        } else {
+            return Result.error(ResultCodeEnum.MISS_TOKEN);
         }
     }
 }

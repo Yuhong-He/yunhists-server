@@ -3,7 +3,7 @@ package com.example.yunhists.enumeration;
 import lombok.Getter;
 
 @Getter
-public enum CategoryUpdateFailEnum {
+public enum CategoryEnum {
 
     TYPE_LINK_THESIS(0),
     TYPE_LINK_CATEGORY(1),
@@ -14,7 +14,7 @@ public enum CategoryUpdateFailEnum {
 
     private final Integer code;
 
-    CategoryUpdateFailEnum(Integer code) {
+    CategoryEnum(Integer code) {
         this.code = code;
     }
 }

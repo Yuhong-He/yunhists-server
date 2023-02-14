@@ -137,6 +137,13 @@
             <version>3.3.2</version>
         </dependency>
 
+        <!-- aliyun sts -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>sts20150401</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+
     </dependencies>
 
     <build>

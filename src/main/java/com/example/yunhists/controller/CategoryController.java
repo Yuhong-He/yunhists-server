@@ -3,7 +3,7 @@ package com.example.yunhists.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.yunhists.entity.*;
-import com.example.yunhists.enumeration.CategoryUpdateFailEnum;
+import com.example.yunhists.enumeration.CategoryEnum;
 import com.example.yunhists.enumeration.ResultCodeEnum;
 import com.example.yunhists.service.CategoryLinkService;
 import com.example.yunhists.service.CategoryService;
@@ -42,7 +42,7 @@ public class CategoryController {
             Integer userId = (Integer) obj;
 
             // 3. check user rights
-            if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() == 1) {
+            if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() >= 1) {
 
                 String zhName = categoryWithParentCat.getZhName();
                 String enName = categoryWithParentCat.getEnName();
@@ -193,25 +193,24 @@ public class CategoryController {
                                         categoryService.saveOrUpdate(parentCat);
                                     } else {
                                         failed.add(new UpdateALotCatFailed(
-                                                c, p, CategoryUpdateFailEnum.TYPE_LINK_CATEGORY.getCode(),
-                                                CategoryUpdateFailEnum.CATEGORY_LINK_EXIST.getCode()));
+                                                c, p, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                                CategoryEnum.CATEGORY_LINK_EXIST.getCode()));
                                     }
                                 } else {
                                     failed.add(new UpdateALotCatFailed(
-                                            c, p, CategoryUpdateFailEnum.TYPE_LINK_CATEGORY.getCode(),
-                                            CategoryUpdateFailEnum.CAN_NOT_ADD_CAT_TO_ITSELF.getCode()));
+                                            c, p, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                            CategoryEnum.CAN_NOT_ADD_CAT_TO_ITSELF.getCode()));
                                 }
                             } else {
                                 failed.add(new UpdateALotCatFailed(
-                                        c, p, CategoryUpdateFailEnum.TYPE_LINK_CATEGORY.getCode(),
-                                        CategoryUpdateFailEnum.PARENT_CAT_NOT_EXIST.getCode()));
+                                        c, p, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                        CategoryEnum.PARENT_CAT_NOT_EXIST.getCode()));
                             }
                         }
                     } else {
-
                         failed.add(new UpdateALotCatFailed(
-                                c, 0, CategoryUpdateFailEnum.TYPE_LINK_CATEGORY.getCode(),
-                                CategoryUpdateFailEnum.CHILD_CAT_NOT_EXIST.getCode()));
+                                c, 0, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                CategoryEnum.CHILD_CAT_NOT_EXIST.getCode()));
                     }
                 }
 
