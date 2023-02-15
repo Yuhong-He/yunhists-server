@@ -156,7 +156,7 @@ public class CategoryController {
             Integer userId = (Integer) obj;
 
             // 3. check user rights
-            if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() == 1) {
+            if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() >= 1) {
 
                 /*
                 * 1.Integer: failed id

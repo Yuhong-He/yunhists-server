@@ -232,9 +232,7 @@ public class UserController {
                 // 4. check lang valid
                 if(UserUtils.validateLang(lang)) {
                     userService.updateLang(id, lang);
-                    Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("token", JwtHelper.createToken(Long.valueOf(id)));
-                    return Result.ok(map);
+                    return Result.ok();
                 } else {
                     obj = Result.error(ResultCodeEnum.INVALID_LANG);
                     throw new Exception();
@@ -476,6 +474,32 @@ public class UserController {
             }
         } else {
             return Result.error(ResultCodeEnum.MISS_TOKEN);
+        }
+    }
+
+    @GetMapping("/refreshSTS")
+    public Result<Object> refreshSTS(HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer id = (Integer) obj;
+
+            // 3. check user exist
+            if(userService.getUserById(id) != null) {
+
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("sts", STSUtils.getSTS(id));
+                return Result.ok(map);
+
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_USER);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            return (Result<Object>) obj;
         }
     }
 }

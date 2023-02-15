@@ -3,6 +3,7 @@ package com.example.yunhists.controller;
 import com.example.yunhists.entity.Category;
 import com.example.yunhists.entity.CategoryLink;
 import com.example.yunhists.entity.Thesis;
+import com.example.yunhists.entity.User;
 import com.example.yunhists.enumeration.ResultCodeEnum;
 import com.example.yunhists.service.CategoryLinkService;
 import com.example.yunhists.service.CategoryService;
@@ -46,7 +47,8 @@ public class ThesisController {
             Integer userId = (Integer) obj;
 
             // 3. check user rights
-            if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() == 1) {
+            User user = userService.getUserById(userId);
+            if(user != null && user.getUserRights() >= 1) {
 
                 // 4. check title exist
                 if(!thesis.getTitle().isEmpty()) {
@@ -94,10 +96,17 @@ public class ThesisController {
                                             failedParentCatId.add(catId);
                                         }
                                     }
+
+                                    // f. update user points
+                                    user.setPoints(user.getPoints() + 1);
+                                    userService.saveOrUpdate(user);
+
+                                    // g. return results
+                                    Map<String, Object> map = new LinkedHashMap<>();
                                     if(failedParentCatId.isEmpty()) {
-                                        return Result.ok();
+                                        map.put("points", user.getPoints());
+                                        return Result.ok(map);
                                     } else {
-                                        Map<String, Object> map = new LinkedHashMap<>();
                                         map.put("failedCatId", failedParentCatId);
                                         return Result.error(map, ResultCodeEnum.PARENT_CAT_NOT_EXIST);
                                     }
