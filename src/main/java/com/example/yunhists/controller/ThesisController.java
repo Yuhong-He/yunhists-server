@@ -103,8 +103,8 @@ public class ThesisController {
 
                                     // g. return results
                                     Map<String, Object> map = new LinkedHashMap<>();
+                                    map.put("points", user.getPoints());
                                     if(failedParentCatId.isEmpty()) {
-                                        map.put("points", user.getPoints());
                                         return Result.ok(map);
                                     } else {
                                         map.put("failedCatId", failedParentCatId);

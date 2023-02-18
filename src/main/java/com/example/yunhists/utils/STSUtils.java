@@ -38,7 +38,7 @@ public class STSUtils {
         String accessKeySecret = getAccessKey("secret");
         String roleArn = getAccessKey("arn");
         String roleSessionName = "YunhistsUserId_" + userId;
-        Long durationSeconds = 900L; // max 1 hour
+        Long durationSeconds = 3600L; // max 1 hour
 
         try {
             String regionId = "cn-hongkong";

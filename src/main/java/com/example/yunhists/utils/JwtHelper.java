@@ -12,7 +12,7 @@ import java.util.Properties;
 public class JwtHelper {
 
     public static String createToken(Long userId) throws IOException {
-        long tokenExpiration = 24 * 60 * 60 * 1000; // 24 hour
+        long tokenExpiration = 60 * 60 * 1000; // 1 hour
         return Jwts.builder()
                 .setSubject("YYGH-USER")
                 .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
