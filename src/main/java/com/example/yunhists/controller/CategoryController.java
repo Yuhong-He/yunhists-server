@@ -158,10 +158,6 @@ public class CategoryController {
             // 3. check user rights
             if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() >= 1) {
 
-                /*
-                * 1.Integer: failed id
-                * 2.Integer: failed reason
-                * */
                 List<UpdateALotCatFailed> failed = new ArrayList<>();
 
                 // 一. add cat to cat

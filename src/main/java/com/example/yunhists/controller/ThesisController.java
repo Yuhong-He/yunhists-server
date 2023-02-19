@@ -1,9 +1,8 @@
 package com.example.yunhists.controller;
 
-import com.example.yunhists.entity.Category;
-import com.example.yunhists.entity.CategoryLink;
-import com.example.yunhists.entity.Thesis;
-import com.example.yunhists.entity.User;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.yunhists.entity.*;
 import com.example.yunhists.enumeration.ResultCodeEnum;
 import com.example.yunhists.service.CategoryLinkService;
 import com.example.yunhists.service.CategoryService;
@@ -132,6 +131,52 @@ public class ThesisController {
         } catch (Exception e) {
             return (Result<Object>) obj;
         }
+    }
+
+    @GetMapping("/list/{pageNo}/{pageSize}")
+    public Result<Object> list(@PathVariable("pageNo") Integer pageNo,
+                               @PathVariable("pageSize") Integer pageSize,
+                               @RequestParam String author,
+                               @RequestParam String title,
+                               @RequestParam String publication,
+                               @RequestParam String year,
+                               @RequestParam String sortCol,
+                               @RequestParam String sortOrder) {
+
+        List<String> validSortCol = List.of("author", "title", "publication", "thesisIssue");
+        if(!validSortCol.contains(sortCol)) {
+            sortCol = "";
+        } else if(sortCol.equals("thesisIssue")) {
+            sortCol = "year";
+        }
+        if(!sortOrder.equals("ASC") && !sortOrder.equals("DESC")) {
+            sortOrder = "";
+        }
+
+        Page<Thesis> page = new Page<>(pageNo, pageSize);
+        IPage<Thesis> pageRs =  thesisService.getThesisBySearch(page, author, title, publication, year, sortCol, sortOrder);
+        List<Thesis> list = pageRs.getRecords();
+        List<ThesisRow> newList = new ArrayList<>();
+        for(Thesis s : list) {
+            List<CategoryLink> categoryLinkList = categoryLinkService.getLinkByChildId(s.getId(), 0);
+            List<CategoryName> categories = new ArrayList<>();
+            for(CategoryLink link : categoryLinkList) {
+                CategoryName c = new CategoryName(link.getCatTo(), link.getCatToZhName(), link.getCatToEnName());
+                categories.add(c);
+            }
+            ThesisIssue thesisIssue = new ThesisIssue(
+                    s.getYear() == null ? "" : s.getYear().toString(),
+                    s.getVolume() == null ? "" : s.getVolume().toString(),
+                    s.getIssue() == null ? "" : s.getIssue()
+            );
+            ThesisRow thesisWithCategory = new ThesisRow(
+                    s.getId(), s.getAuthor(), s.getTitle(), s.getPublication(), thesisIssue, categories
+            );
+            newList.add(thesisWithCategory);
+        }
+        CustomPage customPage = new CustomPage(newList, pageRs.getTotal(), pageRs.getSize(),
+                pageRs.getCurrent(), pageRs.getPages());
+        return Result.ok(customPage);
     }
 
 }
