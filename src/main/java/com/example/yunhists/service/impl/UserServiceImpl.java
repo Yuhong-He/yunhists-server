@@ -8,6 +8,8 @@ import com.example.yunhists.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service("userServiceImpl")
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
@@ -41,6 +43,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("email", email);
         return baseMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public List<User> getUserAll() {
+        return baseMapper.selectList(null);
     }
 
     @Override

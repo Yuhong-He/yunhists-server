@@ -138,32 +138,38 @@ public class UserController {
         // 1. check email format
         if(UserUtils.validateEmail(email)) {
 
-            // 2. check that no emails have been sent within a minute
-            EmailTimer oldEmailTimer = emailTimerService.read(email, "verificationCode");
-            if(oldEmailTimer == null || !EmailTimerUtils.repeatEmail(oldEmailTimer)) {
+            // 2. check email registered
+            if (userService.getUserByEmail(email) == null) {
 
-                try {
-                    // a. generate verification code
-                    EmailVerification emailVerification = EmailVerificationUtils.createVerification(email);
+                // 3. check that no emails have been sent within a minute
+                EmailTimer oldEmailTimer = emailTimerService.read(email, "verificationCode");
+                if(oldEmailTimer == null || !EmailTimerUtils.repeatEmail(oldEmailTimer)) {
 
-                    // b. send email (may throw exception)
-                    DirectMailUtils.sendEmail(email, EmailContentHelper.getRegisterVerificationEmailSubject(lang), EmailContentHelper.getRegisterVerificationEmailBody(lang, emailVerification.getVerificationCode()));
+                    try {
+                        // a. generate verification code
+                        EmailVerification emailVerification = EmailVerificationUtils.createVerification(email);
 
-                    // c. record verification code
-                    evService.create(emailVerification);
+                        // b. send email (may throw exception)
+                        DirectMailUtils.sendEmail(email, EmailContentHelper.getRegisterVerificationEmailSubject(lang), EmailContentHelper.getRegisterVerificationEmailBody(lang, emailVerification.getVerificationCode()));
 
-                    // d. record the action in email timer
-                    EmailTimer newEmailTimer = new EmailTimer(email, "verificationCode");
-                    emailTimerService.create(newEmailTimer);
+                        // c. record verification code
+                        evService.create(emailVerification);
 
-                    return Result.ok();
+                        // d. record the action in email timer
+                        EmailTimer newEmailTimer = new EmailTimer(email, "verificationCode");
+                        emailTimerService.create(newEmailTimer);
 
-                } catch (Exception e) {
-                    System.out.println("Email Error: " + e);
-                    return Result.error(ResultCodeEnum.EMAIL_FAIL);
+                        return Result.ok();
+
+                    } catch (Exception e) {
+                        System.out.println("Email Error: " + e);
+                        return Result.error(ResultCodeEnum.EMAIL_FAIL);
+                    }
+                } else {
+                    return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
                 }
             } else {
-                return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
+                return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
             }
         } else {
             return Result.error(ResultCodeEnum.INVALID_EMAIL);
@@ -318,32 +324,38 @@ public class UserController {
                 // 4. check email format
                 if(UserUtils.validateEmail(email)) {
 
-                    // 5. check that no emails have been sent within a minute
-                    EmailTimer oldEmailTimer = emailTimerService.read(email, "verificationCode");
-                    if(oldEmailTimer == null || !EmailTimerUtils.repeatEmail(oldEmailTimer)) {
+                    // 5. check email registered
+                    if (userService.getUserByEmail(email) == null) {
 
-                        try {
-                            // a. generate verification code
-                            EmailVerification emailVerification = EmailVerificationUtils.createVerification(email);
+                        // 6. check that no emails have been sent within a minute
+                        EmailTimer oldEmailTimer = emailTimerService.read(email, "verificationCode");
+                        if (oldEmailTimer == null || !EmailTimerUtils.repeatEmail(oldEmailTimer)) {
 
-                            // b. send email (may throw exception)
-                            DirectMailUtils.sendEmail(email, EmailContentHelper.getChangeEmailVerificationEmailSubject(user.getLang()), EmailContentHelper.getChangeEmailVerificationEmailBody(user.getLang(), user.getUsername(), emailVerification.getVerificationCode()));
+                            try {
+                                // a. generate verification code
+                                EmailVerification emailVerification = EmailVerificationUtils.createVerification(email);
 
-                            // c. record verification code
-                            evService.create(emailVerification);
+                                // b. send email (may throw exception)
+                                DirectMailUtils.sendEmail(email, EmailContentHelper.getChangeEmailVerificationEmailSubject(user.getLang()), EmailContentHelper.getChangeEmailVerificationEmailBody(user.getLang(), user.getUsername(), emailVerification.getVerificationCode()));
 
-                            // d. record the action in email timer
-                            EmailTimer newEmailTimer = new EmailTimer(email, "verificationCode");
-                            emailTimerService.create(newEmailTimer);
+                                // c. record verification code
+                                evService.create(emailVerification);
 
-                            return Result.ok();
+                                // d. record the action in email timer
+                                EmailTimer newEmailTimer = new EmailTimer(email, "verificationCode");
+                                emailTimerService.create(newEmailTimer);
 
-                        } catch (Exception e) {
-                            System.out.println("Email Error: " + e);
-                            return Result.error(ResultCodeEnum.EMAIL_FAIL);
+                                return Result.ok();
+
+                            } catch (Exception e) {
+                                System.out.println("Email Error: " + e);
+                                return Result.error(ResultCodeEnum.EMAIL_FAIL);
+                            }
+                        } else {
+                            return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
                         }
                     } else {
-                        return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
+                        return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
                     }
                 } else {
                     return Result.error(ResultCodeEnum.INVALID_EMAIL);

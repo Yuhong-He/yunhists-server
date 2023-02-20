@@ -37,12 +37,12 @@ public enum ResultCodeEnum {
     EMPTY_SEARCH(304, "Empty Search"),
 
     // Thesis
-    NO_TITLE(401, "Title missing"),
+    NO_MORE_DOWNLOAD(401, "You can't download more today"),
     INVALID_TYPE(402, "Invalid type"),
     INVALID_COPYRIGHT(403, "Invalid copyright"),
-    NO_FILE(404, "Missing file"),
     UPLOADER_NOT_EXIST(405, "Uploader not exist"),
-    THESIS_EXIST(406, "Thesis exist")
+    THESIS_EXIST(406, "Thesis exist"),
+    THESIS_ID_NOT_EXIST(407, "Thesis id not exist")
     ;
 
     private final Integer code;

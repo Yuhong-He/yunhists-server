@@ -3,6 +3,8 @@ package com.example.yunhists.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.yunhists.entity.User;
 
+import java.util.List;
+
 public interface UserService extends IService<User> {
 
     // Create
@@ -12,6 +14,7 @@ public interface UserService extends IService<User> {
     User login(String email, String password);
     User getUserById(Integer id);
     User getUserByEmail(String email);
+    List<User> getUserAll();
 
     // Update
     int updateUsername(Integer id, String username);

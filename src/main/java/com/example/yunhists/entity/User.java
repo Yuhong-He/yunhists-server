@@ -35,6 +35,9 @@ public class User {
     @TableField("points")
     private Integer points;
 
+    @TableField("today_download")
+    private Integer todayDownload;
+
     @TableField("register_type")
     private Integer registerType;
 
