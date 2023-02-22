@@ -30,6 +30,13 @@ public class ThesisServiceImpl extends ServiceImpl<ThesisMapper, Thesis> impleme
             queryWrapper.like("author", author);
         }
         if(!title.isEmpty()) {
+            if(title.contains(" ")) {
+                while(title.contains(" ")) {
+                    String temp = title.substring(0, title.indexOf(" "));
+                    title = title.substring(title.indexOf(" ") + 1);
+                    queryWrapper.like("title", temp);
+                }
+            }
             queryWrapper.like("title", title);
         }
         if(!publication.isEmpty()) {
