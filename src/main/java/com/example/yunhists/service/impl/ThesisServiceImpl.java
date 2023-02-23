@@ -9,6 +9,9 @@ import com.example.yunhists.mapper.ThesisMapper;
 import com.example.yunhists.service.ThesisService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Objects;
+
 @Service("thesisServiceImpl")
 public class ThesisServiceImpl extends ServiceImpl<ThesisMapper, Thesis> implements ThesisService {
 
@@ -20,6 +23,18 @@ public class ThesisServiceImpl extends ServiceImpl<ThesisMapper, Thesis> impleme
         queryWrapper.eq("publication", thesis.getPublication());
         Thesis t = baseMapper.selectOne(queryWrapper);
         return t == null;
+    }
+
+    @Override
+    public boolean validateNotExistWhenUpdate(Thesis thesis) {
+        QueryWrapper<Thesis> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("author", thesis.getAuthor());
+        queryWrapper.eq("title", thesis.getTitle());
+        queryWrapper.eq("publication", thesis.getPublication());
+        Thesis t = baseMapper.selectOne(queryWrapper);
+        if(t == null) {
+            return true;
+        } else return Objects.equals(t.getId(), thesis.getId());
     }
 
     @Override
@@ -52,6 +67,13 @@ public class ThesisServiceImpl extends ServiceImpl<ThesisMapper, Thesis> impleme
         }
         page.setOptimizeCountSql(false); // https://github.com/baomidou/mybatis-plus/issues/3698
         return baseMapper.selectPage(page, queryWrapper);
+    }
+
+    @Override
+    public Thesis getThesisByFile(String file) {
+        QueryWrapper<Thesis> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("file_name", file);
+        return baseMapper.selectOne(queryWrapper);
     }
 
 }

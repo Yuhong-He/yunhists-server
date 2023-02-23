@@ -12,7 +12,7 @@ public class UserUtils {
     }
 
     public static boolean validateUsername(String username) {
-        return username.length() > 2 && username.length() < 15;
+        return username.length() > 0 && username.length() < 15;
     }
 
     public static boolean validatePassword(String pwd) {

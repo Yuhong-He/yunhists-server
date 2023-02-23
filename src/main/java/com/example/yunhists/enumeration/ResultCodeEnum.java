@@ -40,9 +40,11 @@ public enum ResultCodeEnum {
     NO_MORE_DOWNLOAD(401, "You can't download more today"),
     INVALID_TYPE(402, "Invalid type"),
     INVALID_COPYRIGHT(403, "Invalid copyright"),
+    THESIS_FILE_MISSING(404, "Thesis file missing"),
     UPLOADER_NOT_EXIST(405, "Uploader not exist"),
     THESIS_EXIST(406, "Thesis exist"),
-    THESIS_ID_NOT_EXIST(407, "Thesis id not exist")
+    THESIS_ID_NOT_EXIST(407, "Thesis id not exist"),
+    THESIS_FILE_NOT_EXIST(408, "Thesis file not exist")
     ;
 
     private final Integer code;

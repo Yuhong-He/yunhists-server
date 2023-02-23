@@ -10,6 +10,7 @@ import com.example.yunhists.service.ThesisService;
 import com.example.yunhists.service.UserService;
 import com.example.yunhists.utils.ControllerUtils;
 import com.example.yunhists.utils.Result;
+import org.apache.commons.lang.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -146,12 +147,7 @@ public class ThesisController {
         List<Thesis> list = pageRs.getRecords();
         List<ThesisRow> newList = new ArrayList<>();
         for(Thesis s : list) {
-            List<CategoryLink> categoryLinkList = categoryLinkService.getLinkByChildId(s.getId(), 0);
-            List<CategoryName> categories = new ArrayList<>();
-            for(CategoryLink link : categoryLinkList) {
-                CategoryName c = new CategoryName(link.getCatTo(), link.getCatToZhName(), link.getCatToEnName());
-                categories.add(c);
-            }
+            List<CategoryName> categories = getThesisCat(s);
             ThesisIssue thesisIssue = new ThesisIssue(
                     s.getYear() == null ? "" : s.getYear().toString(),
                     s.getVolume() == null ? "" : s.getVolume().toString(),
@@ -263,16 +259,22 @@ public class ThesisController {
                 Thesis thesis = thesisService.getById(id);
                 if(thesis != null) {
 
-                    // 5. check user download today
-                    int remain = calculateRemain(user.getPoints(), user.getTodayDownload());
-                    if(remain > 0) {
-                        user.setTodayDownload(user.getTodayDownload() + 1);
-                        userService.saveOrUpdate(user);
-                        Map<String, Object> map = new LinkedHashMap<>();
-                        map.put("file", thesis.getFileName());
-                        return Result.ok(map);
+                    // 5. check file exist
+                    if(thesis.getFileName().length() > 0) {
+
+                        // 6. check user download today
+                        int remain = calculateRemain(user.getPoints(), user.getTodayDownload());
+                        if(remain > 0) {
+                            user.setTodayDownload(user.getTodayDownload() + 1);
+                            userService.saveOrUpdate(user);
+                            Map<String, Object> map = new LinkedHashMap<>();
+                            map.put("file", thesis.getFileName());
+                            return Result.ok(map);
+                        } else {
+                            return Result.error(ResultCodeEnum.NO_MORE_DOWNLOAD);
+                        }
                     } else {
-                        return Result.error(ResultCodeEnum.NO_MORE_DOWNLOAD);
+                        return Result.error(ResultCodeEnum.THESIS_FILE_MISSING);
                     }
                 } else {
                     return Result.error(ResultCodeEnum.THESIS_ID_NOT_EXIST);
@@ -284,6 +286,212 @@ public class ThesisController {
         } catch (Exception e) {
             return (Result<Object>) obj;
         }
+    }
+
+    @GetMapping("/id/{thesisId}")
+    public Result<Object> getThesisById(@PathVariable("thesisId") Integer id,
+                                        HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer userId = (Integer) obj;
+
+            // 3. check user rights
+            User user = userService.getUserById(userId);
+            if(user != null && user.getUserRights() >= 1) {
+
+                // 4. check thesis exist
+                Thesis thesis = thesisService.getById(id);
+                if(thesis != null) {
+                    List<CategoryName> categories = getThesisCat(thesis);
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    map.put("thesis", thesis);
+                    map.put("categories", categories);
+                    return Result.ok(map);
+                } else {
+                    return Result.error(ResultCodeEnum.THESIS_ID_NOT_EXIST);
+                }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_PERMISSION);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            return (Result<Object>) obj;
+        }
+    }
+
+    @PostMapping("/deleteFile")
+    public Result<Object> deleteFileOfThesis(@RequestParam String file,
+                                        HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer userId = (Integer) obj;
+
+            // 3. check user rights
+            User user = userService.getUserById(userId);
+            if(user != null && user.getUserRights() >= 1) {
+
+                // 4. check file exist
+                Thesis thesis = thesisService.getThesisByFile(file);
+                if(thesis != null) {
+                    thesis.setFileName("");
+                    thesisService.saveOrUpdate(thesis);
+                    return Result.ok();
+                } else {
+                    return Result.error(ResultCodeEnum.THESIS_FILE_NOT_EXIST);
+                }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_PERMISSION);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            return (Result<Object>) obj;
+        }
+    }
+
+
+    @PostMapping("/update")
+    public Result<Object> update(@RequestParam("id") Integer thesisId,
+                                 @RequestParam("category") int[] catIds,
+                                 @RequestBody Thesis thesis,
+                                 HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer userId = (Integer) obj;
+
+            // 3. check user rights
+            User user = userService.getUserById(userId);
+            if(user != null && user.getUserRights() >= 1) {
+
+                // 4. check type valid
+                List<Integer> validType = List.of(0,1,2);
+                if(validType.contains(thesis.getType())) {
+
+                    // 5. check copyright valid
+                    List<Integer> validCopyright = List.of(0,1,2);
+                    if(validCopyright.contains(thesis.getCopyrightStatus())) {
+
+                        // 6.check thesis exist
+                        Thesis targetThesis = thesisService.getById(thesisId);
+                        if(targetThesis != null) {
+
+                            // 7. set uploader & approver $ approve_time
+                            thesis.setId(thesisId);
+                            thesis.setUploader(targetThesis.getUploader());
+                            thesis.setApprover(targetThesis.getApprover());
+                            thesis.setApproveTime(targetThesis.getApproveTime());
+
+                            // 8. check duplicate
+                            if(thesisService.validateNotExistWhenUpdate(thesis)) {
+
+                                // a. update thesis
+                                thesisService.saveOrUpdate(thesis);
+
+                                // b. handle catIds, the category from client
+                                List<Integer> catIdsList = new ArrayList<>(); // ready adding list
+                                List<Integer> catLinksList = new ArrayList<>(); // old category (from database)
+                                List<CategoryLink> categoryLinkList = categoryLinkService.getLinkByChildId(thesis.getId(), 0);
+                                for(CategoryLink link : categoryLinkList) {
+                                    catLinksList.add(link.getCatTo());
+                                }
+                                /*
+                                * b-1. clean up parent category that removed:
+                                *       loop categories of the thesis in database,
+                                *       if new categories (from client) does not contain the category
+                                *       remove this category in database
+                                *  */
+                                for(CategoryLink link : categoryLinkList) {
+                                    if(!ArrayUtils.contains(catIds, link.getCatTo())) {
+                                        Category cat = categoryService.getCategoryById(link.getCatTo());
+                                        cat.setCatTheses(cat.getCatTheses() - 1);
+                                        categoryService.saveOrUpdate(cat);
+                                        categoryLinkService.removeById(link.getId());
+                                    }
+                                }
+                                /*
+                                 * b-2. clean up parent category which is new:
+                                 *       loop categories of the thesis from client,
+                                 *       if old categories (from database) does not contain the category
+                                 *       add the category to ready-adding list
+                                 *  */
+                                for(int i : catIds) {
+                                    if(!catLinksList.contains(i)) {
+                                        catIdsList.add(i);
+                                    }
+                                }
+
+                                ArrayList<Integer> failedParentCatId = new ArrayList<>();
+
+                                // c. loop parent category from client
+                                for (Integer catId : catIdsList) {
+
+                                    // d. check category exist
+                                    Category cat = categoryService.getCategoryById(catId);
+                                    if(cat != null) {
+
+                                        // e. add category link
+                                        CategoryLink categoryLink = new CategoryLink(
+                                                thesis.getId(), cat.getId(), cat.getZhName(),
+                                                cat.getEnName(), 0, userId);
+                                        categoryLinkService.save(categoryLink);
+
+                                        // f. update category statistics
+                                        cat.setCatTheses(cat.getCatTheses() + 1);
+                                        categoryService.saveOrUpdate(cat);
+
+                                    } else {
+                                        failedParentCatId.add(catId);
+                                    }
+                                }
+
+                                // g. return results
+                                if(failedParentCatId.isEmpty()) {
+                                    return Result.ok();
+                                } else {
+                                    Map<String, Object> map = new LinkedHashMap<>();
+                                    map.put("failedCatId", failedParentCatId);
+                                    return Result.error(map, ResultCodeEnum.PARENT_CAT_NOT_EXIST);
+                                }
+                            } else {
+                                return Result.error(ResultCodeEnum.THESIS_EXIST);
+                            }
+                        } else {
+                            return Result.error(ResultCodeEnum.THESIS_ID_NOT_EXIST);
+                        }
+                    } else {
+                        return Result.error(ResultCodeEnum.INVALID_COPYRIGHT);
+                    }
+                } else {
+                    return Result.error(ResultCodeEnum.INVALID_TYPE);
+                }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_PERMISSION);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            return (Result<Object>) obj;
+        }
+    }
+
+    private List<CategoryName> getThesisCat(Thesis thesis) {
+        List<CategoryLink> categoryLinkList = categoryLinkService.getLinkByChildId(thesis.getId(), 0);
+        List<CategoryName> categories = new ArrayList<>();
+        for(CategoryLink link : categoryLinkList) {
+            CategoryName c = new CategoryName(link.getCatTo(), link.getCatToZhName(), link.getCatToEnName());
+            categories.add(c);
+        }
+        return categories;
     }
 
     private static String vancouverStyle(String author, String title, String publication, String location,
