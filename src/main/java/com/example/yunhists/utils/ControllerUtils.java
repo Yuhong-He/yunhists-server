@@ -25,4 +25,11 @@ public class ControllerUtils {
         }
     }
 
+    public static void printException(Exception e) {
+        System.out.println(e.getMessage());
+        for(StackTraceElement s : e.getStackTrace()) {
+            System.out.println("\t" + s);
+        }
+    }
+
 }

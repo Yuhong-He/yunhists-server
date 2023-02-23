@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static com.example.yunhists.utils.ControllerUtils.printException;
 
 @CrossOrigin
 @RestController
@@ -248,7 +251,12 @@ public class UserController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
@@ -273,7 +281,12 @@ public class UserController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
@@ -302,7 +315,12 @@ public class UserController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
@@ -365,7 +383,12 @@ public class UserController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
@@ -425,7 +448,12 @@ public class UserController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
@@ -470,7 +498,12 @@ public class UserController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
@@ -511,7 +544,12 @@ public class UserController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 }

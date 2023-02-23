@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
+import static com.example.yunhists.utils.ControllerUtils.printException;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/api/thesis")
@@ -118,7 +120,12 @@ public class ThesisController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
@@ -236,7 +243,12 @@ public class ThesisController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
@@ -284,7 +296,12 @@ public class ThesisController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
@@ -319,7 +336,12 @@ public class ThesisController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
@@ -352,7 +374,12 @@ public class ThesisController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
@@ -480,7 +507,12 @@ public class ThesisController {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return (Result<Object>) obj;
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
         }
     }
 
