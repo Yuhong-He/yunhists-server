@@ -7,6 +7,7 @@ import com.example.yunhists.enumeration.CategoryEnum;
 import com.example.yunhists.enumeration.ResultCodeEnum;
 import com.example.yunhists.service.CategoryLinkService;
 import com.example.yunhists.service.CategoryService;
+import com.example.yunhists.service.ThesisService;
 import com.example.yunhists.service.UserService;
 import com.example.yunhists.utils.ControllerUtils;
 import com.example.yunhists.utils.Result;
@@ -31,6 +32,9 @@ public class CategoryController {
 
     @Autowired
     private CategoryLinkService categoryLinkService;
+
+    @Autowired
+    private ThesisService thesisService;
 
     @PostMapping("/add")
     public Result<Object> add(@RequestBody CategoryWithParentCat categoryWithParentCat,
@@ -184,7 +188,7 @@ public class CategoryController {
                                 if(!c.equals(p)) {
 
                                     // d check the category link not exist
-                                    if(categoryLinkService.linkNotExist(c, p)) {
+                                    if(categoryLinkService.linkNotExist(c, p, CategoryEnum.TYPE_LINK_CATEGORY.getCode())) {
 
                                         // e. add new category link
                                         CategoryLink categoryLink = new CategoryLink(c, p, parentCat.getZhName(),
@@ -192,7 +196,7 @@ public class CategoryController {
                                                 userId);
                                         categoryLinkService.save(categoryLink);
 
-                                        // e. update category denormalization info
+                                        // f. update category denormalization info
                                         parentCat.setCatSubCats(parentCat.getCatSubCats() + 1);
                                         categoryService.saveOrUpdate(parentCat);
                                     } else {
@@ -220,7 +224,45 @@ public class CategoryController {
 
                 // 二. add cat to thesis
                 for(Integer t : updateAlotCat.getTheses()) {
-                    System.out.println(t);
+
+                    // a. check thesis exist
+                    Thesis thesis = thesisService.getById(t);
+                    if(thesis != null) {
+
+                        for(Integer p : updateAlotCat.getParentCats()) {
+
+                            // b. check parent category exist
+                            Category parentCat = categoryService.getCategoryById(p);
+                            if(parentCat != null) {
+
+                                // c check the category link not exist
+                                if(categoryLinkService.linkNotExist(t, p, CategoryEnum.TYPE_LINK_THESIS.getCode())) {
+
+                                    // d. add new category link
+                                    CategoryLink categoryLink = new CategoryLink(t, p, parentCat.getZhName(),
+                                            parentCat.getEnName(), CategoryEnum.TYPE_LINK_THESIS.getCode(),
+                                            userId);
+                                    categoryLinkService.save(categoryLink);
+
+                                    // e. update category denormalization info
+                                    parentCat.setCatTheses(parentCat.getCatTheses() + 1);
+                                    categoryService.saveOrUpdate(parentCat);
+                                } else {
+                                    failed.add(new UpdateALotCatFailed(
+                                            t, p, CategoryEnum.TYPE_LINK_THESIS.getCode(),
+                                            CategoryEnum.CATEGORY_LINK_EXIST.getCode()));
+                                }
+                            } else {
+                                failed.add(new UpdateALotCatFailed(
+                                        t, p, CategoryEnum.TYPE_LINK_THESIS.getCode(),
+                                        CategoryEnum.PARENT_CAT_NOT_EXIST.getCode()));
+                            }
+                        }
+                    } else {
+                        failed.add(new UpdateALotCatFailed(
+                                t, 0, CategoryEnum.TYPE_LINK_THESIS.getCode(),
+                                CategoryEnum.THESIS_NOT_EXIST.getCode()));
+                    }
                 }
 
                 // 三. return results

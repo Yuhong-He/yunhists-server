@@ -13,10 +13,11 @@ import java.util.List;
 public class CategoryLinkServiceImpl extends ServiceImpl<CategoryLinkMapper, CategoryLink> implements CategoryLinkService {
 
     @Override
-    public boolean linkNotExist(int catFrom, int catTo) {
+    public boolean linkNotExist(int catFrom, int catTo, int type) {
         QueryWrapper<CategoryLink> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("cat_from", catFrom);
         queryWrapper.eq("cat_to", catTo);
+        queryWrapper.eq("cat_type", type);
         return baseMapper.selectOne(queryWrapper) == null;
     }
 

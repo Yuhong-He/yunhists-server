@@ -6,7 +6,7 @@ import com.example.yunhists.entity.CategoryLink;
 import java.util.List;
 
 public interface CategoryLinkService extends IService<CategoryLink> {
-    boolean linkNotExist(int catFrom, int catTo);
+    boolean linkNotExist(int catFrom, int catTo, int type);
 
     List<CategoryLink> getLinkByChildId(int id, int type);
 }
