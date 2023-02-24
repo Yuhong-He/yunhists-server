@@ -72,7 +72,7 @@ public class CategoryController {
                                 // d. add category link
                                 CategoryLink categoryLink = new CategoryLink(
                                         catId, parentCat.getId(), parentCat.getZhName(),
-                                        parentCat.getEnName(), 1, userId);
+                                        parentCat.getEnName(), CategoryEnum.TYPE_LINK_CATEGORY.getCode(), userId);
                                 categoryLinkService.save(categoryLink);
 
                                 // e. update category statistics
@@ -188,7 +188,8 @@ public class CategoryController {
 
                                         // e. add new category link
                                         CategoryLink categoryLink = new CategoryLink(c, p, parentCat.getZhName(),
-                                                parentCat.getEnName(), 1, userId);
+                                                parentCat.getEnName(), CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                                userId);
                                         categoryLinkService.save(categoryLink);
 
                                         // e. update category denormalization info

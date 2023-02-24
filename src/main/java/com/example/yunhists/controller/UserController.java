@@ -153,7 +153,10 @@ public class UserController {
                         EmailVerification emailVerification = EmailVerificationUtils.createVerification(email);
 
                         // b. send email (may throw exception)
-                        DirectMailUtils.sendEmail(email, EmailContentHelper.getRegisterVerificationEmailSubject(lang), EmailContentHelper.getRegisterVerificationEmailBody(lang, emailVerification.getVerificationCode()));
+                        DirectMailUtils.sendEmail(
+                                email, EmailContentHelper.getRegisterVerificationEmailSubject(lang),
+                                EmailContentHelper.getRegisterVerificationEmailBody(lang,
+                                        emailVerification.getVerificationCode()));
 
                         // c. record verification code
                         evService.create(emailVerification);
@@ -198,7 +201,9 @@ public class UserController {
                         String pwd = UserUtils.generateRandomPwd();
 
                         // b. send email (may throw exception)
-                        DirectMailUtils.sendEmail(email, EmailContentHelper.getResetPasswordEmailSubject(user.getLang()), EmailContentHelper.getResetPasswordEmailBody(user.getLang(), user.getUsername(), pwd));
+                        DirectMailUtils.sendEmail(email, EmailContentHelper.getResetPasswordEmailSubject(
+                                user.getLang()), EmailContentHelper.getResetPasswordEmailBody(
+                                        user.getLang(), user.getUsername(), pwd));
 
                         // c. update user password
                         userService.updatePassword(user.getId(), pwd);
@@ -351,10 +356,15 @@ public class UserController {
 
                             try {
                                 // a. generate verification code
-                                EmailVerification emailVerification = EmailVerificationUtils.createVerification(email);
+                                EmailVerification emailVerification =
+                                        EmailVerificationUtils.createVerification(email);
 
                                 // b. send email (may throw exception)
-                                DirectMailUtils.sendEmail(email, EmailContentHelper.getChangeEmailVerificationEmailSubject(user.getLang()), EmailContentHelper.getChangeEmailVerificationEmailBody(user.getLang(), user.getUsername(), emailVerification.getVerificationCode()));
+                                DirectMailUtils.sendEmail(
+                                        email, EmailContentHelper.getChangeEmailVerificationEmailSubject(
+                                                user.getLang()),
+                                        EmailContentHelper.getChangeEmailVerificationEmailBody(user.getLang(),
+                                                user.getUsername(), emailVerification.getVerificationCode()));
 
                                 // c. record verification code
                                 evService.create(emailVerification);

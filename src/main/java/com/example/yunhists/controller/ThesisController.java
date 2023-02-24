@@ -3,13 +3,10 @@ package com.example.yunhists.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.yunhists.entity.*;
+import com.example.yunhists.enumeration.CategoryEnum;
 import com.example.yunhists.enumeration.ResultCodeEnum;
-import com.example.yunhists.service.CategoryLinkService;
-import com.example.yunhists.service.CategoryService;
-import com.example.yunhists.service.ThesisService;
-import com.example.yunhists.service.UserService;
-import com.example.yunhists.utils.ControllerUtils;
-import com.example.yunhists.utils.Result;
+import com.example.yunhists.service.*;
+import com.example.yunhists.utils.*;
 import org.apache.commons.lang.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +32,9 @@ public class ThesisController {
 
     @Autowired
     private CategoryLinkService categoryLinkService;
+
+    @Autowired
+    private DelThesisService delThesisService;
 
     @PostMapping("/add")
     public Result<Object> add(@RequestBody Thesis thesis,
@@ -81,7 +81,7 @@ public class ThesisController {
                                     // d. add category link
                                     CategoryLink categoryLink = new CategoryLink(
                                             thesis.getId(), cat.getId(), cat.getZhName(),
-                                            cat.getEnName(), 0, userId);
+                                            cat.getEnName(), CategoryEnum.TYPE_LINK_THESIS.getCode(), userId);
                                     categoryLinkService.save(categoryLink);
 
                                     // e. update category statistics
@@ -150,7 +150,8 @@ public class ThesisController {
         }
 
         Page<Thesis> page = new Page<>(pageNo, pageSize);
-        IPage<Thesis> pageRs =  thesisService.getThesisBySearch(page, author, title, publication, year, sortCol, sortOrder);
+        IPage<Thesis> pageRs =  thesisService.getThesisBySearch(
+                page, author, title, publication, year, sortCol, sortOrder);
         List<Thesis> list = pageRs.getRecords();
         List<ThesisRow> newList = new ArrayList<>();
         for(Thesis s : list) {
@@ -188,10 +189,14 @@ public class ThesisController {
             String isbn = thesis.getIsbn();
             int type = thesis.getType();
 
-            String vancouver = vancouverStyle(author, title, publication, location, publisher, year, volume, issue, pages, doi, type);
-            String harvard = harvardStyle(author, title, publication, location, publisher, year, volume, issue, pages, doi, type);
-            String gbt7714 = gbt7714Style(author, title, publication, location, publisher, year, volume, issue, pages, type);
-            String wikipedia = wikipediaStyle(author, title, publication, location, publisher, year, volume, issue, pages, doi, isbn, type);
+            String vancouver = ReferenceUtils.vancouverStyle(
+                    author, title, publication, location, publisher, year, volume, issue, pages, doi, type);
+            String harvard = ReferenceUtils.harvardStyle(
+                    author, title, publication, location, publisher, year, volume, issue, pages, doi, type);
+            String gbt7714 = ReferenceUtils.gbt7714Style(
+                    author, title, publication, location, publisher, year, volume, issue, pages, type);
+            String wikipedia = ReferenceUtils.wikipediaStyle(
+                    author, title, publication, location, publisher, year, volume, issue, pages, doi, isbn, type);
 
 
             Map<String, Object> map = new LinkedHashMap<>();
@@ -383,7 +388,6 @@ public class ThesisController {
         }
     }
 
-
     @PostMapping("/update")
     public Result<Object> update(@RequestParam("id") Integer thesisId,
                                  @RequestParam("category") int[] catIds,
@@ -428,7 +432,8 @@ public class ThesisController {
                                 // b. handle catIds, the category from client
                                 List<Integer> catIdsList = new ArrayList<>(); // ready adding list
                                 List<Integer> catLinksList = new ArrayList<>(); // old category (from database)
-                                List<CategoryLink> categoryLinkList = categoryLinkService.getLinkByChildId(thesis.getId(), 0);
+                                List<CategoryLink> categoryLinkList = categoryLinkService.getLinkByChildId(
+                                        thesis.getId(), CategoryEnum.TYPE_LINK_THESIS.getCode());
                                 for(CategoryLink link : categoryLinkList) {
                                     catLinksList.add(link.getCatTo());
                                 }
@@ -470,7 +475,7 @@ public class ThesisController {
                                         // e. add category link
                                         CategoryLink categoryLink = new CategoryLink(
                                                 thesis.getId(), cat.getId(), cat.getZhName(),
-                                                cat.getEnName(), 0, userId);
+                                                cat.getEnName(), CategoryEnum.TYPE_LINK_THESIS.getCode(), userId);
                                         categoryLinkService.save(categoryLink);
 
                                         // f. update category statistics
@@ -516,271 +521,99 @@ public class ThesisController {
         }
     }
 
+    @PostMapping("/delete/{thesisId}")
+    public Result<Object> deleteThesis(@PathVariable("thesisId") Integer id,
+                                       @RequestBody String reason,
+                                       HttpServletRequest request) {
+
+        reason = HttpServletUtils.decodeUrl(reason);
+        reason = reason.substring(0, reason.length() - 1); // remove the last "="
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer userId = (Integer) obj;
+
+            // 3. check user rights
+            User user = userService.getUserById(userId);
+            if(user != null && user.getUserRights() >= 1) {
+
+                // 4. check thesis exist
+                Thesis thesis = thesisService.getById(id);
+                if(thesis != null) {
+
+                    // a. delete category link
+                    List<CategoryLink> categoryLinkList = categoryLinkService.getLinkByChildId(
+                            thesis.getId(), CategoryEnum.TYPE_LINK_THESIS.getCode());
+                    for(CategoryLink categoryLink : categoryLinkList) {
+
+                        // a-1. update category statistics
+                        Category category = categoryService.getCategoryById(categoryLink.getCatTo());
+                        category.setCatTheses(category.getCatTheses() - 1);
+
+                        // a-2. delete category link by id
+                        categoryLinkService.removeById(categoryLink.getId());
+                    }
+
+                    // b. move oss file to delete folder
+                    String file = thesis.getFileName();
+                    String deletedFile = "";
+                    if(file.startsWith("/default/")) {
+                        String sourceFile = file.substring(1);
+                        deletedFile = "deleted/" + file.substring("/default/".length() + 1);
+                        try{
+                            OSSUtils.moveFileToDeletedFolder(sourceFile, deletedFile);
+                        } catch (Exception e) {
+                            printException(e);
+                        }
+                    }
+
+                    // c. add thesis to delThesis table
+                    DelThesis delThesis = new DelThesis(thesis, deletedFile, userId);
+                    delThesisService.save(delThesis);
+
+                    // d. delete thesis
+                    thesisService.removeById(thesis);
+
+                    // e. send email
+                    User uploader = userService.getUserById(thesis.getUploader());
+                    User admin = userService.getUserById(userId);
+                    if(!Objects.equals(uploader.getId(), admin.getId())) {
+                        DirectMailUtils.sendEmail(uploader.getEmail(),
+                                EmailContentHelper.getDeleteThesisNotificationEmailSubject(uploader.getLang()),
+                                EmailContentHelper.getDeleteThesisNotificationEmailBody(uploader.getLang(),
+                                        uploader.getUsername(), thesis.getTitle(), reason, admin.getUsername()));
+                    }
+
+                    return Result.ok();
+                } else {
+                    return Result.error(ResultCodeEnum.THESIS_ID_NOT_EXIST);
+                }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_PERMISSION);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
+        }
+    }
+
     private List<CategoryName> getThesisCat(Thesis thesis) {
-        List<CategoryLink> categoryLinkList = categoryLinkService.getLinkByChildId(thesis.getId(), 0);
+        List<CategoryLink> categoryLinkList = categoryLinkService.getLinkByChildId(
+                thesis.getId(), CategoryEnum.TYPE_LINK_THESIS.getCode());
         List<CategoryName> categories = new ArrayList<>();
         for(CategoryLink link : categoryLinkList) {
             CategoryName c = new CategoryName(link.getCatTo(), link.getCatToZhName(), link.getCatToEnName());
             categories.add(c);
         }
         return categories;
-    }
-
-    private static String vancouverStyle(String author, String title, String publication, String location,
-                                         String publisher, String year, String volume, String issue,
-                                         String pages, String doi, int type) {
-        StringBuilder vancouver = new StringBuilder();
-        if(!author.isEmpty()) {
-            vancouver.append(author);
-            vancouver.append(". ");
-        }
-        vancouver.append(title);
-        if(type == 1 || type == 2) {
-            if(!publication.isEmpty()) {
-                vancouver.append(". In: ");
-                vancouver.append(publication);
-                vancouver.append(". ");
-            }
-            if(!location.isEmpty()) {
-                vancouver.append(location);
-                vancouver.append(": ");
-            }
-            if(!publisher.isEmpty()) {
-                vancouver.append(publisher);
-                vancouver.append("; ");
-            }
-            if(!year.isEmpty()) {
-                vancouver.append(year);
-            }
-        } else { // type = 0
-            if(!publication.isEmpty()) {
-                vancouver.append(". ");
-                vancouver.append(publication);
-            }
-            if(!year.isEmpty()) {
-                vancouver.append(". ");
-                vancouver.append(year);
-                vancouver.append("; ");
-            }
-            if(!volume.isEmpty()) {
-                vancouver.append(volume);
-            }
-            if(!issue.isEmpty()) {
-                vancouver.append("(");
-                vancouver.append(issue);
-                vancouver.append(")");
-            }
-            if(!pages.isEmpty()) {
-                vancouver.append(": ");
-                vancouver.append(pages);
-            }
-        }
-        if(!doi.isEmpty()) {
-            vancouver.append(". Available from: ");
-            vancouver.append(doi);
-        }
-        vancouver.append(".");
-
-        return String.valueOf(vancouver);
-    }
-
-    private static String harvardStyle(String author, String title, String publication, String location,
-                                         String publisher, String year, String volume, String issue,
-                                         String pages, String doi, int type) {
-        StringBuilder harvard = new StringBuilder();
-        if(!author.isEmpty()) {
-            harvard.append(author);
-        }
-        if(!year.isEmpty()) {
-            harvard.append(" (");
-            harvard.append(year);
-            harvard.append("). ");
-        }
-        harvard.append("'");
-        harvard.append(title);
-        harvard.append("'");
-        if(type == 1 || type == 2) {
-            if(!publication.isEmpty()) {
-                harvard.append(" in ");
-                harvard.append(publication);
-                harvard.append(". ");
-            }
-            if(!location.isEmpty()) {
-                harvard.append(location);
-                harvard.append(": ");
-            }
-            if(!publisher.isEmpty()) {
-                harvard.append(publisher);
-                harvard.append(", ");
-            }
-        } else { // type = 0
-            if(!publication.isEmpty()) {
-                harvard.append(". ");
-                harvard.append(publication);
-            }
-            if(!volume.isEmpty()) {
-                harvard.append(", ");
-                harvard.append(volume);
-            }
-            if(!issue.isEmpty()) {
-                harvard.append("(");
-                harvard.append(issue);
-                harvard.append("), ");
-            }
-        }
-        if(!pages.isEmpty()) {
-            harvard.append("pp.");
-            harvard.append(pages);
-        }
-        if(!doi.isEmpty()) {
-            harvard.append(". doi:");
-            harvard.append(doi);
-        }
-        harvard.append(".");
-
-        return String.valueOf(harvard);
-    }
-
-    private static String gbt7714Style(String author, String title, String publication, String location,
-                                       String publisher, String year, String volume, String issue,
-                                       String pages, int type) {
-        StringBuilder gbt7714 = new StringBuilder();
-        if(!author.isEmpty()) {
-            author = author.replaceAll(",", "，");
-            gbt7714.append(author);
-            gbt7714.append("．");
-        }
-        gbt7714.append(title);
-        if(type == 0) {
-            gbt7714.append("[J]");
-        } else if(type == 1) {
-            gbt7714.append("[G]");
-        } else if(type == 2) {
-            gbt7714.append("[M]");
-        }
-        if(type == 1 || type == 2) {
-            if(!publication.isEmpty()) {
-                gbt7714.append("．");
-                gbt7714.append(publication);
-                gbt7714.append("．");
-            }
-            if(!location.isEmpty()) {
-                gbt7714.append(location);
-                gbt7714.append("：");
-            }
-            if(!publisher.isEmpty()) {
-                gbt7714.append(publisher);
-                gbt7714.append("，");
-            }
-            if(!year.isEmpty()) {
-                gbt7714.append(year);
-            }
-        } else { // type = 0
-            if(!publication.isEmpty()) {
-                gbt7714.append("．");
-                gbt7714.append(publication);
-            }
-            if(!year.isEmpty()) {
-                gbt7714.append("，");
-                gbt7714.append(year);
-                gbt7714.append("，");
-            }
-            if(!volume.isEmpty()) {
-                gbt7714.append(volume);
-            }
-            if(!issue.isEmpty()) {
-                gbt7714.append("(");
-                gbt7714.append(issue);
-                gbt7714.append(")");
-            }
-        }
-        if(!pages.isEmpty()) {
-            gbt7714.append("：");
-            gbt7714.append(pages);
-        }
-        gbt7714.append("．");
-
-        return String.valueOf(gbt7714);
-    }
-
-    private static String wikipediaStyle(String author, String title, String publication, String location,
-                                         String publisher, String year, String volume, String issue,
-                                         String pages, String isbn, String doi, int type) {
-        StringBuilder wikipedia = new StringBuilder();
-        if(type == 0) {
-            wikipedia.append("{{cite journal");
-        } else {
-            wikipedia.append("{{cite book");
-        }
-        if(!author.isEmpty()) {
-            if(author.contains(",")) {
-                int i = 0;
-                for (String au: author.split(",")){
-                    i++;
-                    wikipedia.append(" |author");
-                    wikipedia.append(i);
-                    wikipedia.append("=");
-                    wikipedia.append(au);
-                }
-            } else {
-                wikipedia.append(" |author=");
-                wikipedia.append(author);
-            }
-        }
-        if(type == 1 || type == 2) {
-            wikipedia.append(" |chapter=");
-            wikipedia.append(title);
-            if(!publication.isEmpty()) {
-                wikipedia.append(" |title=");
-                wikipedia.append(publication);
-            }
-            if(!location.isEmpty()) {
-                wikipedia.append(" |location=");
-                wikipedia.append(location);
-            }
-            if(!publisher.isEmpty()) {
-                wikipedia.append(" |publisher=");
-                wikipedia.append(publisher);
-            }
-            if(!year.isEmpty()) {
-                wikipedia.append(" |year=");
-                wikipedia.append(year);
-            }
-            if(!isbn.isEmpty()) {
-                wikipedia.append(" |isbn=");
-                wikipedia.append(isbn);
-            }
-        } else { // type = 0
-            wikipedia.append(" |title=");
-            wikipedia.append(title);
-            if(!publication.isEmpty()) {
-                wikipedia.append(" |journal=");
-                wikipedia.append(publication);
-            }
-            if(!year.isEmpty()) {
-                wikipedia.append(" |year=");
-                wikipedia.append(year);
-            }
-            if(!volume.isEmpty()) {
-                wikipedia.append(" |volume=");
-                wikipedia.append(volume);
-            }
-            if(!issue.isEmpty()) {
-                wikipedia.append(" |issue=");
-                wikipedia.append(issue);
-            }
-        }
-        if(!pages.isEmpty()) {
-            wikipedia.append(" |pages=");
-            wikipedia.append(pages);
-        }
-        if(!doi.isEmpty()) {
-            wikipedia.append(" |doi=");
-            wikipedia.append(doi);
-        }
-        wikipedia.append(" }}");
-
-        return String.valueOf(wikipedia);
     }
 
     private static int calculateRemain(int points, int todayDownload) {

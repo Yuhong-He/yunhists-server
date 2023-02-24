@@ -9,7 +9,6 @@ import com.example.yunhists.mapper.ThesisMapper;
 import com.example.yunhists.service.ThesisService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 
 @Service("thesisServiceImpl")

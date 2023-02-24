@@ -1,6 +1,8 @@
 package com.example.yunhists.utils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 
 public class HttpServletUtils {
@@ -16,6 +18,17 @@ public class HttpServletUtils {
             }
         }
         return token;
+    }
+
+    public static String decodeUrl(String url)
+    {
+        String prevURL = "";
+        String decodeURL = url;
+        while(!prevURL.equals(decodeURL)) {
+            prevURL = decodeURL;
+            decodeURL = URLDecoder.decode( decodeURL, StandardCharsets.UTF_8);
+        }
+        return decodeURL;
     }
 
 }
