@@ -23,11 +23,31 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     @Override
+    public boolean validateChineseName(int catId, String zhName) {
+        QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("zh_name", zhName);
+        Category category = baseMapper.selectOne(queryWrapper);
+        if(category == null) {
+            return true;
+        } else return catId == category.getId();
+    }
+
+    @Override
     public boolean validateEnglishName(String enName) {
         QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("en_name", enName);
         Category category = baseMapper.selectOne(queryWrapper);
         return category == null;
+    }
+
+    @Override
+    public boolean validateEnglishName(int catId, String zhName) {
+        QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("en_name", zhName);
+        Category category = baseMapper.selectOne(queryWrapper);
+        if(category == null) {
+            return true;
+        } else return catId == category.getId();
     }
 
     @Override

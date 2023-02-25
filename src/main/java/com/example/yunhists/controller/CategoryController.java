@@ -383,4 +383,65 @@ public class CategoryController {
         }
     }
 
+    @PostMapping("/updateCatName/{catId}")
+    public Result<Object> updateCatName(@PathVariable("catId") int catId,
+                                        @RequestParam String zhName,
+                                        @RequestParam String enName,
+                                        HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer userId = (Integer) obj;
+
+            // 3. check user rights
+            if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() >= 1) {
+
+                // 4. check category id exist
+                Category category = categoryService.getById(catId);
+                if(category != null) {
+
+                    // 5. check chinese name
+                    if(categoryService.validateChineseName(catId, zhName)) {
+
+                        // 6. check english name
+                        if(categoryService.validateEnglishName(catId, enName)) {
+
+                            category.setZhName(zhName);
+                            category.setEnName(enName);
+                            categoryService.saveOrUpdate(category);
+
+                            List<CategoryLink> list = categoryLinkService.getLinkByParentId(catId);
+                            for(CategoryLink link : list) {
+                                link.setCatToZhName(zhName);
+                                link.setCatToEnName(enName);
+                                categoryLinkService.saveOrUpdate(link);
+                            }
+
+                            return Result.ok();
+                        } else {
+                            return Result.error(ResultCodeEnum.REPEAT_EN_NAME);
+                        }
+                    } else {
+                        return Result.error(ResultCodeEnum.REPEAT_ZH_NAME);
+                    }
+                } else {
+                    return Result.error(ResultCodeEnum.CATEGORY_ID_NOT_EXIST);
+                }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_PERMISSION);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
+        }
+    }
+
 }

@@ -10,7 +10,11 @@ import java.util.List;
 public interface CategoryService extends IService<Category> {
     boolean validateChineseName(String zhName);
 
+    boolean validateChineseName(int catId, String zhName);
+
     boolean validateEnglishName(String enName);
+
+    boolean validateEnglishName(int catId, String zhName);
 
     Category getCategoryByIdWithoutPrivacy(int id);
 
