@@ -35,6 +35,7 @@ public enum ResultCodeEnum {
     REPEAT_EN_NAME(302,"Category English name exist"),
     PARENT_CAT_NOT_EXIST(303, "One of parent category not exist"),
     EMPTY_SEARCH(304, "Empty Search"),
+    CATEGORY_ID_NOT_EXIST(305, "Category ID not exist"),
 
     // Thesis
     NO_MORE_DOWNLOAD(401, "You can't download more today"),

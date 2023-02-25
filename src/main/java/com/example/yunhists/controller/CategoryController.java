@@ -70,7 +70,7 @@ public class CategoryController {
                         for (Integer parentId : list) {
 
                             // c. check parent category exist
-                            Category parentCat = categoryService.getCategoryById(parentId);
+                            Category parentCat = categoryService.getById(parentId);
                             if(parentCat != null) {
 
                                 // d. add category link
@@ -175,13 +175,13 @@ public class CategoryController {
                 for(Integer c : updateAlotCat.getCategories()) {
 
                     // a. check child category exist
-                    Category childCat = categoryService.getCategoryById(c);
+                    Category childCat = categoryService.getById(c);
                     if(childCat != null) {
 
                         for(Integer p : updateAlotCat.getParentCats()) {
 
                             // b. check parent category exist
-                            Category parentCat = categoryService.getCategoryById(p);
+                            Category parentCat = categoryService.getById(p);
                             if(parentCat != null) {
 
                                 // c. check parent category is not the child category
@@ -232,7 +232,7 @@ public class CategoryController {
                         for(Integer p : updateAlotCat.getParentCats()) {
 
                             // b. check parent category exist
-                            Category parentCat = categoryService.getCategoryById(p);
+                            Category parentCat = categoryService.getById(p);
                             if(parentCat != null) {
 
                                 // c check the category link not exist
@@ -287,11 +287,11 @@ public class CategoryController {
     @GetMapping("/id/{catId}")
     public Result<Object> getCategoryById(@PathVariable("catId") int catId) {
 
-        Category category = categoryService.getCategoryById(catId);
+        Category category = categoryService.getCategoryByIdWithoutPrivacy(catId);
         if(category != null) {
             return Result.ok(category);
         } else {
-            return Result.error(ResultCodeEnum.FAIL);
+            return Result.error(ResultCodeEnum.CATEGORY_ID_NOT_EXIST);
         }
     }
 
@@ -310,7 +310,76 @@ public class CategoryController {
             }
             return Result.ok(categoryNames);
         } else {
-            return Result.error(ResultCodeEnum.FAIL);
+            return Result.error(ResultCodeEnum.CATEGORY_ID_NOT_EXIST);
+        }
+    }
+
+    @GetMapping("/parentCats/{catId}")
+    public Result<Object> getCategoryParentCats(@PathVariable("catId") int catId) {
+
+        Category category = categoryService.getById(catId);
+        if(category != null) {
+            List<CategoryLink> parentCatLinks = categoryLinkService.getLinkByChildId(category.getId(),
+                    CategoryEnum.TYPE_LINK_CATEGORY.getCode());
+            List<CategoryName> parentCats = new ArrayList<>();
+            for(CategoryLink link : parentCatLinks) {
+                CategoryName parentCat = new CategoryName(link.getCatTo(), link.getCatToZhName(), link.getCatToEnName());
+                parentCats.add(parentCat);
+            }
+            return Result.ok(parentCats);
+        } else {
+            return Result.error(ResultCodeEnum.CATEGORY_ID_NOT_EXIST);
+        }
+    }
+
+    @GetMapping("/childCat/{catId}")
+    public Result<Object> getCategoryChildCats(@PathVariable("catId") int catId,
+                                               @RequestParam String sortCol,
+                                               @RequestParam String sortOrder) {
+
+        if(!sortCol.equals("catTheses") && !sortCol.equals("catSubCats")) {
+            sortCol = "";
+        }
+        if(!sortOrder.equals("ASC") && !sortOrder.equals("DESC")) {
+            sortOrder = "";
+        }
+
+        Category category = categoryService.getById(catId);
+        if(category != null) {
+            List<CategoryLink> childCatLinks = categoryLinkService.getLinkByParentId(category.getId(),
+                    CategoryEnum.TYPE_LINK_CATEGORY.getCode());
+            List<Category> childCats = new ArrayList<>();
+            for(CategoryLink link : childCatLinks) {
+                Category childCat = categoryService.getCategoryByIdWithoutPrivacy(link.getCatFrom());
+                if(childCat != null) { // avoid data inconsistency and loss of category leading to program errors
+                    childCats.add(childCat);
+                }
+            }
+
+            // sort by column
+            if(!(sortCol.isEmpty() || sortOrder.isEmpty())) {
+                String finalSortCol = sortCol;
+                String finalSortOrder = sortOrder;
+                childCats.sort((c1, c2) -> {
+                    if (finalSortCol.equals("catTheses")) {
+                        if (finalSortOrder.equals("ASC")) {
+                            return Integer.compare(c1.getCatTheses(), c2.getCatTheses());
+                        } else {
+                            return Integer.compare(c2.getCatTheses(), c1.getCatTheses());
+                        }
+                    } else {
+                        if (finalSortOrder.equals("ASC")) {
+                            return Integer.compare(c1.getCatSubCats(), c2.getCatSubCats());
+                        } else {
+                            return Integer.compare(c2.getCatSubCats(), c1.getCatSubCats());
+                        }
+                    }
+                });
+            }
+
+            return Result.ok(childCats);
+        } else {
+            return Result.error(ResultCodeEnum.CATEGORY_ID_NOT_EXIST);
         }
     }
 

@@ -6,14 +6,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.yunhists.entity.Category;
 
 import java.util.List;
-import java.util.Map;
 
 public interface CategoryService extends IService<Category> {
     boolean validateChineseName(String zhName);
 
     boolean validateEnglishName(String enName);
 
-    Category getCategoryById(int id);
+    Category getCategoryByIdWithoutPrivacy(int id);
 
     List<Category> getCategoriesByBatchId(List<Integer> ids);
 

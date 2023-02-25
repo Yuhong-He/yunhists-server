@@ -31,8 +31,12 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     @Override
-    public Category getCategoryById(int id) {
-        return baseMapper.selectById(id);
+    public Category getCategoryByIdWithoutPrivacy(int id) {
+        QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like("id", id);
+        queryWrapper.select(Category.class, info -> !info.getColumn().equals("operator")
+                && !info.getColumn().equals("created_at"));
+        return baseMapper.selectOne(queryWrapper);
     }
 
     @Override

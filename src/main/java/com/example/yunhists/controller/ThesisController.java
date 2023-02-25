@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.Collator;
 import java.util.*;
 
 import static com.example.yunhists.utils.ControllerUtils.printException;
@@ -75,7 +76,7 @@ public class ThesisController {
                             for (int catId : catIds) {
 
                                 // c. check category exist
-                                Category cat = categoryService.getCategoryById(catId);
+                                Category cat = categoryService.getById(catId);
                                 if(cat != null) {
 
                                     // d. add category link
@@ -445,7 +446,7 @@ public class ThesisController {
                                 *  */
                                 for(CategoryLink link : categoryLinkList) {
                                     if(!ArrayUtils.contains(catIds, link.getCatTo())) {
-                                        Category cat = categoryService.getCategoryById(link.getCatTo());
+                                        Category cat = categoryService.getById(link.getCatTo());
                                         cat.setCatTheses(cat.getCatTheses() - 1);
                                         categoryService.saveOrUpdate(cat);
                                         categoryLinkService.removeById(link.getId());
@@ -469,7 +470,7 @@ public class ThesisController {
                                 for (Integer catId : catIdsList) {
 
                                     // d. check category exist
-                                    Category cat = categoryService.getCategoryById(catId);
+                                    Category cat = categoryService.getById(catId);
                                     if(cat != null) {
 
                                         // e. add category link
@@ -550,7 +551,7 @@ public class ThesisController {
                     for(CategoryLink categoryLink : categoryLinkList) {
 
                         // a-1. update category statistics
-                        Category category = categoryService.getCategoryById(categoryLink.getCatTo());
+                        Category category = categoryService.getById(categoryLink.getCatTo());
                         category.setCatTheses(category.getCatTheses() - 1);
 
                         // a-2. delete category link by id
@@ -602,6 +603,134 @@ public class ThesisController {
                 printException(e);
                 return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
             }
+        }
+    }
+
+    @GetMapping("/categoryTheses/{catId}")
+    public Result<Object> getCategoryDetails(@PathVariable("catId") int catId,
+                                             @RequestParam String sortCol,
+                                             @RequestParam String sortOrder) {
+
+        List<String> validSortCol = List.of("author", "title", "publication", "thesisIssue");
+        if(!validSortCol.contains(sortCol)) {
+            sortCol = "";
+        }
+        if(!sortOrder.equals("ASC") && !sortOrder.equals("DESC")) {
+            sortOrder = "";
+        }
+
+        Category category = categoryService.getById(catId);
+        if(category != null) {
+            List<CategoryLink> thesisLinks = categoryLinkService.getLinkByParentId(category.getId(),
+                    CategoryEnum.TYPE_LINK_THESIS.getCode());
+            List<ThesisRow> theses = new ArrayList<>();
+            for(CategoryLink link : thesisLinks) {
+                Thesis thesis = thesisService.getById(link.getCatFrom());
+                if(thesis != null) {
+                    ThesisIssue thesisIssue = new ThesisIssue(
+                            thesis.getYear() == null ? "" : thesis.getYear().toString(),
+                            thesis.getVolume() == null ? "" : thesis.getVolume().toString(),
+                            thesis.getIssue() == null ? "" : thesis.getIssue()
+                    );
+                    List<CategoryName> categories = getThesisCat(thesis);
+                    ThesisRow row = new ThesisRow(thesis.getId(), thesis.getAuthor(), thesis.getTitle(),
+                            thesis.getPublication(), thesisIssue, categories);
+                    theses.add(row);
+                }
+            }
+
+            // sort by column
+            if(!(sortCol.isEmpty() || sortOrder.isEmpty())) {
+                String finalSortCol = sortCol;
+                String finalSortOrder = sortOrder;
+
+                List<ThesisRow> thesisSortList = new ArrayList<>();
+                List<ThesisRow> thesisNullList = new ArrayList<>();
+                switch (sortCol) {
+                    case "author":
+                        for (ThesisRow t : theses) {
+                            if (t.getAuthor() == null || t.getAuthor().isEmpty()) {
+                                thesisNullList.add(t);
+                            } else {
+                                thesisSortList.add(t);
+                            }
+                        }
+                        break;
+                    case "title":
+                        for (ThesisRow t : theses) {
+                            if (t.getTitle() == null || t.getTitle().isEmpty()) {
+                                thesisNullList.add(t);
+                            } else {
+                                thesisSortList.add(t);
+                            }
+                        }
+                        break;
+                    case "publication":
+                        for (ThesisRow t : theses) {
+                            if (t.getPublication() == null || t.getPublication().isEmpty()) {
+                                thesisNullList.add(t);
+                            } else {
+                                thesisSortList.add(t);
+                            }
+                        }
+                        break;
+                    case "thesisIssue":
+                        for (ThesisRow t : theses) {
+                            if (t.getThesisIssue().getYear().isEmpty()) {
+                                thesisNullList.add(t);
+                            } else {
+                                thesisSortList.add(t);
+                            }
+                        }
+                        break;
+                }
+
+                thesisSortList.sort((t1, t2) -> {
+                    switch (finalSortCol) {
+                        case "author":
+                            if (finalSortOrder.equals("ASC")) {
+                                return Collator.getInstance(Locale.CHINESE).
+                                        compare(t1.getAuthor().toLowerCase(),t2.getAuthor().toLowerCase());
+                            } else {
+                                return Collator.getInstance(Locale.CHINESE).
+                                        compare(t2.getAuthor().toLowerCase(),t1.getAuthor().toLowerCase());
+                            }
+                        case "title":
+                            if (finalSortOrder.equals("ASC")) {
+                                return Collator.getInstance(Locale.CHINESE).
+                                        compare(t1.getTitle().toLowerCase(),t2.getTitle().toLowerCase());
+                            } else {
+                                return Collator.getInstance(Locale.CHINESE).
+                                        compare(t2.getTitle().toLowerCase(),t1.getTitle().toLowerCase());
+                            }
+                        case "publication":
+                            if (finalSortOrder.equals("ASC")) {
+                                return Collator.getInstance(Locale.CHINESE).
+                                        compare(t1.getPublication().toLowerCase(),t2.getPublication().toLowerCase());
+                            } else {
+                                return Collator.getInstance(Locale.CHINESE).
+                                        compare(t2.getPublication().toLowerCase(),t1.getPublication().toLowerCase());
+                            }
+                        default:
+                            if (finalSortOrder.equals("ASC")) {
+                                return Integer.compare(
+                                        Integer.parseInt(t1.getThesisIssue().getYear()),
+                                        Integer.parseInt(t2.getThesisIssue().getYear()));
+                            } else {
+                                return Integer.compare(
+                                        Integer.parseInt(t2.getThesisIssue().getYear()),
+                                        Integer.parseInt(t1.getThesisIssue().getYear()));
+                            }
+                    }
+                });
+
+                thesisSortList.addAll(thesisNullList);
+                return Result.ok(thesisSortList);
+            } else {
+                return Result.ok(theses);
+            }
+        } else {
+            return Result.error(ResultCodeEnum.CATEGORY_ID_NOT_EXIST);
         }
     }
 

@@ -9,4 +9,6 @@ public interface CategoryLinkService extends IService<CategoryLink> {
     boolean linkNotExist(int catFrom, int catTo, int type);
 
     List<CategoryLink> getLinkByChildId(int id, int type);
+
+    List<CategoryLink> getLinkByParentId(int id, int type);
 }
