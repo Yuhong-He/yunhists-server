@@ -110,4 +110,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         return category.getId();
     }
 
+    @Override
+    public List<Category> getAll() {
+        return baseMapper.selectList(null);
+    }
+
 }
