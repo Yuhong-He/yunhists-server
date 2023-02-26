@@ -607,7 +607,7 @@ public class ThesisController {
     }
 
     @GetMapping("/categoryTheses/{catId}")
-    public Result<Object> getCategoryDetails(@PathVariable("catId") int catId,
+    public Result<Object> getCategoryTheses(@PathVariable("catId") int catId,
                                              @RequestParam String sortCol,
                                              @RequestParam String sortOrder) {
 

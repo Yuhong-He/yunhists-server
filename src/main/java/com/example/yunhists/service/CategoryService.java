@@ -24,4 +24,6 @@ public interface CategoryService extends IService<Category> {
                                           String lang, String sortCol, String sortOrder);
 
     List<Category> getCategories(String catName, String lang);
+
+    int getCatIdByName(String catName, String lang);
 }

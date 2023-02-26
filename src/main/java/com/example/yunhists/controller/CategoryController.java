@@ -444,4 +444,116 @@ public class CategoryController {
         }
     }
 
+    @PostMapping("/updateCatParentCat/{catId}")
+    public Result<Object> updateCatParentCat(@PathVariable("catId") int catId,
+                                             @RequestParam("lang") String lang,
+                                             @RequestParam("categories") String[] catNames,
+                                             HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer userId = (Integer) obj;
+
+            // 3. check user rights
+            if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() >= 1) {
+
+                // 4. check category id exist
+                Category category = categoryService.getById(catId);
+                if(category != null) {
+
+                    // a. get the catIds of the catNames
+                    ArrayList<Integer> catIds = new ArrayList<>();
+                    ArrayList<String> failedParentCatName = new ArrayList<>();
+                    for(String catName : catNames) {
+                        try {
+                            int parentCatId = categoryService.getCatIdByName(catName, lang);
+                            catIds.add(parentCatId);
+                        } catch (Exception e) {
+                            failedParentCatName.add(catName);
+                        }
+                    }
+
+                    // b. handle catIds, the category from client
+                    List<Integer> catIdsList = new ArrayList<>(); // ready adding list
+                    List<Integer> catLinksList = new ArrayList<>(); // old category (from database)
+                    List<CategoryLink> categoryLinkList = categoryLinkService.getLinkByChildId(
+                            category.getId(), CategoryEnum.TYPE_LINK_CATEGORY.getCode());
+                    for(CategoryLink link : categoryLinkList) {
+                        catLinksList.add(link.getCatTo());
+                    }
+                    /*
+                     * b-1. clean up parent category that removed:
+                     *       loop categories of the category in database,
+                     *       if new categories (from client) does not contain the category
+                     *       remove this category in database
+                     *  */
+                    for(CategoryLink link : categoryLinkList) {
+                        if(!catIds.contains(link.getCatTo())) {
+                            Category cat = categoryService.getById(link.getCatTo());
+                            cat.setCatSubCats(cat.getCatSubCats() - 1);
+                            categoryService.saveOrUpdate(cat);
+                            categoryLinkService.removeById(link.getId());
+                        }
+                    }
+                    /*
+                     * b-2. clean up parent category which is new:
+                     *       loop categories of the thesis from client,
+                     *       if old categories (from database) does not contain the category
+                     *       add the category to ready-adding list
+                     *  */
+                    for(int i : catIds) {
+                        if(!catLinksList.contains(i)) {
+                            catIdsList.add(i);
+                        }
+                    }
+
+                    List<UpdateALotCatFailed> failed = new ArrayList<>();
+                    // c. loop parent category from client
+                    for (Integer parentCatId : catIdsList) {
+
+                        // d. check parent category is not the child category
+                        if(parentCatId != catId) {
+
+                            // e. add category link
+                            Category cat = categoryService.getById(parentCatId);
+                            CategoryLink categoryLink = new CategoryLink(
+                                    category.getId(), cat.getId(), cat.getZhName(),
+                                    cat.getEnName(), CategoryEnum.TYPE_LINK_CATEGORY.getCode(), userId);
+                            categoryLinkService.save(categoryLink);
+
+                            // f. update category statistics
+                            cat.setCatSubCats(cat.getCatSubCats() + 1);
+                            categoryService.saveOrUpdate(cat);
+                        } else {
+                            failed.add(new UpdateALotCatFailed(
+                                    catId, parentCatId, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                    CategoryEnum.CAN_NOT_ADD_CAT_TO_ITSELF.getCode()));
+                        }
+                    }
+
+                    // g. return results
+                    Map<String, Object> result = new LinkedHashMap<>();
+                    result.put("failed", failed);
+                    result.put("failedParentCatName", failedParentCatName);
+                    return Result.ok(result);
+                } else {
+                    return Result.error(ResultCodeEnum.CATEGORY_ID_NOT_EXIST);
+                }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_PERMISSION);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
+        }
+    }
+
 }

@@ -98,4 +98,16 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         return baseMapper.selectList(queryWrapper);
     }
 
+    @Override
+    public int getCatIdByName(String catName, String lang) {
+        QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
+        if(lang.equals("zh")) {
+            queryWrapper.eq("zh_name", catName);
+        } else {
+            queryWrapper.eq("en_name", catName);
+        }
+        Category category = baseMapper.selectOne(queryWrapper);
+        return category.getId();
+    }
+
 }
