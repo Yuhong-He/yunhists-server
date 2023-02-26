@@ -9,6 +9,7 @@ import com.example.yunhists.mapper.ThesisMapper;
 import com.example.yunhists.service.ThesisService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service("thesisServiceImpl")
@@ -73,6 +74,13 @@ public class ThesisServiceImpl extends ServiceImpl<ThesisMapper, Thesis> impleme
         QueryWrapper<Thesis> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("file_name", file);
         return baseMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public List<Thesis> getThesisWithFileNotNull() {
+        QueryWrapper<Thesis> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNotNull("file_name");
+        return baseMapper.selectList(queryWrapper);
     }
 
 }

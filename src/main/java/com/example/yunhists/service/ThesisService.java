@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.yunhists.entity.Thesis;
 
+import java.util.List;
+
 public interface ThesisService extends IService<Thesis> {
     boolean validateNotExist(Thesis thesis);
 
@@ -14,4 +16,6 @@ public interface ThesisService extends IService<Thesis> {
                                     String sortCol, String sortOrder);
 
     Thesis getThesisByFile(String file);
+
+    List<Thesis> getThesisWithFileNotNull();
 }

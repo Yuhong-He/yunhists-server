@@ -46,7 +46,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public List<User> getUserAll() {
+    public List<User> getAll() {
         return baseMapper.selectList(null);
     }
 

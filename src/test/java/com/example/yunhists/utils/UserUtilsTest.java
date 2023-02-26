@@ -1,6 +1,8 @@
 package com.example.yunhists.utils;
 
+import com.example.yunhists.service.ThesisService;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.*;
 

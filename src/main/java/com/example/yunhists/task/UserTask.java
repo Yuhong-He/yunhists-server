@@ -16,7 +16,7 @@ public class UserTask {
 
     @Scheduled(cron ="0 0 0 * * ?")
     public void resetTodayDownload() {
-        List<User> userList = userService.getUserAll();
+        List<User> userList = userService.getAll();
         for(User user : userList) {
             user.setTodayDownload(0);
             userService.saveOrUpdate(user);

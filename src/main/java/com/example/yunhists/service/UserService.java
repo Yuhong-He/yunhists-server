@@ -14,7 +14,7 @@ public interface UserService extends IService<User> {
     User login(String email, String password);
     User getUserById(Integer id);
     User getUserByEmail(String email);
-    List<User> getUserAll();
+    List<User> getAll();
 
     // Update
     int updateUsername(Integer id, String username);
