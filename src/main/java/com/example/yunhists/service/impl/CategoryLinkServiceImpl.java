@@ -44,4 +44,9 @@ public class CategoryLinkServiceImpl extends ServiceImpl<CategoryLinkMapper, Cat
         return baseMapper.selectList(queryWrapper);
     }
 
+    @Override
+    public List<CategoryLink> getAll() {
+        return baseMapper.selectList(null);
+    }
+
 }

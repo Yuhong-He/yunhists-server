@@ -2,9 +2,11 @@ package com.example.yunhists.task;
 
 import com.example.yunhists.entity.Category;
 import com.example.yunhists.entity.CategoryLink;
+import com.example.yunhists.entity.Thesis;
 import com.example.yunhists.enumeration.CategoryEnum;
 import com.example.yunhists.service.CategoryLinkService;
 import com.example.yunhists.service.CategoryService;
+import com.example.yunhists.service.ThesisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,9 @@ public class CategoryTask {
 
     @Autowired
     CategoryLinkService categoryLinkService;
+
+    @Autowired
+    ThesisService thesisService;
 
     @Scheduled(cron ="0 0 0 * * ?")
     public void categoryStatisticDenormalizationSynchronization() {
@@ -56,6 +61,24 @@ public class CategoryTask {
                     link.setCatToEnName(category.getEnName());
                 }
                 categoryLinkService.saveOrUpdate(link);
+            }
+        }
+    }
+
+    @Scheduled(cron ="0 0 0 * * ?")
+    public void categoryLinkSynchronization() {
+        List<CategoryLink> allLinks = categoryLinkService.getAll();
+        for(CategoryLink link : allLinks) {
+            if(link.getCatType() == CategoryEnum.TYPE_LINK_THESIS.getCode()) {
+                Thesis thesis = thesisService.getById(link.getCatFrom());
+                if(thesis == null) {
+                    categoryLinkService.removeById(link);
+                }
+            } else if(link.getCatType() == CategoryEnum.TYPE_LINK_CATEGORY.getCode()) {
+                Category category = categoryService.getById(link.getCatFrom());
+                if(category == null) {
+                    categoryLinkService.removeById(link);
+                }
             }
         }
     }

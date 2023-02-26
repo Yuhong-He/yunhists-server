@@ -13,4 +13,6 @@ public interface CategoryLinkService extends IService<CategoryLink> {
     List<CategoryLink> getLinkByParentId(int id);
 
     List<CategoryLink> getLinkByParentId(int id, int type);
+
+    List<CategoryLink> getAll();
 }
