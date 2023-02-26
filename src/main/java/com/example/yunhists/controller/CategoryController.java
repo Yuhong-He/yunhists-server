@@ -187,7 +187,7 @@ public class CategoryController {
                                 // c. check parent category is not the child category
                                 if(!c.equals(p)) {
 
-                                    // d check the category link not exist
+                                    // d. check the category link not exist
                                     if(categoryLinkService.linkNotExist(c, p, CategoryEnum.TYPE_LINK_CATEGORY.getCode())) {
 
                                         // e. add new category link
@@ -542,6 +542,77 @@ public class CategoryController {
                 } else {
                     return Result.error(ResultCodeEnum.CATEGORY_ID_NOT_EXIST);
                 }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_PERMISSION);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
+        }
+    }
+
+    @PostMapping("/removeFromCat/{catId}")
+    public Result<Object> removeFromCat(@PathVariable("catId") int parentCatId,
+                                        @RequestParam("subCats") int[] subCats,
+                                        @RequestParam("subTheses") int[] subTheses,
+                                        HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer userId = (Integer) obj;
+
+            // 3. check user rights
+            if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() >= 1) {
+
+                List<UpdateALotCatFailed> failed = new ArrayList<>();
+
+                // 一. check parent category exist
+                Category parentCat = categoryService.getById(parentCatId);
+                if(parentCat != null) {
+
+                    // 二. remove subCats from the cat
+                    for(int c : subCats) {
+
+                        // b. remove category link
+                        CategoryLink categoryLink = categoryLinkService.getCategoryLinkByQuery(c, parentCatId,
+                                CategoryEnum.TYPE_LINK_CATEGORY.getCode());
+                        categoryLinkService.removeById(categoryLink);
+
+                        // c. update category denormalization info
+                        parentCat.setCatSubCats(parentCat.getCatSubCats() - 1);
+                        categoryService.saveOrUpdate(parentCat);
+                    }
+
+                    // 三. remove subTheses from the cat
+                    for(int t : subTheses) {
+
+                        // b. remove category link
+                        CategoryLink categoryLink = categoryLinkService.getCategoryLinkByQuery(t, parentCatId,
+                                CategoryEnum.TYPE_LINK_THESIS.getCode());
+                        categoryLinkService.removeById(categoryLink);
+
+                        // c. update category denormalization info
+                        parentCat.setCatTheses(parentCat.getCatTheses() - 1);
+                        categoryService.saveOrUpdate(parentCat);
+                    }
+                } else {
+                    failed.add(new UpdateALotCatFailed(
+                            0, parentCatId, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                            CategoryEnum.PARENT_CAT_NOT_EXIST.getCode()));
+                }
+
+                // 四. return results
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("failed", failed);
+                return Result.ok(result);
             } else {
                 obj = Result.error(ResultCodeEnum.NO_PERMISSION);
                 throw new Exception();

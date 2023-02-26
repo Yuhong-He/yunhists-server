@@ -22,6 +22,15 @@ public class CategoryLinkServiceImpl extends ServiceImpl<CategoryLinkMapper, Cat
     }
 
     @Override
+    public CategoryLink getCategoryLinkByQuery(int catFrom, int catTo, int type) {
+        QueryWrapper<CategoryLink> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("cat_from", catFrom);
+        queryWrapper.eq("cat_to", catTo);
+        queryWrapper.eq("cat_type", type);
+        return baseMapper.selectOne(queryWrapper);
+    }
+
+    @Override
     public List<CategoryLink> getLinkByChildId(int id, int type) {
         QueryWrapper<CategoryLink> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("cat_from", id);
