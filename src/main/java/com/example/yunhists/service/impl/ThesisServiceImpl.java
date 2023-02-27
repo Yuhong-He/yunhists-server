@@ -77,10 +77,8 @@ public class ThesisServiceImpl extends ServiceImpl<ThesisMapper, Thesis> impleme
     }
 
     @Override
-    public List<Thesis> getThesisWithFileNotNull() {
-        QueryWrapper<Thesis> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNotNull("file_name");
-        return baseMapper.selectList(queryWrapper);
+    public List<Thesis> getAll() {
+        return baseMapper.selectList(null);
     }
 
 }

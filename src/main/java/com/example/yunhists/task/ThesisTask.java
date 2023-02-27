@@ -23,11 +23,13 @@ public class ThesisTask {
 
     @Scheduled(cron ="0 0 0 * * ?")
     public void checkThesisFileDatabaseRecords() throws IOException {
-        List<Thesis> thesisList = thesisService.getThesisWithFileNotNull();
+        List<Thesis> thesisList = thesisService.getAll();
         for(Thesis thesis : thesisList) {
-            if(!OSSUtils.checkFileExist(thesis.getFileName())) {
-                thesis.setFileName("");
-                thesisService.saveOrUpdate(thesis);
+            if(!thesis.getFileName().isEmpty()) {
+                if(!OSSUtils.checkFileExist(thesis.getFileName())) {
+                    thesis.setFileName("");
+                    thesisService.saveOrUpdate(thesis);
+                }
             }
         }
     }
@@ -37,8 +39,7 @@ public class ThesisTask {
         List<String> fileList = OSSUtils.getAllFile();
         for(String file : fileList) {
             if(file.startsWith("default/")) {
-                String fileInDB = "/" + file;
-                Thesis thesis = thesisService.getThesisByFile(fileInDB);
+                Thesis thesis = thesisService.getThesisByFile(file);
                 if(thesis == null) {
                     OSSUtils.deleteFile(file);
                 }
