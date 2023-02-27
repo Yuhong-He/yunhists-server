@@ -1,4 +1,4 @@
-package com.example.yunhists.entity;
+package com.example.yunhists.pojo;
 
 import lombok.Data;
 

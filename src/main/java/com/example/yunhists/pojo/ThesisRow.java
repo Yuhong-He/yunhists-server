@@ -1,5 +1,7 @@
-package com.example.yunhists.entity;
+package com.example.yunhists.pojo;
 
+import com.example.yunhists.pojo.CategoryName;
+import com.example.yunhists.pojo.ThesisIssue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
