@@ -11,7 +11,8 @@ public enum CategoryEnum {
     PARENT_CAT_NOT_EXIST(2),
     CAN_NOT_ADD_CAT_TO_ITSELF(3),
     CATEGORY_LINK_EXIST(4),
-    THESIS_NOT_EXIST(5);
+    THESIS_NOT_EXIST(5),
+    MOVE_TO_ITSELF(6);
 
     private final Integer code;
 

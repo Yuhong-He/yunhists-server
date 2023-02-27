@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class UpdateALotCatFailed {
+public class BatchOperateCatFailed {
 
     private int catFromId;
 

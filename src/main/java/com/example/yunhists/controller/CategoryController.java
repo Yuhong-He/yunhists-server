@@ -169,7 +169,7 @@ public class CategoryController {
             // 3. check user rights
             if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() >= 1) {
 
-                List<UpdateALotCatFailed> failed = new ArrayList<>();
+                List<BatchOperateCatFailed> failed = new ArrayList<>();
 
                 // 一. add cat to cat
                 for(Integer c : updateAlotCat.getCategories()) {
@@ -200,23 +200,23 @@ public class CategoryController {
                                         parentCat.setCatSubCats(parentCat.getCatSubCats() + 1);
                                         categoryService.saveOrUpdate(parentCat);
                                     } else {
-                                        failed.add(new UpdateALotCatFailed(
+                                        failed.add(new BatchOperateCatFailed(
                                                 c, p, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
                                                 CategoryEnum.CATEGORY_LINK_EXIST.getCode()));
                                     }
                                 } else {
-                                    failed.add(new UpdateALotCatFailed(
+                                    failed.add(new BatchOperateCatFailed(
                                             c, p, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
                                             CategoryEnum.CAN_NOT_ADD_CAT_TO_ITSELF.getCode()));
                                 }
                             } else {
-                                failed.add(new UpdateALotCatFailed(
+                                failed.add(new BatchOperateCatFailed(
                                         c, p, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
                                         CategoryEnum.PARENT_CAT_NOT_EXIST.getCode()));
                             }
                         }
                     } else {
-                        failed.add(new UpdateALotCatFailed(
+                        failed.add(new BatchOperateCatFailed(
                                 c, 0, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
                                 CategoryEnum.CHILD_CAT_NOT_EXIST.getCode()));
                     }
@@ -248,18 +248,18 @@ public class CategoryController {
                                     parentCat.setCatTheses(parentCat.getCatTheses() + 1);
                                     categoryService.saveOrUpdate(parentCat);
                                 } else {
-                                    failed.add(new UpdateALotCatFailed(
+                                    failed.add(new BatchOperateCatFailed(
                                             t, p, CategoryEnum.TYPE_LINK_THESIS.getCode(),
                                             CategoryEnum.CATEGORY_LINK_EXIST.getCode()));
                                 }
                             } else {
-                                failed.add(new UpdateALotCatFailed(
+                                failed.add(new BatchOperateCatFailed(
                                         t, p, CategoryEnum.TYPE_LINK_THESIS.getCode(),
                                         CategoryEnum.PARENT_CAT_NOT_EXIST.getCode()));
                             }
                         }
                     } else {
-                        failed.add(new UpdateALotCatFailed(
+                        failed.add(new BatchOperateCatFailed(
                                 t, 0, CategoryEnum.TYPE_LINK_THESIS.getCode(),
                                 CategoryEnum.THESIS_NOT_EXIST.getCode()));
                     }
@@ -510,7 +510,7 @@ public class CategoryController {
                         }
                     }
 
-                    List<UpdateALotCatFailed> failed = new ArrayList<>();
+                    List<BatchOperateCatFailed> failed = new ArrayList<>();
                     // c. loop parent category from client
                     for (Integer parentCatId : catIdsList) {
 
@@ -528,7 +528,7 @@ public class CategoryController {
                             cat.setCatSubCats(cat.getCatSubCats() + 1);
                             categoryService.saveOrUpdate(cat);
                         } else {
-                            failed.add(new UpdateALotCatFailed(
+                            failed.add(new BatchOperateCatFailed(
                                     catId, parentCatId, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
                                     CategoryEnum.CAN_NOT_ADD_CAT_TO_ITSELF.getCode()));
                         }
@@ -572,7 +572,7 @@ public class CategoryController {
             // 3. check user rights
             if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() >= 1) {
 
-                List<UpdateALotCatFailed> failed = new ArrayList<>();
+                List<BatchOperateCatFailed> failed = new ArrayList<>();
 
                 // 一. check parent category exist
                 Category parentCat = categoryService.getById(parentCatId);
@@ -604,12 +604,167 @@ public class CategoryController {
                         categoryService.saveOrUpdate(parentCat);
                     }
                 } else {
-                    failed.add(new UpdateALotCatFailed(
+                    failed.add(new BatchOperateCatFailed(
                             0, parentCatId, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
                             CategoryEnum.PARENT_CAT_NOT_EXIST.getCode()));
                 }
 
                 // 四. return results
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("failed", failed);
+                return Result.ok(result);
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_PERMISSION);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
+        }
+    }
+
+    @PostMapping("/moveTo")
+    public Result<Object> moveTo(@RequestParam("originId") int originId,
+                                 @RequestParam("destId") int destId,
+                                 @RequestParam("subCats") int[] subCats,
+                                 @RequestParam("subTheses") int[] subTheses,
+                                 HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer userId = (Integer) obj;
+
+            // 3. check user rights
+            if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() >= 1) {
+
+                List<BatchOperateCatFailed> failed = new ArrayList<>();
+
+                // 4. check originId exist
+                Category origin = categoryService.getById(originId);
+                if(origin != null) {
+
+                    // 5. check destId exist
+                    Category dest = categoryService.getById(destId);
+                    if(dest != null) {
+
+                        // 6. check dest is not origin
+                        if(originId != destId) {
+
+                            // 一. move subCats
+                            for(int c : subCats) {
+
+                                // a. check child category exist
+                                Category childCat = categoryService.getById(c);
+                                if(childCat != null) {
+
+                                    // b. check parent category is not the child category
+                                    if(c != destId) {
+
+                                        // c. check the category link not exist
+                                        if(categoryLinkService.linkNotExist(c, destId, CategoryEnum.TYPE_LINK_CATEGORY.getCode())) {
+
+                                            // d. delete origin category link
+                                            CategoryLink originLink = categoryLinkService.getCategoryLinkByQuery(
+                                                    c, originId, CategoryEnum.TYPE_LINK_CATEGORY.getCode());
+                                            if(originLink != null) { // if link null (case deleted recently), do nothing
+                                                categoryLinkService.removeById(originLink);
+
+                                                // e. update origin category denormalization info
+                                                origin.setCatSubCats(origin.getCatSubCats() - 1);
+                                                categoryService.saveOrUpdate(origin);
+                                            }
+
+                                            // f. add dest category link
+                                            CategoryLink categoryLink = new CategoryLink(c, destId, dest.getZhName(),
+                                                    dest.getEnName(), CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                                    userId);
+                                            categoryLinkService.save(categoryLink);
+
+                                            // g. update dest category denormalization info
+                                            dest.setCatSubCats(dest.getCatSubCats() + 1);
+                                            categoryService.saveOrUpdate(dest);
+                                        } else {
+                                            failed.add(new BatchOperateCatFailed(
+                                                    c, destId, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                                    CategoryEnum.CATEGORY_LINK_EXIST.getCode()));
+                                        }
+                                    } else {
+                                        failed.add(new BatchOperateCatFailed(
+                                                c, destId, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                                CategoryEnum.CAN_NOT_ADD_CAT_TO_ITSELF.getCode()));
+                                    }
+                                } else {
+                                    failed.add(new BatchOperateCatFailed(
+                                            c, destId, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                            CategoryEnum.CHILD_CAT_NOT_EXIST.getCode()));
+                                }
+                            }
+
+                            // 二. move subTheses
+                            for(int t : subTheses) {
+
+                                // a. check thesis exist
+                                Thesis childThesis = thesisService.getById(t);
+                                if(childThesis != null) {
+
+                                    // b. check the category link not exist
+                                    if(categoryLinkService.linkNotExist(t, destId, CategoryEnum.TYPE_LINK_THESIS.getCode())) {
+
+                                        // c. delete origin category link
+                                        CategoryLink originLink = categoryLinkService.getCategoryLinkByQuery(
+                                                t, originId, CategoryEnum.TYPE_LINK_THESIS.getCode());
+                                        if(originLink != null) { // if link null (case deleted recently), do nothing
+                                            categoryLinkService.removeById(originLink);
+
+                                            // d. update origin category denormalization info
+                                            origin.setCatTheses(origin.getCatTheses() - 1);
+                                            categoryService.saveOrUpdate(origin);
+                                        }
+
+                                        // e. add dest category link
+                                        CategoryLink categoryLink = new CategoryLink(t, destId, dest.getZhName(),
+                                                dest.getEnName(), CategoryEnum.TYPE_LINK_THESIS.getCode(),
+                                                userId);
+                                        categoryLinkService.save(categoryLink);
+
+                                        // f. update dest category denormalization info
+                                        dest.setCatTheses(dest.getCatTheses() + 1);
+                                        categoryService.saveOrUpdate(dest);
+                                    } else {
+                                        failed.add(new BatchOperateCatFailed(
+                                                t, destId, CategoryEnum.TYPE_LINK_THESIS.getCode(),
+                                                CategoryEnum.CATEGORY_LINK_EXIST.getCode()));
+                                    }
+                                } else {
+                                    failed.add(new BatchOperateCatFailed(
+                                            t, destId, CategoryEnum.TYPE_LINK_THESIS.getCode(),
+                                            CategoryEnum.THESIS_NOT_EXIST.getCode()));
+                                }
+                            }
+                        } else {
+                            failed.add(new BatchOperateCatFailed(
+                                    originId, destId, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                    CategoryEnum.MOVE_TO_ITSELF.getCode()));
+                        }
+                    } else {
+                        failed.add(new BatchOperateCatFailed(
+                                originId, destId, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                                CategoryEnum.PARENT_CAT_NOT_EXIST.getCode()));
+                    }
+                } else {
+                    failed.add(new BatchOperateCatFailed(
+                            0, originId, CategoryEnum.TYPE_LINK_CATEGORY.getCode(),
+                            CategoryEnum.PARENT_CAT_NOT_EXIST.getCode()));
+                }
+
+                // 7. return results
                 Map<String, Object> result = new LinkedHashMap<>();
                 result.put("failed", failed);
                 return Result.ok(result);
