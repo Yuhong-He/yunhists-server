@@ -782,4 +782,60 @@ public class CategoryController {
         }
     }
 
+    @PostMapping("/delete/{catId}")
+    public Result<Object> delete(@PathVariable("catId") int catId,
+                                 HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer userId = (Integer) obj;
+
+            // 3. check user rights
+            if(userService.getUserById(userId) != null && userService.getUserById(userId).getUserRights() >= 1) {
+
+                // 4. check cat exist
+                Category category = categoryService.getById(catId);
+                if(category != null) {
+
+                    // 5. check cat empty
+                    List<CategoryLink> parentList = categoryLinkService.getLinkByParentId(catId);
+                    if(parentList.size() == 0) {
+
+                        // a. delete category link
+                        List<CategoryLink> childList = categoryLinkService.getLinkByChildId(catId,
+                                CategoryEnum.TYPE_LINK_CATEGORY.getCode());
+                        for(CategoryLink link : childList) {
+                            // b. update parent cat statistics
+                            Category parentCat = categoryService.getById(link.getCatTo());
+                            parentCat.setCatSubCats(parentCat.getCatSubCats() - 1);
+                            categoryService.saveOrUpdate(parentCat);
+                            categoryLinkService.removeById(link);
+                        }
+
+                        // c. delete category
+                        categoryService.removeById(category);
+                        return Result.ok();
+                    } else {
+                        return Result.error(ResultCodeEnum.CAN_ONLY_DELETE_EMPTY_CAT);
+                    }
+                } else {
+                    return Result.error(ResultCodeEnum.CATEGORY_ID_NOT_EXIST);
+                }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_PERMISSION);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
+        }
+    }
+
 }

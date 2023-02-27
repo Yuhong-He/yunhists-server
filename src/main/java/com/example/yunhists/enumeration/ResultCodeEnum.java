@@ -36,6 +36,7 @@ public enum ResultCodeEnum {
     PARENT_CAT_NOT_EXIST(303, "One of parent category not exist"),
     EMPTY_SEARCH(304, "Empty Search"),
     CATEGORY_ID_NOT_EXIST(305, "Category ID not exist"),
+    CAN_ONLY_DELETE_EMPTY_CAT(306, "Can only delete empty category"),
 
     // Thesis
     NO_MORE_DOWNLOAD(401, "You can't download more today"),
