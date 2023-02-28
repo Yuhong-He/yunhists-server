@@ -41,6 +41,9 @@ public class ThesisController {
     @Autowired
     private DelThesisService delThesisService;
 
+    @Autowired
+    private ShareService shareService;
+
     @PostMapping("/add")
     public Result<Object> add(@RequestBody Thesis thesis,
                               @RequestParam("category") int[] catIds,
@@ -77,6 +80,7 @@ public class ThesisController {
                             ArrayList<Integer> failedParentCatId = new ArrayList<>();
 
                             // b. loop parent category from client
+                            List<String> catOkList = new ArrayList<>();
                             for (int catId : catIds) {
 
                                 // c. check category exist
@@ -93,16 +97,23 @@ public class ThesisController {
                                     cat.setCatTheses(cat.getCatTheses() + 1);
                                     categoryService.saveOrUpdate(cat);
 
+                                    catOkList.add(String.valueOf(catId));
+
                                 } else {
                                     failedParentCatId.add(catId);
                                 }
                             }
 
-                            // f. update user points
+                            // f. add share records
+                            String catOkStr = String.join(",", catOkList);
+                            Share share = new Share(thesis, userId, catOkStr);
+                            shareService.save(share);
+
+                            // g. update user points
                             user.setPoints(user.getPoints() + 1);
                             userService.saveOrUpdate(user);
 
-                            // g. return results
+                            // h. return results
                             Map<String, Object> map = new LinkedHashMap<>();
                             map.put("points", user.getPoints());
                             if(failedParentCatId.isEmpty()) {
