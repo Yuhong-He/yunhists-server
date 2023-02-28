@@ -9,4 +9,5 @@ public interface ShareService extends IService<Share> {
 
     IPage<Share> getShareBySearch(Page<Share> page, int userId, String title);
 
+    Share getShareByFile(String file);
 }

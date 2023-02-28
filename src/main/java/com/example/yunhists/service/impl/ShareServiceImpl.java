@@ -33,4 +33,11 @@ public class ShareServiceImpl extends ServiceImpl<ShareMapper, Share> implements
         return baseMapper.selectPage(page, queryWrapper);
     }
 
+    @Override
+    public Share getShareByFile(String file) {
+        QueryWrapper<Share> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("file_name", file);
+        return baseMapper.selectOne(queryWrapper);
+    }
+
 }

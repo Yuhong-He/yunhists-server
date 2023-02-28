@@ -50,6 +50,9 @@ public enum ResultCodeEnum {
 
     // Share
     SHARE_ID_NOT_EXIST(501, "Share id not exist"),
+    NOT_YOUR_SHARE(502, "This is not the thesis you shared"),
+    SHARE_CAN_NOT_UPDATE(503, "This sharing can not be change"),
+    SHARE_FILE_NOT_EXIST(504, "Shared thesis file not exist"),
     ;
 
     private final Integer code;
