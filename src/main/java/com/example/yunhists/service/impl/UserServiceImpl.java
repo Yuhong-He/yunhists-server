@@ -51,6 +51,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public List<User> getAllAdmin() {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_rights", 1);
+        return baseMapper.selectList(queryWrapper);
+    }
+
+    @Override
     public int updateUsername(Integer id, String username) {
         User user = this.getUserById(id);
         user.setUsername(username);

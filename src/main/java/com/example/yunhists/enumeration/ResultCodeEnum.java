@@ -46,7 +46,10 @@ public enum ResultCodeEnum {
     UPLOADER_NOT_EXIST(405, "Uploader not exist"),
     THESIS_EXIST(406, "Thesis exist"),
     THESIS_ID_NOT_EXIST(407, "Thesis id not exist"),
-    THESIS_FILE_NOT_EXIST(408, "Thesis file not exist")
+    THESIS_FILE_NOT_EXIST(408, "Thesis file not exist"),
+
+    // Share
+    SHARE_ID_NOT_EXIST(501, "Share id not exist"),
     ;
 
     private final Integer code;

@@ -576,9 +576,9 @@ public class ThesisController {
                     // b. move oss file to delete folder
                     String file = thesis.getFileName();
                     String deletedFile = "";
-                    if(file.startsWith("/default/")) {
+                    if(file.startsWith("default/")) {
                         String sourceFile = file.substring(1);
-                        deletedFile = "deleted/" + file.substring("/default/".length() + 1);
+                        deletedFile = "deleted/" + file.substring("default/".length() + 1);
                         try{
                             OSSUtils.moveFileToDeletedFolder(sourceFile, deletedFile);
                         } catch (Exception e) {

@@ -34,6 +34,14 @@ public class EmailContentHelper {
         }
     }
 
+    public static String getNewShareNotificationEmailSubject(String lang) {
+        if(lang.equals("zh")) {
+            return "新分享通知";
+        } else {
+            return "New Sharing Notification";
+        }
+    }
+
     public static String getRegisterVerificationEmailBody(String lang, String code) {
         if(lang.equals("zh")) {
             return "<p>新用户您好，这是您的注册验证码：</p>" +
@@ -97,6 +105,16 @@ public class EmailContentHelper {
                     "<p style='text-indent: 2em'>We are sorry to inform you that the paper \"<span style='font-style:oblique'>" + title + "\" you shared has been deleted. The reason is:</p>" +
                     "<p style='padding-left: 4em; padding-right: 4em; color: #666666'>" + reason + "</p>" +
                     "<p style='text-indent: 2em'>The administrator who performed this operation is:" + admin + ", please feel free to contact us if you have any questions about this.</p>" +
+                    "<p>滇史论辑 Yunhists</p>";
+        }
+    }
+
+    public static String getNewShareNotificationEmailBody(String lang) {
+        if(lang.equals("zh")) {
+            return "<p>管理员您好，滇史论辑收到新的分享，请审批。</p>" +
+                    "<p>滇史论辑 Yunhists</p>";
+        } else {
+            return "<p>Dear admin, Yunhists received new sharing. Please approve.</p>" +
                     "<p>滇史论辑 Yunhists</p>";
         }
     }
