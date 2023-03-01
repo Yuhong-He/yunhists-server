@@ -29,7 +29,6 @@ public class ShareServiceImpl extends ServiceImpl<ShareMapper, Share> implements
         queryWrapper.orderByDesc("upload_time");
         queryWrapper.select(Share.class, info -> !info.getColumn().equals("approver")
                 && !info.getColumn().equals("approve_time"));
-        page.setOptimizeCountSql(false); // https://github.com/baomidou/mybatis-plus/issues/3698
         return baseMapper.selectPage(page, queryWrapper);
     }
 
@@ -38,6 +37,26 @@ public class ShareServiceImpl extends ServiceImpl<ShareMapper, Share> implements
         QueryWrapper<Share> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("file_name", file);
         return baseMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public IPage<Share> getAllShareBySearch(Page<Share> page, String title, String unapproved) {
+        QueryWrapper<Share> queryWrapper = new QueryWrapper<>();
+        if(!title.isEmpty()) {
+            if(title.contains(" ")) {
+                while(title.contains(" ")) {
+                    String temp = title.substring(0, title.indexOf(" "));
+                    title = title.substring(title.indexOf(" ") + 1);
+                    queryWrapper.like("title", temp);
+                }
+            }
+            queryWrapper.like("title", title);
+        }
+        if(unapproved.equals("ON")) {
+            queryWrapper.eq("status", 0);
+        }
+        queryWrapper.orderByDesc("upload_time");
+        return baseMapper.selectPage(page, queryWrapper);
     }
 
 }

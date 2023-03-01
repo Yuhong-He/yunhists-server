@@ -1,8 +1,10 @@
 package com.example.yunhists.task;
 
 import com.example.yunhists.entity.DelThesis;
+import com.example.yunhists.entity.Share;
 import com.example.yunhists.entity.Thesis;
 import com.example.yunhists.service.DelThesisService;
+import com.example.yunhists.service.ShareService;
 import com.example.yunhists.service.ThesisService;
 import com.example.yunhists.utils.OSSUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ public class ThesisTask {
 
     @Autowired
     DelThesisService delThesisService;
+
+    @Autowired
+    ShareService shareService;
 
     @Scheduled(cron ="0 0 0 * * ?")
     public void checkThesisFileDatabaseRecords() throws IOException {
@@ -46,6 +51,11 @@ public class ThesisTask {
             } else if(file.startsWith("deleted/")) {
                 DelThesis delThesis = delThesisService.getThesisByFile(file);
                 if(delThesis == null) {
+                    OSSUtils.deleteFile(file);
+                }
+            } else if(file.startsWith("temp/")) {
+                Share share = shareService.getShareByFile(file);
+                if(share == null) {
                     OSSUtils.deleteFile(file);
                 }
             }

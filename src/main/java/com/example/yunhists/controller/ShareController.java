@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.yunhists.entity.*;
 import com.example.yunhists.enumeration.ResultCodeEnum;
-import com.example.yunhists.pojo.CategoryName;
+import com.example.yunhists.pojo.*;
 import com.example.yunhists.service.CategoryService;
 import com.example.yunhists.service.ShareService;
 import com.example.yunhists.service.ThesisService;
@@ -99,7 +99,7 @@ public class ShareController {
         }
     }
 
-    @GetMapping("/list/{pageNo}")
+    @GetMapping("/myList/{pageNo}")
     public Result<Object> list(@PathVariable("pageNo") Integer pageNo,
                                @RequestParam(required = false) String title,
                                HttpServletRequest request) {
@@ -117,7 +117,23 @@ public class ShareController {
 
                 Page<Share> page = new Page<>(pageNo, 10);
                 IPage<Share> pageRs = shareService.getShareBySearch(page, userId, title);
-                return Result.ok(pageRs);
+                List<Share> list = pageRs.getRecords();
+                List<ShareRow> newList = new ArrayList<>();
+                for(Share s : list) {
+                    ThesisIssue thesisIssue = new ThesisIssue(
+                            s.getYear() == null ? "" : s.getYear().toString(),
+                            s.getVolume() == null ? "" : s.getVolume().toString(),
+                            s.getIssue() == null ? "" : s.getIssue()
+                    );
+                    ShareRow shareWithUser = new ShareRow(
+                            s.getId(), s.getAuthor(), s.getTitle(), s.getPublication(), thesisIssue, "",
+                            s.getStatus(), ""
+                    );
+                    newList.add(shareWithUser);
+                }
+                CustomPage customPage = new CustomPage(newList, pageRs.getTotal(), pageRs.getSize(),
+                        pageRs.getCurrent(), pageRs.getPages());
+                return Result.ok(customPage);
             } else {
                 obj = Result.error(ResultCodeEnum.NO_PERMISSION);
                 throw new Exception();
@@ -341,6 +357,61 @@ public class ShareController {
             }
         } catch (Exception e) {
             try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
+        }
+    }
+
+    @GetMapping("/listAll/{pageNo}")
+    public Result<Object> listAll(@PathVariable("pageNo") Integer pageNo,
+                                  @RequestParam(required = false) String title,
+                                  @RequestParam(required = false) String unapproved,
+                                  HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer userId = (Integer) obj;
+
+            // 3. check user rights
+            User user = userService.getUserById(userId);
+            if (user != null && user.getUserRights() >= 1) {
+
+                Page<Share> page = new Page<>(pageNo, 10);
+                IPage<Share> pageRs = shareService.getAllShareBySearch(page, title, unapproved);
+                List<Share> list = pageRs.getRecords();
+                List<ShareRow> newList = new ArrayList<>();
+                for(Share s : list) {
+                    ThesisIssue thesisIssue = new ThesisIssue(
+                            s.getYear() == null ? "" : s.getYear().toString(),
+                            s.getVolume() == null ? "" : s.getVolume().toString(),
+                            s.getIssue() == null ? "" : s.getIssue()
+                    );
+                    String uploader = userService.getUserById(s.getUploader()).getUsername();
+                    String approver = "";
+                    if(s.getApprover() != null) {
+                        approver = userService.getUserById(s.getApprover()).getUsername();
+                    }
+                    ShareRow shareWithUser = new ShareRow(
+                            s.getId(), s.getAuthor(), s.getTitle(), s.getPublication(), thesisIssue, uploader,
+                            s.getStatus(), approver
+                    );
+                    newList.add(shareWithUser);
+                }
+                CustomPage customPage = new CustomPage(newList, pageRs.getTotal(), pageRs.getSize(),
+                        pageRs.getCurrent(), pageRs.getPages());
+                return Result.ok(customPage);
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_PERMISSION);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            try {
                 return (Result<Object>) obj;
             } catch (Exception exception) {
                 printException(e);
