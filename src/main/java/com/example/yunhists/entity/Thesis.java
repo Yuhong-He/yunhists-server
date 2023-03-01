@@ -74,4 +74,24 @@ public class Thesis {
     @TableField("approve_time")
     private Timestamp approveTime;
 
+    public Thesis(Share share, int uploaderId, int adminId) {
+        this.author = share.getAuthor();
+        this.title = share.getTitle();
+        this.publication = share.getPublication();
+        this.location = share.getLocation();
+        this.publisher = share.getPublisher();
+        this.year = share.getYear();
+        this.volume = share.getVolume();
+        this.issue = share.getIssue();
+        this.pages = share.getPages();
+        this.doi = share.getDoi();
+        this.isbn = share.getIsbn();
+        this.onlinePublisher = share.getOnlinePublisher();
+        this.onlinePublishUrl = share.getOnlinePublishUrl();
+        this.type = share.getType();
+        this.copyrightStatus = share.getCopyrightStatus();
+        this.fileName = share.getFileName();
+        this.uploader = uploaderId;
+        this.approver = adminId;
+    }
 }

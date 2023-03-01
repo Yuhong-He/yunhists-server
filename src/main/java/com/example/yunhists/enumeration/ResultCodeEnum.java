@@ -42,7 +42,6 @@ public enum ResultCodeEnum {
     INVALID_TYPE(402, "Invalid type"),
     INVALID_COPYRIGHT(403, "Invalid copyright"),
     THESIS_FILE_MISSING(404, "Thesis file missing"),
-    UPLOADER_NOT_EXIST(405, "Uploader not exist"),
     THESIS_EXIST(406, "Thesis exist"),
     THESIS_ID_NOT_EXIST(407, "Thesis id not exist"),
     THESIS_FILE_NOT_EXIST(408, "Thesis file not exist"),
@@ -52,6 +51,8 @@ public enum ResultCodeEnum {
     NOT_YOUR_SHARE(502, "This is not the thesis you shared"),
     SHARE_CAN_NOT_UPDATE(503, "This sharing can not be change"),
     SHARE_FILE_NOT_EXIST(504, "Shared thesis file not exist"),
+    MOVE_SHARE_FILE_FAIL(201, "Move shared thesis file failed"),
+    REMOVE_FILE_FAIL(201, "Remove file failed"),
     ;
 
     private final Integer code;

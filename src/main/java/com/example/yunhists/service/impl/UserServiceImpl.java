@@ -106,6 +106,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setUsername("Deleted User");
         user.setEmail("");
         user.setPassword("");
+        user.setUserRights(0);
         return baseMapper.updateById(user);
     }
 

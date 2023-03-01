@@ -19,7 +19,7 @@ public class OSSUtils {
     static String endpoint = "oss-cn-hongkong.aliyuncs.com";
     static String bucketName = "yunhists";
 
-    public static void moveFileToDeletedFolder(String sourceObject, String destinationObject) throws Exception {
+    public static void moveFile(String sourceObject, String destinationObject) throws Exception {
         OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
         ossClient.copyObject(bucketName, sourceObject, bucketName, destinationObject);
         ossClient.deleteObject(bucketName, sourceObject);

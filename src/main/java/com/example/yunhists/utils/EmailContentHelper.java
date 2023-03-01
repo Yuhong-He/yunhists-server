@@ -42,6 +42,22 @@ public class EmailContentHelper {
         }
     }
 
+    public static String getShareApprovedNotificationEmailSubject(String lang) {
+        if(lang.equals("zh")) {
+            return "批准通知";
+        } else {
+            return "Approved Notification";
+        }
+    }
+
+    public static String getShareRejectedNotificationEmailSubject(String lang) {
+        if(lang.equals("zh")) {
+            return "驳回通知";
+        } else {
+            return "Reject Notification";
+        }
+    }
+
     public static String getRegisterVerificationEmailBody(String lang, String code) {
         if(lang.equals("zh")) {
             return "<p>新用户您好，这是您的注册验证码：</p>" +
@@ -115,6 +131,32 @@ public class EmailContentHelper {
                     "<p>滇史论辑 Yunhists</p>";
         } else {
             return "<p>Dear admin, Yunhists received new sharing. Please approve.</p>" +
+                    "<p>滇史论辑 Yunhists</p>";
+        }
+    }
+
+    public static String getShareApprovedNotificationEmailBody(String lang, String username, String title) {
+        if(lang.equals("zh")) {
+            return "<p>" + username + "您好，</p>" +
+                    "<p>您分享的论文《" + title + "》已审批通过，非常感谢您的贡献！</p>" +
+                    "<p>滇史论辑 Yunhists</p>";
+        } else {
+            return "<p>Dear " + username + ",</p>" +
+                    "<p>The thesis you shared <span style='font-style:oblique'>" + title + "</span> has been approved. Thank you very much for your contribution.</p>" +
+                    "<p>滇史论辑 Yunhists</p>";
+        }
+    }
+
+    public static String getShareRejectedNotificationEmailBody(String lang, String username, String title, String reason) {
+        if(lang.equals("zh")) {
+            reason = DeepL.translateToZh(reason);
+            return "<p>" + username + "您好，</p>" +
+                    "<p>很抱歉，您分享的论文《" + title + "》未通过审批，理由是：" + reason + "</p>" +
+                    "<p>滇史论辑 Yunhists</p>";
+        } else {
+            reason = DeepL.translateToEn(reason);
+            return "<p>Dear " + username + ",</p>" +
+                    "<p>We are sorry to inform you, the thesis you shared <span style='font-style:oblique'>" + title + "</span> has been rejected. The reason is: " + reason + "</p>" +
                     "<p>滇史论辑 Yunhists</p>";
         }
     }

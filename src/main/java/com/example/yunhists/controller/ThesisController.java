@@ -577,10 +577,9 @@ public class ThesisController {
                     String file = thesis.getFileName();
                     String deletedFile = "";
                     if(file.startsWith("default/")) {
-                        String sourceFile = file.substring(1);
                         deletedFile = "deleted/" + file.substring("default/".length() + 1);
                         try{
-                            OSSUtils.moveFileToDeletedFolder(sourceFile, deletedFile);
+                            OSSUtils.moveFile(file, deletedFile);
                         } catch (Exception e) {
                             printException(e);
                         }
@@ -597,10 +596,12 @@ public class ThesisController {
                     User uploader = userService.getUserById(thesis.getUploader());
                     User admin = userService.getUserById(userId);
                     if(!Objects.equals(uploader.getId(), admin.getId())) {
-                        DirectMailUtils.sendEmail(uploader.getEmail(),
-                                EmailContentHelper.getDeleteThesisNotificationEmailSubject(uploader.getLang()),
-                                EmailContentHelper.getDeleteThesisNotificationEmailBody(uploader.getLang(),
-                                        uploader.getUsername(), thesis.getTitle(), reason, admin.getUsername()));
+                        if(!uploader.getEmail().isEmpty()) {
+                            DirectMailUtils.sendEmail(uploader.getEmail(),
+                                    EmailContentHelper.getDeleteThesisNotificationEmailSubject(uploader.getLang()),
+                                    EmailContentHelper.getDeleteThesisNotificationEmailBody(uploader.getLang(),
+                                            uploader.getUsername(), thesis.getTitle(), reason, admin.getUsername()));
+                        }
                     }
 
                     return Result.ok();
