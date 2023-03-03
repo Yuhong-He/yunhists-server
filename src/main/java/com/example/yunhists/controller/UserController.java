@@ -71,6 +71,54 @@ public class UserController {
         }
     }
 
+    @PostMapping("/google")
+    public Result<Object> google(@RequestParam("email") String email,
+                                 @RequestParam("username") String username,
+                                 @RequestParam("lang") String lang) throws IOException {
+
+
+        // 4. check lang valid
+        if(UserUtils.validateLang(lang)) {
+
+            // 5. check email registered
+            User user = userService.getUserByEmail(email);
+            if (user == null) { // google register
+
+                User newUser = new User(username, "", email, lang, 1);
+                int userId = userService.googleRegister(newUser);
+
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("token", JwtHelper.createToken((long) userId));
+                map.put("userId", userId);
+                map.put("username", username);
+                map.put("email", email);
+                map.put("lang", lang);
+                map.put("userRights", 0);
+                map.put("points", 0);
+                map.put("sts", STSUtils.getSTS(userId));
+
+                return Result.ok(map);
+
+            } else if(user.getRegisterType() == 1) { // google login
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("token", JwtHelper.createToken(user.getId().longValue()));
+                map.put("userId", user.getId());
+                map.put("username", user.getUsername());
+                map.put("email", user.getEmail());
+                map.put("lang", user.getLang());
+                map.put("userRights", user.getUserRights());
+                map.put("points", user.getPoints());
+                map.put("sts", STSUtils.getSTS(user.getId()));
+                return Result.ok(map);
+
+            } else { // email registered user
+                return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
+            }
+        } else {
+            return Result.error(ResultCodeEnum.INVALID_LANG);
+        }
+    }
+
     @PostMapping("/register")
     public Result<Object> register(
             @RequestParam("lang") String lang,

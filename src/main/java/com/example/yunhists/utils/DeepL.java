@@ -27,7 +27,7 @@ public class DeepL {
     public static String translateToEn(String str) {
         try {
             translator = new Translator(getAccessKey());
-            TextResult result = translator.translateText(str, null, "en");
+            TextResult result = translator.translateText(str, null, "en-GB");
             return result.getText();
         } catch (Exception e) {
             ControllerUtils.printException(e);

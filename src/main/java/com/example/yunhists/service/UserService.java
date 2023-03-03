@@ -12,6 +12,9 @@ public interface UserService extends IService<User> {
 
     // Read
     User login(String email, String password);
+
+    int googleRegister(User user);
+
     User getUserById(Integer id);
     User getUserByEmail(String email);
     List<User> getAll();

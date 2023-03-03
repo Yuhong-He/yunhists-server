@@ -32,6 +32,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public int googleRegister(User user) {
+        return baseMapper.insert(user);
+    }
+
+    @Override
     public User getUserById(Integer id) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", id);
