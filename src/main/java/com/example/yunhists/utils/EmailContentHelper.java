@@ -36,9 +36,9 @@ public class EmailContentHelper {
 
     public static String getNewShareNotificationEmailSubject(String lang) {
         if(lang.equals("zh")) {
-            return "新分享通知";
+            return "新上传通知";
         } else {
-            return "New Sharing Notification";
+            return "New Upload Notification";
         }
     }
 
@@ -109,7 +109,7 @@ public class EmailContentHelper {
                 reason = DeepL.translateToZh(reason);
             }
             return "<p>" + username + "您好，</p>" +
-                    "<p style='text-indent: 2em'>很抱歉的通知您，您分享的论文《" + title + "》已被删除。理由是：</p>" +
+                    "<p style='text-indent: 2em'>很抱歉的通知您，您上传的论文《" + title + "》已被删除。理由是：</p>" +
                     "<p style='padding-left: 4em; padding-right: 4em; color: #666666'>" + reason + "</p>" +
                     "<p style='text-indent: 2em'>执行此操作的管理员是：" + admin + "，如您对此有疑问，请与我们联系。</p>" +
                     "<p>滇史论辑 Yunhists</p>";
@@ -118,7 +118,7 @@ public class EmailContentHelper {
                 reason = DeepL.translateToEn(reason);
             }
             return "<p>Hello " + username + ",</p>" +
-                    "<p style='text-indent: 2em'>We are sorry to inform you that the paper \"<span style='font-style:oblique'>" + title + "\" you shared has been deleted. The reason is:</p>" +
+                    "<p style='text-indent: 2em'>We are sorry to inform you that the paper \"<span style='font-style:oblique'>" + title + "\" you uploaded has been deleted. The reason is:</p>" +
                     "<p style='padding-left: 4em; padding-right: 4em; color: #666666'>" + reason + "</p>" +
                     "<p style='text-indent: 2em'>The administrator who performed this operation is:" + admin + ", please feel free to contact us if you have any questions about this.</p>" +
                     "<p>滇史论辑 Yunhists</p>";
@@ -127,10 +127,10 @@ public class EmailContentHelper {
 
     public static String getNewShareNotificationEmailBody(String lang) {
         if(lang.equals("zh")) {
-            return "<p>管理员您好，滇史论辑收到新的分享，请审批。</p>" +
+            return "<p>管理员您好，滇史论辑收到新的上传，请审批。</p>" +
                     "<p>滇史论辑 Yunhists</p>";
         } else {
-            return "<p>Dear admin, Yunhists received new sharing. Please approve.</p>" +
+            return "<p>Dear admin, Yunhists received new upload. Please approve.</p>" +
                     "<p>滇史论辑 Yunhists</p>";
         }
     }
@@ -138,11 +138,11 @@ public class EmailContentHelper {
     public static String getShareApprovedNotificationEmailBody(String lang, String username, String title) {
         if(lang.equals("zh")) {
             return "<p>" + username + "您好，</p>" +
-                    "<p>您分享的论文《" + title + "》已审批通过，非常感谢您的贡献！</p>" +
+                    "<p>您上传的论文《" + title + "》已审批通过，非常感谢您的贡献！</p>" +
                     "<p>滇史论辑 Yunhists</p>";
         } else {
             return "<p>Dear " + username + ",</p>" +
-                    "<p>The thesis you shared <span style='font-style:oblique'>" + title + "</span> has been approved. Thank you very much for your contribution.</p>" +
+                    "<p>The thesis you uploaded <span style='font-style:oblique'>" + title + "</span> has been approved. Thank you very much for your contribution.</p>" +
                     "<p>滇史论辑 Yunhists</p>";
         }
     }
@@ -151,12 +151,14 @@ public class EmailContentHelper {
         if(lang.equals("zh")) {
             reason = DeepL.translateToZh(reason);
             return "<p>" + username + "您好，</p>" +
-                    "<p>很抱歉，您分享的论文《" + title + "》未通过审批，理由是：" + reason + "</p>" +
+                    "<p>很抱歉，您上传的论文《" + title + "》未通过审批，理由是：</p>" +
+                    "<p style='padding-left: 4em; padding-right: 4em; color: #666666'>" + reason + "</p>" +
                     "<p>滇史论辑 Yunhists</p>";
         } else {
             reason = DeepL.translateToEn(reason);
             return "<p>Dear " + username + ",</p>" +
-                    "<p>We are sorry to inform you, the thesis you shared <span style='font-style:oblique'>" + title + "</span> has been rejected. The reason is: " + reason + "</p>" +
+                    "<p>We are sorry to inform you, the thesis you uploaded <span style='font-style:oblique'>" + title + "</span> has been rejected. The reason is: </p>" +
+                    "<p style='padding-left: 4em; padding-right: 4em; color: #666666'>" + reason + "</p>" +
                     "<p>滇史论辑 Yunhists</p>";
         }
     }
