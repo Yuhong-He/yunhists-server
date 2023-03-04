@@ -182,9 +182,45 @@ public class UserController {
         }
     }
 
+    @GetMapping("/getUserInfo")
+    public Result<Object> getUserInfo(HttpServletRequest request) {
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer id = (Integer) obj;
+
+            // 3. check user exist
+            User user = userService.getUserById(id);
+            if(user != null) {
+
+                // 4. get userinfo
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("userId", user.getId());
+                map.put("username", user.getUsername());
+                map.put("email", user.getEmail());
+                map.put("userRights", user.getUserRights());
+                map.put("points", user.getPoints());
+                map.put("registration", user.getRegisterType());
+                return Result.ok(map);
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_USER);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
+        }
+    }
+
     @PostMapping("/sendRegisterEmail")
     public Result<Object> sendRegisterEmail(@RequestParam("lang") String lang,
-                                                @RequestParam("email") String email) {
+                                            @RequestParam("email") String email) {
 
         // 1. check email format
         if(UserUtils.validateEmail(email)) {
