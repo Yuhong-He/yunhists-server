@@ -38,6 +38,9 @@ public class User {
     @TableField("today_download")
     private Integer todayDownload;
 
+    @TableField("send_email")
+    private String sendEmail;
+
     @TableField("register_type")
     private Integer registerType;
 

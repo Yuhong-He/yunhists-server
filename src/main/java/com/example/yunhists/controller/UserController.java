@@ -85,7 +85,8 @@ public class UserController {
             if (user == null) { // google register
 
                 User newUser = new User(username, "", email, lang, 1);
-                int userId = userService.googleRegister(newUser);
+                userService.googleRegister(newUser);
+                int userId = newUser.getId();
 
                 Map<String, Object> map = new LinkedHashMap<>();
                 map.put("token", JwtHelper.createToken((long) userId));
@@ -202,6 +203,7 @@ public class UserController {
                 map.put("email", user.getEmail());
                 map.put("userRights", user.getUserRights());
                 map.put("points", user.getPoints());
+                map.put("sendEmail", user.getSendEmail());
                 map.put("registration", user.getRegisterType());
                 return Result.ok(map);
             } else {
@@ -333,6 +335,42 @@ public class UserController {
                     return Result.ok();
                 } else {
                     obj = Result.error(ResultCodeEnum.INVALID_LANG);
+                    throw new Exception();
+                }
+            } else {
+                obj = Result.error(ResultCodeEnum.NO_USER);
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            try{
+                return (Result<Object>) obj;
+            } catch (Exception exception) {
+                printException(e);
+                return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
+            }
+        }
+    }
+
+    @PostMapping("/updateEmailNotification")
+    public Result<Object> updateEmailNotification(@RequestParam("status") String status,
+                                                  HttpServletRequest request) {
+
+        // 1. get token
+        Object obj = ControllerUtils.getUserIdFromToken(request);
+        try {
+
+            // 2. get id (if obj is not number, throw exception, case token error)
+            Integer id = (Integer) obj;
+
+            // 3. check user exist
+            if(userService.getUserById(id) != null) {
+
+                // 4. check lang valid
+                if(UserUtils.validateEmailNotificationStatus(status)) {
+                    userService.updateEmailNotification(id, status);
+                    return Result.ok();
+                } else {
+                    obj = Result.error(ResultCodeEnum.INVALID_PARAM);
                     throw new Exception();
                 }
             } else {

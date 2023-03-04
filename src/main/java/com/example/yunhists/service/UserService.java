@@ -27,6 +27,9 @@ public interface UserService extends IService<User> {
     int updatePassword(Integer id, String password);
     int updateUserRights(Integer id, Integer userRights);
     int updateLang(Integer id, String lang);
+
+    void updateEmailNotification(Integer id, String status);
+
     int addPoints(Integer id);
     int updateUserToDeletedUser(Integer id);
 

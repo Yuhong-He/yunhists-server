@@ -99,6 +99,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public void updateEmailNotification(Integer id, String status) {
+        User user = this.getUserById(id);
+        user.setSendEmail(status);
+        baseMapper.updateById(user);
+    }
+
+    @Override
     public int addPoints(Integer id) {
         User user = this.getUserById(id);
         user.setPoints(user.getPoints() + 1);

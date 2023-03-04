@@ -597,10 +597,12 @@ public class ThesisController {
                     User admin = userService.getUserById(userId);
                     if(!Objects.equals(uploader.getId(), admin.getId())) {
                         if(!uploader.getEmail().isEmpty()) {
-                            DirectMailUtils.sendEmail(uploader.getEmail(),
-                                    EmailContentHelper.getDeleteThesisNotificationEmailSubject(uploader.getLang()),
-                                    EmailContentHelper.getDeleteThesisNotificationEmailBody(uploader.getLang(),
-                                            uploader.getUsername(), thesis.getTitle(), reason, admin.getUsername()));
+                            if(uploader.getSendEmail().equals("ON")) {
+                                DirectMailUtils.sendEmail(uploader.getEmail(),
+                                        EmailContentHelper.getDeleteThesisNotificationEmailSubject(uploader.getLang()),
+                                        EmailContentHelper.getDeleteThesisNotificationEmailBody(uploader.getLang(),
+                                                uploader.getUsername(), thesis.getTitle(), reason, admin.getUsername()));
+                            }
                         }
                     }
 

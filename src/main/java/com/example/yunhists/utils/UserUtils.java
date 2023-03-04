@@ -28,6 +28,11 @@ public class UserUtils {
         return langList.contains(lang);
     }
 
+    public static boolean validateEmailNotificationStatus(String status) {
+        List<String> langList = List.of("ON", "OFF");
+        return langList.contains(status);
+    }
+
     public static String generateRandomPwd() {
         String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();

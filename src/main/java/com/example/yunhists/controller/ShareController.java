@@ -74,11 +74,14 @@ public class ShareController {
                         // c. email notify admin
                         List<User> adminList = userService.getAllAdmin();
                         for(User admin : adminList) {
-                            String email = admin.getEmail();
-                            String lang = admin.getLang();
-                            DirectMailUtils.sendEmail(email,
-                                    EmailContentHelper.getNewShareNotificationEmailSubject(lang),
-                                    EmailContentHelper.getNewShareNotificationEmailBody(lang));
+                            String notify = admin.getSendEmail();
+                            if(notify.equals("ON")) {
+                                String email = admin.getEmail();
+                                String lang = admin.getLang();
+                                DirectMailUtils.sendEmail(email,
+                                        EmailContentHelper.getNewShareNotificationEmailSubject(lang),
+                                        EmailContentHelper.getNewShareNotificationEmailBody(lang));
+                            }
                         }
 
                         return Result.ok();
@@ -568,10 +571,12 @@ public class ShareController {
 
                                     // i. email notify user
                                     if(!uploader.getEmail().isEmpty()) {
-                                        DirectMailUtils.sendEmail(uploader.getEmail(),
-                                                EmailContentHelper.getShareApprovedNotificationEmailSubject(uploader.getLang()),
-                                                EmailContentHelper.getShareApprovedNotificationEmailBody(uploader.getLang(),
-                                                        uploader.getUsername(), thesis.getTitle()));
+                                        if(uploader.getSendEmail().equals("ON")) {
+                                            DirectMailUtils.sendEmail(uploader.getEmail(),
+                                                    EmailContentHelper.getShareApprovedNotificationEmailSubject(uploader.getLang()),
+                                                    EmailContentHelper.getShareApprovedNotificationEmailBody(uploader.getLang(),
+                                                            uploader.getUsername(), thesis.getTitle()));
+                                        }
                                     }
 
                                     // j. return results
@@ -656,10 +661,12 @@ public class ShareController {
                         // c. email notify user
                         User uploader = userService.getUserById(share.getUploader());
                         if(!uploader.getEmail().isEmpty()) {
-                            DirectMailUtils.sendEmail(uploader.getEmail(),
-                                    EmailContentHelper.getShareRejectedNotificationEmailSubject(uploader.getLang()),
-                                    EmailContentHelper.getShareRejectedNotificationEmailBody(uploader.getLang(),
-                                            uploader.getUsername(), share.getTitle(), reason));
+                            if(uploader.getSendEmail().equals("ON")) {
+                                DirectMailUtils.sendEmail(uploader.getEmail(),
+                                        EmailContentHelper.getShareRejectedNotificationEmailSubject(uploader.getLang()),
+                                        EmailContentHelper.getShareRejectedNotificationEmailBody(uploader.getLang(),
+                                                uploader.getUsername(), share.getTitle(), reason));
+                            }
                         }
 
                         return Result.ok();
