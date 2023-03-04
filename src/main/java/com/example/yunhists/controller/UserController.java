@@ -278,34 +278,40 @@ public class UserController {
             User user = userService.getUserByEmail(email);
             if(user != null) {
 
-                // 3. check that no emails have been sent within a minute
-                EmailTimer oldEmailTimer = emailTimerService.read(email, "resetPwd");
-                if(oldEmailTimer == null || !EmailTimerUtils.repeatEmail(oldEmailTimer)) {
+                // 3. check user registered with email
+                if(user.getRegisterType() == 0) {
 
-                    try {
-                        // a. generate new password
-                        String pwd = UserUtils.generateRandomPwd();
+                    // 4. check that no emails have been sent within a minute
+                    EmailTimer oldEmailTimer = emailTimerService.read(email, "resetPwd");
+                    if(oldEmailTimer == null || !EmailTimerUtils.repeatEmail(oldEmailTimer)) {
 
-                        // b. send email (may throw exception)
-                        DirectMailUtils.sendEmail(email, EmailContentHelper.getResetPasswordEmailSubject(
-                                user.getLang()), EmailContentHelper.getResetPasswordEmailBody(
-                                        user.getLang(), user.getUsername(), pwd));
+                        try {
+                            // a. generate new password
+                            String pwd = UserUtils.generateRandomPwd();
 
-                        // c. update user password
-                        userService.updatePassword(user.getId(), pwd);
+                            // b. send email (may throw exception)
+                            DirectMailUtils.sendEmail(email, EmailContentHelper.getResetPasswordEmailSubject(
+                                    user.getLang()), EmailContentHelper.getResetPasswordEmailBody(
+                                    user.getLang(), user.getUsername(), pwd));
 
-                        // d. record the action in email timer
-                        EmailTimer newEmailTimer = new EmailTimer(email, "resetPwd");
-                        emailTimerService.create(newEmailTimer);
+                            // c. update user password
+                            userService.updatePassword(user.getId(), pwd);
 
-                        return Result.ok();
+                            // d. record the action in email timer
+                            EmailTimer newEmailTimer = new EmailTimer(email, "resetPwd");
+                            emailTimerService.create(newEmailTimer);
 
-                    } catch (Exception e) {
-                        System.out.println("Email Error: " + e);
-                        return Result.error(ResultCodeEnum.EMAIL_FAIL);
+                            return Result.ok();
+
+                        } catch (Exception e) {
+                            System.out.println("Email Error: " + e);
+                            return Result.error(ResultCodeEnum.EMAIL_FAIL);
+                        }
+                    } else {
+                        return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
                     }
                 } else {
-                    return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
+                    return Result.error(ResultCodeEnum.REGISTERED_WITH_GOOGLE);
                 }
             } else {
                 return Result.error(ResultCodeEnum.EMAIL_NOT_REGISTERED);
@@ -453,7 +459,7 @@ public class UserController {
 
     @PostMapping("/sendChangeEmailEmail")
     public Result<Object> sendChangeEmailEmail(@RequestParam("email") String email,
-                                            HttpServletRequest request) {
+                                               HttpServletRequest request) {
 
         // 1. get token
         Object obj = ControllerUtils.getUserIdFromToken(request);
@@ -466,49 +472,55 @@ public class UserController {
             User user = userService.getUserById(id);
             if(user != null) {
 
-                // 4. check email format
-                if(UserUtils.validateEmail(email)) {
+                // 4. check user registered with email
+                if(user.getRegisterType() == 0) {
 
-                    // 5. check email registered
-                    if (userService.getUserByEmail(email) == null) {
+                    // 5. check email format
+                    if(UserUtils.validateEmail(email)) {
 
-                        // 6. check that no emails have been sent within a minute
-                        EmailTimer oldEmailTimer = emailTimerService.read(email, "verificationCode");
-                        if (oldEmailTimer == null || !EmailTimerUtils.repeatEmail(oldEmailTimer)) {
+                        // 6. check email registered
+                        if (userService.getUserByEmail(email) == null) {
 
-                            try {
-                                // a. generate verification code
-                                EmailVerification emailVerification =
-                                        EmailVerificationUtils.createVerification(email);
+                            // 7. check that no emails have been sent within a minute
+                            EmailTimer oldEmailTimer = emailTimerService.read(email, "verificationCode");
+                            if (oldEmailTimer == null || !EmailTimerUtils.repeatEmail(oldEmailTimer)) {
 
-                                // b. send email (may throw exception)
-                                DirectMailUtils.sendEmail(
-                                        email, EmailContentHelper.getChangeEmailVerificationEmailSubject(
-                                                user.getLang()),
-                                        EmailContentHelper.getChangeEmailVerificationEmailBody(user.getLang(),
-                                                user.getUsername(), emailVerification.getVerificationCode()));
+                                try {
+                                    // a. generate verification code
+                                    EmailVerification emailVerification =
+                                            EmailVerificationUtils.createVerification(email);
 
-                                // c. record verification code
-                                evService.create(emailVerification);
+                                    // b. send email (may throw exception)
+                                    DirectMailUtils.sendEmail(
+                                            email, EmailContentHelper.getChangeEmailVerificationEmailSubject(
+                                                    user.getLang()),
+                                            EmailContentHelper.getChangeEmailVerificationEmailBody(user.getLang(),
+                                                    user.getUsername(), emailVerification.getVerificationCode()));
 
-                                // d. record the action in email timer
-                                EmailTimer newEmailTimer = new EmailTimer(email, "verificationCode");
-                                emailTimerService.create(newEmailTimer);
+                                    // c. record verification code
+                                    evService.create(emailVerification);
 
-                                return Result.ok();
+                                    // d. record the action in email timer
+                                    EmailTimer newEmailTimer = new EmailTimer(email, "verificationCode");
+                                    emailTimerService.create(newEmailTimer);
 
-                            } catch (Exception e) {
-                                System.out.println("Email Error: " + e);
-                                return Result.error(ResultCodeEnum.EMAIL_FAIL);
+                                    return Result.ok();
+
+                                } catch (Exception e) {
+                                    System.out.println("Email Error: " + e);
+                                    return Result.error(ResultCodeEnum.EMAIL_FAIL);
+                                }
+                            } else {
+                                return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
                             }
                         } else {
-                            return Result.error(ResultCodeEnum.LESS_THAN_ONE_MINUTE);
+                            return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
                         }
                     } else {
-                        return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
+                        return Result.error(ResultCodeEnum.INVALID_EMAIL);
                     }
                 } else {
-                    return Result.error(ResultCodeEnum.INVALID_EMAIL);
+                    return Result.error(ResultCodeEnum.REGISTERED_WITH_GOOGLE);
                 }
             } else {
                 obj = Result.error(ResultCodeEnum.NO_USER);
@@ -606,24 +618,30 @@ public class UserController {
             User user = userService.getUserById(id);
             if(user != null) {
 
-                // 4. check old password correct
-                if(userService.login(user.getEmail(), oldPwd) != null) {
+                // 4. check user registered with email
+                if(user.getRegisterType() == 0) {
 
-                    // 5. check new password
-                    if(UserUtils.validatePassword(newPwd)) {
+                    // 5. check old password correct
+                    if(userService.login(user.getEmail(), oldPwd) != null) {
 
-                        // 6. check confirm password
-                        if(UserUtils.validateConfirmPassword(newPwd, newPwd2)) {
-                            userService.updatePassword(id, newPwd);
-                            return Result.ok();
+                        // 6. check new password
+                        if(UserUtils.validatePassword(newPwd)) {
+
+                            // 7. check confirm password
+                            if(UserUtils.validateConfirmPassword(newPwd, newPwd2)) {
+                                userService.updatePassword(id, newPwd);
+                                return Result.ok();
+                            } else {
+                                return Result.error(ResultCodeEnum.PASSWORD_NOT_MATCH);
+                            }
                         } else {
-                            return Result.error(ResultCodeEnum.PASSWORD_NOT_MATCH);
+                            return Result.error(ResultCodeEnum.PASSWORD_LENGTH);
                         }
                     } else {
-                        return Result.error(ResultCodeEnum.PASSWORD_LENGTH);
+                        return Result.error(ResultCodeEnum.PASSWORD_INCORRECT);
                     }
                 } else {
-                    return Result.error(ResultCodeEnum.PASSWORD_INCORRECT);
+                    return Result.error(ResultCodeEnum.REGISTERED_WITH_GOOGLE);
                 }
             } else {
                 obj = Result.error(ResultCodeEnum.NO_USER);
