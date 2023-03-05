@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.yunhists.entity.Thesis;
 import com.example.yunhists.mapper.ThesisMapper;
 import com.example.yunhists.service.ThesisService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -79,6 +80,13 @@ public class ThesisServiceImpl extends ServiceImpl<ThesisMapper, Thesis> impleme
     @Override
     public List<Thesis> getAll() {
         return baseMapper.selectList(null);
+    }
+
+    @Override
+    public List<Thesis> getThesisWithoutFile() {
+        QueryWrapper<Thesis> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(Thesis::getFileName, StringUtils.EMPTY);
+        return baseMapper.selectList(queryWrapper);
     }
 
 }

@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.yunhists.entity.*;
 import com.example.yunhists.enumeration.CategoryEnum;
 import com.example.yunhists.enumeration.ResultCodeEnum;
-import com.example.yunhists.pojo.CategoryName;
-import com.example.yunhists.pojo.CustomPage;
-import com.example.yunhists.pojo.ThesisIssue;
-import com.example.yunhists.pojo.ThesisRow;
+import com.example.yunhists.pojo.*;
 import com.example.yunhists.service.*;
 import com.example.yunhists.utils.*;
 import org.apache.commons.lang.ArrayUtils;
@@ -750,6 +747,29 @@ public class ThesisController {
         } else {
             return Result.error(ResultCodeEnum.CATEGORY_ID_NOT_EXIST);
         }
+    }
+
+    @GetMapping("/missingFile")
+    public Result<Object> missingFile() {
+        List<Thesis> list = thesisService.getThesisWithoutFile();
+        List<ThesisName> result = new ArrayList<>();
+        for(Thesis t : list) {
+            result.add(new ThesisName(t.getId(), t.getTitle()));
+        }
+        return Result.ok(result);
+    }
+
+    @GetMapping("/thesisWithoutCat")
+    public Result<Object> thesisWithoutCat() {
+        List<Thesis> list = thesisService.getAll();
+        List<ThesisName> result = new ArrayList<>();
+        for(Thesis t : list) {
+            List<CategoryLink> categoryLink = categoryLinkService.getLinkByChildId(t.getId(), CategoryEnum.TYPE_LINK_THESIS.getCode());
+            if(categoryLink.size() == 0) {
+                result.add(new ThesisName(t.getId(), t.getTitle()));
+            }
+        }
+        return Result.ok(result);
     }
 
     private List<CategoryName> getThesisCat(Thesis thesis) {
