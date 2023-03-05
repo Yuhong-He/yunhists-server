@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.yunhists.entity.*;
 import com.example.yunhists.enumeration.CategoryEnum;
 import com.example.yunhists.enumeration.ResultCodeEnum;
-import com.example.yunhists.pojo.BatchOperateCatFailed;
-import com.example.yunhists.pojo.CategoryName;
-import com.example.yunhists.pojo.CategoryWithParentCat;
-import com.example.yunhists.pojo.UpdateALotCat;
+import com.example.yunhists.pojo.*;
 import com.example.yunhists.service.CategoryLinkService;
 import com.example.yunhists.service.CategoryService;
 import com.example.yunhists.service.ThesisService;
@@ -840,6 +837,32 @@ public class CategoryController {
                 return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
             }
         }
+    }
+
+    @GetMapping("/catWithoutCat")
+    public Result<Object> catWithoutCat() {
+        List<Category> list = categoryService.getAll();
+        List<CategoryName> result = new ArrayList<>();
+        for(Category c : list) {
+            List<CategoryLink> categoryLink = categoryLinkService.getLinkByChildId(c.getId(), CategoryEnum.TYPE_LINK_CATEGORY.getCode());
+            if(categoryLink.size() == 0) {
+                result.add(new CategoryName(c.getId(), c.getZhName(), c.getEnName()));
+            }
+        }
+        return Result.ok(result);
+    }
+
+    @GetMapping("/emptyCat")
+    public Result<Object> emptyCat() {
+        List<Category> list = categoryService.getAll();
+        List<CategoryName> result = new ArrayList<>();
+        for(Category c : list) {
+            List<CategoryLink> categoryLink = categoryLinkService.getLinkByParentId(c.getId());
+            if(categoryLink.size() == 0) {
+                result.add(new CategoryName(c.getId(), c.getZhName(), c.getEnName()));
+            }
+        }
+        return Result.ok(result);
     }
 
 }

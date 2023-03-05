@@ -751,10 +751,12 @@ public class ThesisController {
 
     @GetMapping("/missingFile")
     public Result<Object> missingFile() {
-        List<Thesis> list = thesisService.getThesisWithoutFile();
+        List<Thesis> list = thesisService.getAll();
         List<ThesisName> result = new ArrayList<>();
         for(Thesis t : list) {
-            result.add(new ThesisName(t.getId(), t.getTitle()));
+            if(t.getFileName().length() == 0) {
+                result.add(new ThesisName(t.getId(), t.getTitle()));
+            }
         }
         return Result.ok(result);
     }

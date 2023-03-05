@@ -82,11 +82,4 @@ public class ThesisServiceImpl extends ServiceImpl<ThesisMapper, Thesis> impleme
         return baseMapper.selectList(null);
     }
 
-    @Override
-    public List<Thesis> getThesisWithoutFile() {
-        QueryWrapper<Thesis> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(Thesis::getFileName, StringUtils.EMPTY);
-        return baseMapper.selectList(queryWrapper);
-    }
-
 }

@@ -18,6 +18,4 @@ public interface ThesisService extends IService<Thesis> {
     Thesis getThesisByFile(String file);
 
     List<Thesis> getAll();
-
-    List<Thesis> getThesisWithoutFile();
 }
