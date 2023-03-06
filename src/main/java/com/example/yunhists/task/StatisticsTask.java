@@ -33,7 +33,7 @@ public class StatisticsTask {
 
     public static String filePath = "src/main/resources/statistics/";
 
-    @Scheduled(cron ="0 0 0 * * ?")
+    @Scheduled(cron ="0 55 23 * * ?")
     public void generateGeneralStatistics() throws IOException {
         Map<String, Long> result = new LinkedHashMap<>();
         result.put("thesisCount", thesisService.count());
@@ -55,7 +55,7 @@ public class StatisticsTask {
         mapper.writeValue(file, result);
     }
 
-    @Scheduled(cron ="0 0 0 * * ?")
+    @Scheduled(cron ="0 55 23 * * ?")
     public void generateThesisCopyrightStatistics() throws IOException {
         Map<String, Long> result = new LinkedHashMap<>();
 
@@ -77,7 +77,33 @@ public class StatisticsTask {
         mapper.writeValue(file, result);
     }
 
-    @Scheduled(cron ="0 0 0 * * ?")
+    @Scheduled(cron ="0 55 23 * * ?")
+    public void generateThesisTypeStatistics() throws IOException {
+        Map<String, Long> result = new LinkedHashMap<>();
+
+        QueryWrapper<Thesis> queryWrapper0 = new QueryWrapper<>();
+        queryWrapper0.eq("type", 0);
+        result.put("journal", thesisService.count(queryWrapper0));
+
+        QueryWrapper<Thesis> queryWrapper1 = new QueryWrapper<>();
+        queryWrapper1.eq("type", 1);
+        result.put("collection", thesisService.count(queryWrapper1));
+
+        QueryWrapper<Thesis> queryWrapper2 = new QueryWrapper<>();
+        queryWrapper2.eq("type", 2);
+        result.put("chapter", thesisService.count(queryWrapper2));
+
+        QueryWrapper<Thesis> queryWrapper3 = new QueryWrapper<>();
+        queryWrapper3.eq("type", 3);
+        result.put("newspaper", thesisService.count(queryWrapper3));
+
+        ObjectMapper mapper = new ObjectMapper();
+        String fileName = "thesisType.json";
+        File file = new File(filePath + fileName);
+        mapper.writeValue(file, result);
+    }
+
+    @Scheduled(cron ="0 55 23 * * ?")
     public void generateThesisYearStatistics() throws IOException {
 
         // 1. Get all years
@@ -88,11 +114,13 @@ public class StatisticsTask {
                 yearSet.add(t.getYear());
             }
         }
+        int max = Collections.max(yearSet);
+        int min = Collections.min(yearSet);
 
         // 2. Prepare HashMap
         Map<Integer, Integer> map = new HashMap<>();
-        for(Integer year : yearSet) {
-            map.put(year, 0);
+        for(int i = min; i <= max; i++) {
+            map.put(i, 0);
         }
 
         // 3. Count

@@ -26,6 +26,11 @@ public class StatisticsTaskTest {
     }
 
     @Test
+    public void testGenerateThesisTypeStatistics() throws IOException {
+        statisticsTask.generateThesisTypeStatistics();
+    }
+
+    @Test
     public void testGenerateThesisYearStatistics() throws IOException {
         statisticsTask.generateThesisYearStatistics();
     }

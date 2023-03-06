@@ -54,7 +54,7 @@ public class ShareController {
             if(user != null && user.getUserRights() >= 0) {
 
                 // 4. check type valid
-                List<Integer> validType = List.of(0,1,2);
+                List<Integer> validType = List.of(0,1,2,3);
                 if(validType.contains(share.getType())) {
 
                     // 5. check copyright valid
@@ -326,7 +326,7 @@ public class ShareController {
                     if(targetShare.getStatus() == 0) {
 
                         // 6. check type valid
-                        List<Integer> validType = List.of(0,1,2);
+                        List<Integer> validType = List.of(0,1,2,3);
                         if(validType.contains(share.getType())) {
 
                             // 7. check copyright valid
@@ -497,7 +497,7 @@ public class ShareController {
                     if(targetShare.getStatus() == 0) {
 
                         // 4. check type valid
-                        List<Integer> validType = List.of(0,1,2);
+                        List<Integer> validType = List.of(0,1,2,3);
                         if(validType.contains(share.getType())) {
 
                             // 5. check copyright valid

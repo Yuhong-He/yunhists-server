@@ -58,7 +58,7 @@ public class ThesisController {
             if(user != null && user.getUserRights() >= 1) {
 
                 // 4. check type valid
-                List<Integer> validType = List.of(0,1,2);
+                List<Integer> validType = List.of(0,1,2,3);
                 if(validType.contains(thesis.getType())) {
 
                     // 5. check copyright valid
@@ -419,7 +419,7 @@ public class ThesisController {
             if(user != null && user.getUserRights() >= 1) {
 
                 // 4. check type valid
-                List<Integer> validType = List.of(0,1,2);
+                List<Integer> validType = List.of(0,1,2,3);
                 if(validType.contains(thesis.getType())) {
 
                     // 5. check copyright valid

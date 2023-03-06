@@ -3,9 +3,7 @@ package com.example.yunhists.utils;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.dm.model.v20151123.SingleSendMailRequest;
-import com.aliyuncs.dm.model.v20151123.SingleSendMailResponse;
 import com.aliyuncs.profile.DefaultProfile;
-import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,9 +27,7 @@ public class DirectMailUtils {
         request.setToAddress(email);
         request.setSubject(subject);
         request.setHtmlBody(emailBody);
-
-        SingleSendMailResponse response = client.getAcsResponse(request);
-        System.out.println("Send email: " + new Gson().toJson(response));
+        client.getAcsResponse(request);
     }
 
     private static String getAccessKey(String s) throws IOException {

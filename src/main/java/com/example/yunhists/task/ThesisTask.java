@@ -28,10 +28,11 @@ public class ThesisTask {
 
     @Scheduled(cron ="0 0 0 * * ?")
     public void checkThesisFileDatabaseRecords() throws IOException {
+        List<String> fileList = OSSUtils.getAllFile();
         List<Thesis> thesisList = thesisService.getAll();
         for(Thesis thesis : thesisList) {
             if(!thesis.getFileName().isEmpty()) {
-                if(!OSSUtils.checkFileExist(thesis.getFileName())) {
+                if(!fileList.contains(thesis.getFileName())) {
                     thesis.setFileName("");
                     thesisService.saveOrUpdate(thesis);
                 }

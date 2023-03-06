@@ -26,11 +26,6 @@ public class OSSUtils {
         ossClient.shutdown();
     }
 
-    public static boolean checkFileExist(String objectName) throws IOException {
-        OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
-        return ossClient.doesObjectExist(bucketName, objectName);
-    }
-
     public static List<String> getAllFile() throws IOException {
         OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
         ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName);

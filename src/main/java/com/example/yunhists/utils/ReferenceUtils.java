@@ -28,7 +28,7 @@ public class ReferenceUtils {
             if(!year.isEmpty()) {
                 vancouver.append(year);
             }
-        } else { // type = 0
+        } else if(type == 0 || type == 3) {
             if(!publication.isEmpty()) {
                 vancouver.append(". ");
                 vancouver.append(publication);
@@ -42,9 +42,13 @@ public class ReferenceUtils {
                 vancouver.append(volume);
             }
             if(!issue.isEmpty()) {
-                vancouver.append("(");
-                vancouver.append(issue);
-                vancouver.append(")");
+                if(type == 0) {
+                    vancouver.append("(");
+                    vancouver.append(issue);
+                    vancouver.append(")");
+                } else { // type == 3
+                    vancouver.append(issue);
+                }
             }
             if(!pages.isEmpty()) {
                 vancouver.append(": ");
@@ -89,9 +93,9 @@ public class ReferenceUtils {
                 harvard.append(publisher);
                 harvard.append(", ");
             }
-        } else { // type = 0
+        } else if(type == 0 || type == 3) { // type = 0
             if(!publication.isEmpty()) {
-                harvard.append(". ");
+                harvard.append(", ");
                 harvard.append(publication);
             }
             if(!volume.isEmpty()) {
@@ -99,9 +103,14 @@ public class ReferenceUtils {
                 harvard.append(volume);
             }
             if(!issue.isEmpty()) {
-                harvard.append("(");
-                harvard.append(issue);
-                harvard.append("), ");
+                if(type == 0) {
+                    harvard.append("(");
+                    harvard.append(issue);
+                    harvard.append(")");
+                } else { // type == 3
+                    harvard.append(", ");
+                    harvard.append(issue);
+                }
             }
         }
         if(!pages.isEmpty()) {
@@ -133,6 +142,8 @@ public class ReferenceUtils {
             gbt7714.append("[G]");
         } else if(type == 2) {
             gbt7714.append("[M]");
+        } else if(type == 3) {
+            gbt7714.append("[N]");
         }
         if(type == 1 || type == 2) {
             if(!publication.isEmpty()) {
@@ -151,23 +162,30 @@ public class ReferenceUtils {
             if(!year.isEmpty()) {
                 gbt7714.append(year);
             }
-        } else { // type = 0
+        } else if(type == 0 || type == 3) {
             if(!publication.isEmpty()) {
                 gbt7714.append("．");
                 gbt7714.append(publication);
             }
             if(!year.isEmpty()) {
-                gbt7714.append("，");
-                gbt7714.append(year);
-                gbt7714.append("，");
+                if(type == 0) {
+                    gbt7714.append("，");
+                    gbt7714.append(year);
+                    gbt7714.append("，");
+                }
             }
             if(!volume.isEmpty()) {
                 gbt7714.append(volume);
             }
             if(!issue.isEmpty()) {
-                gbt7714.append("(");
-                gbt7714.append(issue);
-                gbt7714.append(")");
+                if(type == 0) {
+                    gbt7714.append("(");
+                    gbt7714.append(issue);
+                    gbt7714.append(")");
+                } else { // type == 3
+                    gbt7714.append("，");
+                    gbt7714.append(year).append("-").append(issue);
+                }
             }
         }
         if(!pages.isEmpty()) {
@@ -185,6 +203,8 @@ public class ReferenceUtils {
         StringBuilder wikipedia = new StringBuilder();
         if(type == 0) {
             wikipedia.append("{{cite journal");
+        } else if(type == 3) {
+            wikipedia.append("{{cite news");
         } else {
             wikipedia.append("{{cite book");
         }
@@ -226,24 +246,35 @@ public class ReferenceUtils {
                 wikipedia.append(" |isbn=");
                 wikipedia.append(isbn);
             }
-        } else { // type = 0
+        } else if(type == 0 || type == 3) {
             wikipedia.append(" |title=");
             wikipedia.append(title);
             if(!publication.isEmpty()) {
-                wikipedia.append(" |journal=");
+                if(type == 0) {
+                    wikipedia.append(" |journal=");
+                } else { // type 3
+                    wikipedia.append(" |newspaper=");
+                }
                 wikipedia.append(publication);
             }
             if(!year.isEmpty()) {
-                wikipedia.append(" |year=");
-                wikipedia.append(year);
+                if(type == 0) {
+                    wikipedia.append(" |year=");
+                    wikipedia.append(year);
+                }
             }
             if(!volume.isEmpty()) {
                 wikipedia.append(" |volume=");
                 wikipedia.append(volume);
             }
             if(!issue.isEmpty()) {
-                wikipedia.append(" |issue=");
-                wikipedia.append(issue);
+                if(type == 0) {
+                    wikipedia.append(" |issue=");
+                    wikipedia.append(issue);
+                } else { // type 3
+                    wikipedia.append(" |date=");
+                    wikipedia.append(year).append("-").append(issue);
+                }
             }
         }
         if(!pages.isEmpty()) {
