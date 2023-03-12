@@ -6,8 +6,8 @@ import com.example.yunhists.common.Result;
 import com.example.yunhists.entity.User;
 import com.example.yunhists.enumeration.ResultCodeEnum;
 import com.example.yunhists.service.UserService;
+import com.example.yunhists.utils.AuthenticationPathHelper;
 import com.example.yunhists.utils.JwtHelper;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -23,7 +23,6 @@ import java.io.IOException;
 @WebFilter(urlPatterns = "/*")
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@Slf4j
 public class AuthenticationFilter implements Filter {
 
     @Autowired
@@ -37,34 +36,17 @@ public class AuthenticationFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        // 1. Get request url
+        // 1. Get request url and auth path
         String requestURI = request.getRequestURI();
-        String[] urls = new String[]{
-                "/api/user/login",
-                "/api/user/google",
-                "/api/user/register",
-                "/api/user/sendRegisterEmail",
-                "/api/user/resetPassword",
-                "/api/user/validateToken",
-                "/api/statistics/get",
-                "/api/category/option/{catName}/{lang}",
-                "/api/category/list/{lang}/{pageNo}/{pageSize}",
-                "/api/category/id/{catId}",
-                "/api/category/parentCats/{catId}",
-                "/api/category/childCat/{catId}",
-                "/api/thesis/list/{pageNo}/{pageSize}",
-                "/api/thesis/cite/{id}",
-                "/api/thesis/onlinePublishInfo/{id}",
-                "/api/thesis/categoryTheses/{catId}",
-        };
+        String[] unregistered = AuthenticationPathHelper.unregistered();
 
-        // 2. Check the request should be dealt with? If not just go ahead
-        if(check(urls, requestURI)){
+        // 2. Check the request is for unregistered user
+        if(check(unregistered, requestURI)){
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 3. Check login status
+        // 3. Check login and authentication
         if ("OPTIONS".equals(request.getMethod())) { // https://blog.csdn.net/wxw1997a/article/details/106472081
             filterChain.doFilter(request, servletResponse);
         } else {

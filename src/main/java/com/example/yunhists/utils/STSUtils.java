@@ -20,17 +20,22 @@ import java.util.Properties;
 @Slf4j
 public class STSUtils {
 
-    public static Map<String, String> getSTS(Integer userId) throws IOException {
-        AssumeRoleResponse assumeRoleResponse = generateSTS(userId);
-        Map<String, String> sts = new HashMap<>();
-        if(assumeRoleResponse != null) {
-            sts.put("accessKeyId", assumeRoleResponse.getCredentials().getAccessKeyId());
-            sts.put("accessKeySecret", assumeRoleResponse.getCredentials().getAccessKeySecret());
-            sts.put("stsToken", assumeRoleResponse.getCredentials().getSecurityToken());
-        } else {
-            sts.put("msg", "Alibaba Cloud STS Error");
+    public static Map<String, String> getSTS(Integer userId) {
+        try {
+            AssumeRoleResponse assumeRoleResponse = generateSTS(userId);
+            Map<String, String> sts = new HashMap<>();
+            if(assumeRoleResponse != null) {
+                sts.put("accessKeyId", assumeRoleResponse.getCredentials().getAccessKeyId());
+                sts.put("accessKeySecret", assumeRoleResponse.getCredentials().getAccessKeySecret());
+                sts.put("stsToken", assumeRoleResponse.getCredentials().getSecurityToken());
+            } else {
+                sts.put("msg", "Alibaba Cloud STS Error");
+            }
+            return sts;
+        } catch (Exception e) {
+            log.error("Jwt error: " + e);
+            return null;
         }
-        return sts;
     }
 
     private static AssumeRoleResponse generateSTS(Integer userId) throws IOException {

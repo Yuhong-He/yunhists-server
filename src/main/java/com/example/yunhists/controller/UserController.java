@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,7 @@ public class UserController {
 
     @PostMapping("/login")
     public Result<Object> login(@RequestParam("email") String email,
-                                @RequestParam("password") String password) throws IOException {
+                                @RequestParam("password") String password) {
 
         // 1. Check user exist
         User u = userService.getUserByEmail(email);
@@ -74,7 +73,7 @@ public class UserController {
     @PostMapping("/google")
     public Result<Object> google(@RequestParam("email") String email,
                                  @RequestParam("username") String username,
-                                 @RequestParam("lang") String lang) throws IOException {
+                                 @RequestParam("lang") String lang) {
 
 
         // 4. check lang valid
@@ -487,7 +486,7 @@ public class UserController {
     }
 
     @GetMapping("/refreshSTS")
-    public Result<Object> refreshSTS() throws IOException {
+    public Result<Object> refreshSTS() {
 
         Integer id = Math.toIntExact(BaseContext.getCurrentId());
 

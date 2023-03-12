@@ -36,7 +36,7 @@ public class JwtHelperTest {
 
     @Order(2)
     @Test
-    public void getUserId_validToken_success() throws IOException {
+    public void getUserId_validToken_success() {
         Long result = JwtHelper.getUserId(testToken);
         assertEquals(userId, result);
     }
