@@ -19,18 +19,9 @@ public class UserUtils {
         return pwd.length() >= 6;
     }
 
-    public static boolean validateConfirmPassword(String pwd, String pwd2) {
-        return pwd.equals(pwd2);
-    }
-
     public static boolean validateLang(String lang) {
         List<String> langList = List.of("zh", "en");
         return langList.contains(lang);
-    }
-
-    public static boolean validateEmailNotificationStatus(String status) {
-        List<String> langList = List.of("ON", "OFF");
-        return langList.contains(status);
     }
 
     public static String generateRandomPwd() {

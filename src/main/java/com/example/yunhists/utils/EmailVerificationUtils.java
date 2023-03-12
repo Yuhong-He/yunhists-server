@@ -22,8 +22,4 @@ public class EmailVerificationUtils {
         return currentTime - ev.getTimestamp().getTime() > fiveMinutes;
     }
 
-    public static boolean compareVerification(String verificationCode, EmailVerification ev) {
-        return verificationCode.equals(ev.getVerificationCode());
-    }
-
 }

@@ -13,7 +13,6 @@ public class UserUtilsTest {
         assertFalse(UserUtils.validateEmail("aaa"));
         assertFalse(UserUtils.validateUsername("a"));
         assertFalse(UserUtils.validatePassword("aaa"));
-        assertFalse(UserUtils.validateConfirmPassword("aaa", "a"));
         assertFalse(UserUtils.validateLang("fr"));
         assertEquals(10, UserUtils.generateRandomPwd().length());
     }

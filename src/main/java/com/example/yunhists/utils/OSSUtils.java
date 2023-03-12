@@ -5,6 +5,7 @@ import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.ListObjectsRequest;
 import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectListing;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,16 +15,21 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
+@Slf4j
 public class OSSUtils {
 
     static String endpoint = "oss-cn-hongkong.aliyuncs.com";
     static String bucketName = "yunhists";
 
-    public static void moveFile(String sourceObject, String destinationObject) throws Exception {
-        OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
-        ossClient.copyObject(bucketName, sourceObject, bucketName, destinationObject);
-        ossClient.deleteObject(bucketName, sourceObject);
-        ossClient.shutdown();
+    public static void moveFile(String sourceObject, String destinationObject) {
+        try {
+            OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
+            ossClient.copyObject(bucketName, sourceObject, bucketName, destinationObject);
+            ossClient.deleteObject(bucketName, sourceObject);
+            ossClient.shutdown();
+        } catch (Exception e) {
+            log.error("OSS move file error: e");
+        }
     }
 
     public static List<String> getAllFile() throws IOException {

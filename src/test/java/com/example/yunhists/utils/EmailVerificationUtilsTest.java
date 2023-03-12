@@ -45,12 +45,4 @@ public class EmailVerificationUtilsTest {
         assertFalse(EmailVerificationUtils.isExpiration(ev));
     }
 
-    @Test
-    public void compareVerification_codeMatches_true() {
-        String verificationCode = "114514";
-        EmailVerification ev = mock(EmailVerification.class);
-        when(ev.getVerificationCode()).thenReturn(verificationCode);
-        assertTrue(EmailVerificationUtils.compareVerification(verificationCode, ev));
-    }
-
 }

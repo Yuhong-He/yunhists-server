@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.example.yunhists.enumeration.ResultCodeEnum;
 import com.example.yunhists.task.StatisticsTask;
-import com.example.yunhists.utils.Result;
+import com.example.yunhists.common.Result;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;

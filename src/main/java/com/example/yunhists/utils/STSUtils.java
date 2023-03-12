@@ -7,6 +7,7 @@ import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
+@Slf4j
 public class STSUtils {
 
     public static Map<String, String> getSTS(Integer userId) throws IOException {
@@ -55,12 +57,9 @@ public class STSUtils {
             return client.getAcsResponse(request);
 
         } catch (ClientException e) {
-            System.out.println("Failed：");
-            System.out.println("Error code: " + e.getErrCode());
-            System.out.println("Error message: " + e.getErrMsg());
-            System.out.println("RequestId: " + e.getRequestId());
+            log.error("Aliyun STS error: " + e.getErrMsg());
+            return null;
         }
-        return null;
     }
 
     private static String getAccessKey(String s) throws IOException {

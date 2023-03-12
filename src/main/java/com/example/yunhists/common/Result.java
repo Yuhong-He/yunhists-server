@@ -1,4 +1,4 @@
-package com.example.yunhists.utils;
+package com.example.yunhists.common;
 
 import com.example.yunhists.enumeration.ResultCodeEnum;
 import lombok.Data;
