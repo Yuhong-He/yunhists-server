@@ -38,7 +38,7 @@ public class DeepL {
     private static String getAccessKey() throws IOException {
         Properties props = new Properties();
         InputStreamReader inputStreamReader = new InputStreamReader(
-                Objects.requireNonNull(DirectMailUtils.class.getClassLoader().getResourceAsStream("securityKey.properties")),
+                Objects.requireNonNull(DeepL.class.getClassLoader().getResourceAsStream("securityKey.properties")),
                 StandardCharsets.UTF_8);
         props.load(inputStreamReader);
         return props.getProperty("deepl.key");

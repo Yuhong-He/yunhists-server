@@ -45,7 +45,7 @@ public class OSSUtils {
     private static String getAccessKey(String s) throws IOException {
         Properties props = new Properties();
         InputStreamReader inputStreamReader = new InputStreamReader(
-                Objects.requireNonNull(DirectMailUtils.class.getClassLoader().getResourceAsStream("securityKey.properties")),
+                Objects.requireNonNull(OSSUtils.class.getClassLoader().getResourceAsStream("securityKey.properties")),
                 StandardCharsets.UTF_8);
         props.load(inputStreamReader);
         if(s.equals("id")) {
