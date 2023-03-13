@@ -71,19 +71,19 @@ public class AuthenticationFilter implements Filter {
             // a. check token exist
             if(token != null && !token.isEmpty()) {
 
-                // b. check token valid
-                Long userId = JwtHelper.getUserId(token);
+                // b. check token expired
+                if(!JwtHelper.isExpiration(token)) {
 
-                // c. check userId exist (valid token should contain a valid userid)
-                if(userId != null) {
-                    Integer userIdInt = Math.toIntExact(userId);
-                    User user = userService.getUserById(userIdInt);
+                    // c. check token valid
+                    Long userId = JwtHelper.getUserId(token);
 
-                    // d. check user exist
-                    if(user != null) {
+                    // d. check userId exist (valid token should contain a valid userid)
+                    if(userId != null) {
+                        Integer userIdInt = Math.toIntExact(userId);
+                        User user = userService.getUserById(userIdInt);
 
-                        // e. check token expired
-                        if(!JwtHelper.isExpiration(token)) {
+                        // e. check user exist
+                        if(user != null) {
 
                             // f. check user rights
                             switch (rights) {
@@ -115,10 +115,10 @@ public class AuthenticationFilter implements Filter {
                             action(response, Result.error(ResultCodeEnum.NO_USER));
                         }
                     } else {
-                        action(response, Result.error(ResultCodeEnum.NO_USER));
+                        action(response, Result.error(ResultCodeEnum.TOKEN_ERROR));
                     }
                 } else {
-                    action(response, Result.error(ResultCodeEnum.TOKEN_ERROR));
+                    action(response, Result.error(ResultCodeEnum.TOKEN_EXPIRED));
                 }
             } else {
                 action(response, Result.error(ResultCodeEnum.MISS_TOKEN));

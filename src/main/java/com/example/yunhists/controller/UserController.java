@@ -49,12 +49,9 @@ public class UserController {
 
                     Map<String, Object> map = new LinkedHashMap<>();
                     map.put("token", JwtHelper.createToken(user.getId().longValue()));
-                    map.put("userId", user.getId());
                     map.put("username", user.getUsername());
-                    map.put("email", user.getEmail());
                     map.put("lang", user.getLang());
                     map.put("userRights", user.getUserRights());
-                    map.put("points", user.getPoints());
                     map.put("sts", STSUtils.getSTS(user.getId()));
 
                     return Result.ok(map);
@@ -89,12 +86,9 @@ public class UserController {
 
                 Map<String, Object> map = new LinkedHashMap<>();
                 map.put("token", JwtHelper.createToken((long) userId));
-                map.put("userId", userId);
                 map.put("username", username);
-                map.put("email", email);
                 map.put("lang", lang);
                 map.put("userRights", 0);
-                map.put("points", 0);
                 map.put("sts", STSUtils.getSTS(userId));
 
                 return Result.ok(map);
@@ -102,12 +96,9 @@ public class UserController {
             } else if(user.getRegisterType() == 1) { // google login
                 Map<String, Object> map = new LinkedHashMap<>();
                 map.put("token", JwtHelper.createToken(user.getId().longValue()));
-                map.put("userId", user.getId());
                 map.put("username", user.getUsername());
-                map.put("email", user.getEmail());
                 map.put("lang", user.getLang());
                 map.put("userRights", user.getUserRights());
-                map.put("points", user.getPoints());
                 map.put("sts", STSUtils.getSTS(user.getId()));
                 return Result.ok(map);
 

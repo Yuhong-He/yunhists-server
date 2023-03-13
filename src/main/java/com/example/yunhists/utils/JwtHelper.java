@@ -50,6 +50,7 @@ public class JwtHelper {
                     .getBody()
                     .getExpiration().before(new Date());
         } catch(Exception e) {
+            log.error("Jwt error: " + e);
             return true;
         }
     }
