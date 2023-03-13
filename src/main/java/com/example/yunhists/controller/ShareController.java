@@ -220,7 +220,7 @@ public class ShareController {
         if(targetShare != null) {
 
             // 4. check this is my share
-            if(userId == share.getUploader()) {
+            if(userId == targetShare.getUploader()) {
 
                 // 5. check share status unapproved
                 if(targetShare.getStatus() == 0) {

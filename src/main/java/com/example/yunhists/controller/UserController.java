@@ -461,21 +461,6 @@ public class UserController {
         }
     }
 
-    @GetMapping("/validateToken")
-    public Result<Object> validateToken(HttpServletRequest request) {
-
-        String token = request.getHeader("token");
-        if(!token.equals("")) {
-            if(JwtHelper.isExpiration(token)) {
-                return Result.error(ResultCodeEnum.TOKEN_EXPIRED);
-            } else {
-                return Result.ok();
-            }
-        } else {
-            return Result.error(ResultCodeEnum.MISS_TOKEN);
-        }
-    }
-
     @GetMapping("/refreshSTS")
     public Result<Object> refreshSTS() {
 
