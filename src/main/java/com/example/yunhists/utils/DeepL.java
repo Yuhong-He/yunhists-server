@@ -21,7 +21,7 @@ public class DeepL {
             TextResult result = translator.translateText(str, null, "zh");
             return result.getText();
         } catch (Exception e) {
-            log.error("Deepl error: " + e);
+            log.error("Deepl error: " + e.getMessage());
             return "DeepL Translation ERROR";
         }
     }
@@ -32,7 +32,7 @@ public class DeepL {
             TextResult result = translator.translateText(str, null, "en-GB");
             return result.getText();
         } catch (Exception e) {
-            log.error("Deepl error: " + e);
+            log.error("Deepl error: " + e.getMessage());
             return "DeepL Translation ERROR";
         }
     }

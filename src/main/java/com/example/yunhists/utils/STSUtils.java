@@ -33,7 +33,7 @@ public class STSUtils {
             }
             return sts;
         } catch (Exception e) {
-            log.error("Jwt error: " + e);
+            log.error("Jwt error: " + e.getMessage());
             return null;
         }
     }

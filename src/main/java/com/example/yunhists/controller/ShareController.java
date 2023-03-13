@@ -402,14 +402,10 @@ public class ShareController {
                             // i. email notify user
                             if(!uploader.getEmail().isEmpty()) {
                                 if(uploader.getSendEmail().equals("ON")) {
-                                    try {
-                                        DirectMailUtils.sendEmail(uploader.getEmail(),
-                                                EmailContentHelper.getShareApprovedNotificationEmailSubject(uploader.getLang()),
-                                                EmailContentHelper.getShareApprovedNotificationEmailBody(uploader.getLang(),
-                                                        uploader.getUsername(), thesis.getTitle()));
-                                    } catch (Exception e) {
-                                        return Result.error(ResultCodeEnum.FAIL);
-                                    }
+                                    DirectMailUtils.sendEmail(uploader.getEmail(),
+                                            EmailContentHelper.getShareApprovedNotificationEmailSubject(uploader.getLang()),
+                                            EmailContentHelper.getShareApprovedNotificationEmailBody(uploader.getLang(),
+                                                    uploader.getUsername(), thesis.getTitle()));
                                 }
                             }
 
@@ -471,14 +467,10 @@ public class ShareController {
                 User uploader = userService.getUserById(share.getUploader());
                 if(!uploader.getEmail().isEmpty()) {
                     if(uploader.getSendEmail().equals("ON")) {
-                        try {
-                            DirectMailUtils.sendEmail(uploader.getEmail(),
-                                    EmailContentHelper.getShareRejectedNotificationEmailSubject(uploader.getLang()),
-                                    EmailContentHelper.getShareRejectedNotificationEmailBody(uploader.getLang(),
-                                            uploader.getUsername(), share.getTitle(), reason));
-                        } catch (Exception e) {
-                            return Result.error(ResultCodeEnum.FAIL);
-                        }
+                        DirectMailUtils.sendEmail(uploader.getEmail(),
+                                EmailContentHelper.getShareRejectedNotificationEmailSubject(uploader.getLang()),
+                                EmailContentHelper.getShareRejectedNotificationEmailBody(uploader.getLang(),
+                                        uploader.getUsername(), share.getTitle(), reason));
                     }
                 }
 

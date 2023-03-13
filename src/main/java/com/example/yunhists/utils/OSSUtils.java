@@ -28,7 +28,7 @@ public class OSSUtils {
             ossClient.deleteObject(bucketName, sourceObject);
             ossClient.shutdown();
         } catch (Exception e) {
-            log.error("OSS move file error: " + e);
+            log.error("OSS move file error: " + e.getMessage());
         }
     }
 
@@ -43,7 +43,7 @@ public class OSSUtils {
             }
             return fileList;
         } catch (Exception e) {
-            log.error("OSS move file error: " + e);
+            log.error("OSS move file error: " + e.getMessage());
             return null;
         }
     }
@@ -53,7 +53,7 @@ public class OSSUtils {
             OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
             ossClient.deleteObject(bucketName, objectName);
         } catch (Exception e) {
-            log.error("OSS move file error: " + e);
+            log.error("OSS move file error: " + e.getMessage());
         }
     }
 

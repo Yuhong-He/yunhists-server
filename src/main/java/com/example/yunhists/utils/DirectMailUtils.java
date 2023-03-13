@@ -32,7 +32,7 @@ public class DirectMailUtils {
             request.setHtmlBody(emailBody);
             client.getAcsResponse(request);
         } catch (Exception e) {
-            log.error("Email send fail: " + e);
+            log.error("Email send fail: " + e.getMessage());
         }
     }
 
