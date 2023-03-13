@@ -28,24 +28,33 @@ public class OSSUtils {
             ossClient.deleteObject(bucketName, sourceObject);
             ossClient.shutdown();
         } catch (Exception e) {
-            log.error("OSS move file error: e");
+            log.error("OSS move file error: " + e);
         }
     }
 
-    public static List<String> getAllFile() throws IOException {
-        OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
-        ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName);
-        ObjectListing listing = ossClient.listObjects(listObjectsRequest);
-        List<String> fileList = new ArrayList<>();
-        for (OSSObjectSummary objectSummary : listing.getObjectSummaries()) {
-            fileList.add(objectSummary.getKey());
+    public static List<String> getAllFile() {
+        try {
+            OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
+            ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName);
+            ObjectListing listing = ossClient.listObjects(listObjectsRequest);
+            List<String> fileList = new ArrayList<>();
+            for (OSSObjectSummary objectSummary : listing.getObjectSummaries()) {
+                fileList.add(objectSummary.getKey());
+            }
+            return fileList;
+        } catch (Exception e) {
+            log.error("OSS move file error: " + e);
+            return null;
         }
-        return fileList;
     }
 
-    public static void deleteFile(String objectName) throws IOException {
-        OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
-        ossClient.deleteObject(bucketName, objectName);
+    public static void deleteFile(String objectName) {
+        try {
+            OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
+            ossClient.deleteObject(bucketName, objectName);
+        } catch (Exception e) {
+            log.error("OSS move file error: " + e);
+        }
     }
 
     private static String getAccessKey(String s) throws IOException {

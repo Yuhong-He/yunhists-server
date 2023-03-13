@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -27,11 +26,12 @@ public class ThesisTask {
     ShareService shareService;
 
     @Scheduled(cron ="0 0 0 * * ?")
-    public void checkThesisFileDatabaseRecords() throws IOException {
+    public void checkThesisFileDatabaseRecords() {
         List<String> fileList = OSSUtils.getAllFile();
         List<Thesis> thesisList = thesisService.getAll();
         for(Thesis thesis : thesisList) {
             if(!thesis.getFileName().isEmpty()) {
+                assert fileList != null;
                 if(!fileList.contains(thesis.getFileName())) {
                     thesis.setFileName("");
                     thesisService.saveOrUpdate(thesis);
@@ -41,8 +41,9 @@ public class ThesisTask {
     }
 
     @Scheduled(cron ="0 0 0 * * mon")
-    public void checkThesisFileOSS() throws IOException {
+    public void checkThesisFileOSS() {
         List<String> fileList = OSSUtils.getAllFile();
+        assert fileList != null;
         for(String file : fileList) {
             if(file.startsWith("default/")) {
                 Thesis thesis = thesisService.getThesisByFile(file);

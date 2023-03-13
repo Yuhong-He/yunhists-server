@@ -7,6 +7,7 @@ public enum ResultCodeEnum {
 
     SUCCESS(200,"Success"),
     FAIL(201, "Fail"),
+    NOT_REGISTERED_API(202, "Not Registered API"),
 
     // User
     NO_PERMISSION(203, "No Authentication"),
