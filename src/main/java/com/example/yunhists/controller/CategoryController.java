@@ -10,7 +10,6 @@ import com.example.yunhists.pojo.*;
 import com.example.yunhists.service.CategoryLinkService;
 import com.example.yunhists.service.CategoryService;
 import com.example.yunhists.service.ThesisService;
-import com.example.yunhists.service.UserService;
 import com.example.yunhists.common.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -130,7 +129,7 @@ public class CategoryController {
         return Result.ok(pageRs);
     }
 
-    @PostMapping("/addCatALot")
+    @PutMapping("/addCatALot")
     public Result<Object> addCatALot(@RequestBody UpdateALotCat updateAlotCat) {
 
         // get user id
@@ -336,7 +335,7 @@ public class CategoryController {
         }
     }
 
-    @PostMapping("/updateCatName/{catId}")
+    @PutMapping("/updateCatName/{catId}")
     public Result<Object> updateCatName(@PathVariable("catId") int catId,
                                         @RequestParam String zhName,
                                         @RequestParam String enName) {
@@ -374,7 +373,7 @@ public class CategoryController {
         }
     }
 
-    @PostMapping("/updateCatParentCat/{catId}")
+    @PutMapping("/updateCatParentCat/{catId}")
     public Result<Object> updateCatParentCat(@PathVariable("catId") int catId,
                                              @RequestParam("lang") String lang,
                                              @RequestParam("categories") String[] catNames) {
@@ -466,7 +465,7 @@ public class CategoryController {
         }
     }
 
-    @PostMapping("/removeFromCat/{catId}")
+    @DeleteMapping("/removeFromCat/{catId}")
     public Result<Object> removeFromCat(@PathVariable("catId") int parentCatId,
                                         @RequestParam("subCats") int[] subCats,
                                         @RequestParam("subTheses") int[] subTheses) {
@@ -514,7 +513,7 @@ public class CategoryController {
         return Result.ok(result);
     }
 
-    @PostMapping("/moveTo")
+    @PutMapping("/moveTo")
     public Result<Object> moveTo(@RequestParam("originId") int originId,
                                  @RequestParam("destId") int destId,
                                  @RequestParam("subCats") int[] subCats,
@@ -649,7 +648,7 @@ public class CategoryController {
         return Result.ok(result);
     }
 
-    @PostMapping("/delete/{catId}")
+    @DeleteMapping("/delete/{catId}")
     public Result<Object> delete(@PathVariable("catId") int catId) {
 
         // 1. check cat exist

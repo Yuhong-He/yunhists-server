@@ -32,7 +32,7 @@ public class UserController {
     @Autowired
     private EmailTimerService emailTimerService;
 
-    @PostMapping("/login")
+    @GetMapping("/login")
     public Result<Object> login(@RequestParam("email") String email,
                                 @RequestParam("password") String password) {
 
@@ -70,7 +70,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/google")
+    @GetMapping("/google")
     public Result<Object> google(@RequestParam("email") String email,
                                  @RequestParam("username") String username,
                                  @RequestParam("lang") String lang) {
@@ -288,7 +288,7 @@ public class UserController {
         return Result.ok(map);
     }
 
-    @PostMapping("/updateLang")
+    @PutMapping("/updateLang")
     public Result<Object> updateLang(@RequestParam("lang") String lang) {
 
         Integer id = Math.toIntExact(BaseContext.getCurrentId());
@@ -301,7 +301,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/updateEmailNotification")
+    @PutMapping("/updateEmailNotification")
     public Result<Object> updateEmailNotification(@RequestParam("status") String status) {
 
         Integer id = Math.toIntExact(BaseContext.getCurrentId());
@@ -314,7 +314,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/delete")
+    @DeleteMapping("/delete")
     public Result<Object> delete() {
 
         Integer id = Math.toIntExact(BaseContext.getCurrentId());
@@ -323,7 +323,7 @@ public class UserController {
         return Result.ok();
     }
 
-    @PostMapping("/updateUsername")
+    @PutMapping("/updateUsername")
     public Result<Object> updateUsername(@RequestParam("username") String username) {
 
         Integer id = Math.toIntExact(BaseContext.getCurrentId());
@@ -389,7 +389,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/updateEmail")
+    @PutMapping("/updateEmail")
     public Result<Object> updateEmail(@RequestParam("email") String email,
                                       @RequestParam("password") String password,
                                       @RequestParam("code") String code) {
@@ -434,7 +434,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/updatePassword")
+    @PutMapping("/updatePassword")
     public Result<Object> updatePassword(@RequestParam("oldPwd") String oldPwd,
                                       @RequestParam("newPwd") String newPwd,
                                       @RequestParam("newPwd2") String newPwd2) {

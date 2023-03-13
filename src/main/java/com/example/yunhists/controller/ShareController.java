@@ -110,7 +110,7 @@ public class ShareController {
         return Result.ok(customPage);
     }
 
-    @PostMapping("/delete/{shareId}")
+    @DeleteMapping("/delete/{shareId}")
     public Result<Object> deleteShare(@PathVariable("shareId") int shareId) {
 
         // 1. get id
@@ -179,7 +179,7 @@ public class ShareController {
         }
     }
 
-    @PostMapping("/deleteFile")
+    @DeleteMapping("/deleteFile")
     public Result<Object> deleteFileOfShare(@RequestParam String file) {
 
         // 1. get id
@@ -208,7 +208,7 @@ public class ShareController {
         }
     }
 
-    @PostMapping("/update/{shareId}")
+    @PutMapping("/update/{shareId}")
     public Result<Object> update(@PathVariable("shareId") int shareId,
                                  @RequestBody Share share) {
 
@@ -315,7 +315,7 @@ public class ShareController {
         }
     }
 
-    @PostMapping("/approve/{shareId}")
+    @PutMapping("/approve/{shareId}")
     public Result<Object> approve(@PathVariable("shareId") int shareId,
                                   @RequestBody Share share,
                                   @RequestParam("category") int[] catIds) {
@@ -438,7 +438,7 @@ public class ShareController {
         }
     }
 
-    @PostMapping("/reject/{shareId}")
+    @PutMapping("/reject/{shareId}")
     public Result<Object> reject(@PathVariable("shareId") int shareId,
                                  @RequestParam("reason") String reason) {
 

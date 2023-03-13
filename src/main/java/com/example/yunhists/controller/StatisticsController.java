@@ -18,7 +18,7 @@ import java.util.Map;
 @RequestMapping("/api/statistics")
 public class StatisticsController {
 
-    @GetMapping("/get")
+    @GetMapping("")
     public Result<Object> get() {
         try {
             String generalJson = new String(Files.readAllBytes(Paths.get(StatisticsTask.filePath + "general.json")));

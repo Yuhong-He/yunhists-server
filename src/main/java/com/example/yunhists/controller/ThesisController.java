@@ -276,7 +276,7 @@ public class ThesisController {
         }
     }
 
-    @PostMapping("/deleteFile")
+    @DeleteMapping("/deleteFile")
     public Result<Object> deleteFileOfThesis(@RequestParam String file) {
         Thesis thesis = thesisService.getThesisByFile(file);
         if(thesis != null) {
@@ -288,7 +288,7 @@ public class ThesisController {
         }
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public Result<Object> update(@RequestParam("id") Integer thesisId,
                                  @RequestParam("category") int[] catIds,
                                  @RequestBody Thesis thesis) {
@@ -400,7 +400,7 @@ public class ThesisController {
         }
     }
 
-    @PostMapping("/delete/{thesisId}")
+    @DeleteMapping("/delete/{thesisId}")
     public Result<Object> deleteThesis(@PathVariable("thesisId") Integer id,
                                        @RequestBody String reason) {
 
