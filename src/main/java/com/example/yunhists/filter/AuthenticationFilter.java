@@ -66,18 +66,18 @@ public class AuthenticationFilter implements Filter {
         if ("OPTIONS".equals(request.getMethod())) { // https://blog.csdn.net/wxw1997a/article/details/106472081
             filterChain.doFilter(request, servletResponse);
         } else {
-            String token = request.getHeader("token");
+            String access_token = request.getHeader("access_token");
 
-            // a. check token exist
-            if(token != null && !token.isEmpty()) {
+            // a. check access_token exist
+            if(access_token != null && !access_token.isEmpty()) {
 
-                // b. check token expired
-                if(!JwtHelper.isExpiration(token)) {
+                // b. check access_token expired
+                if(JwtHelper.notExpired(access_token)) {
 
-                    // c. check token valid
-                    Long userId = JwtHelper.getUserId(token);
+                    // c. check access_token valid
+                    Long userId = JwtHelper.getUserId(access_token);
 
-                    // d. check userId exist (valid token should contain a valid userid)
+                    // d. check userId exist (valid access_token should contain a valid userid)
                     if(userId != null) {
                         Integer userIdInt = Math.toIntExact(userId);
                         User user = userService.getUserById(userIdInt);

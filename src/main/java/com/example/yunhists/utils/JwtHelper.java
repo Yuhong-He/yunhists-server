@@ -15,11 +15,25 @@ import java.util.Properties;
 @Slf4j
 public class JwtHelper {
 
-    public static String createToken(Long userId) {
-        long tokenExpiration = 60 * 60 * 1000; // 1 hour
+    public static String createAccessToken(Long userId) {
+        long tokenExpiration = 20 * 1000; // 50 minutes
+        return createToken(tokenExpiration, userId);
+    }
+
+    public static long getExpiredTime() {
+        long tokenExpiration = 20 * 1000; // 50 minutes
+        return System.currentTimeMillis() + tokenExpiration;
+    }
+
+    public static String createRefreshToken(Long userId) {
+        long tokenExpiration = 365L * 24 * 60 * 60 * 1000; // 1 year
+        return createToken(tokenExpiration, userId);
+    }
+
+    private static String createToken(long tokenExpiration, long userId) {
         try {
             return Jwts.builder()
-                    .setSubject("YYGH-USER")
+                    .setSubject("YUNHISTS-USER")
                     .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
                     .claim("userId", userId)
                     .signWith(getKey(), SignatureAlgorithm.HS512)
@@ -44,13 +58,13 @@ public class JwtHelper {
         }
     }
 
-    public static boolean isExpiration(String token) {
+    public static boolean notExpired(String token) {
         try {
-            return Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token)
+            return !Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token)
                     .getBody().getExpiration().before(new Date());
         } catch(Exception e) {
             log.error("Jwt error: " + e.getMessage());
-            return true;
+            return false;
         }
     }
 

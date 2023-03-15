@@ -13,7 +13,6 @@ import com.example.yunhists.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +47,9 @@ public class UserController {
                 if(user != null){
 
                     Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("token", JwtHelper.createToken(user.getId().longValue()));
+                    map.put("access_token", JwtHelper.createAccessToken(user.getId().longValue()));
+                    map.put("refresh_token", JwtHelper.createRefreshToken(user.getId().longValue()));
+                    map.put("expired_time", JwtHelper.getExpiredTime());
                     map.put("username", user.getUsername());
                     map.put("lang", user.getLang());
                     map.put("userRights", user.getUserRights());
@@ -85,7 +86,9 @@ public class UserController {
                 int userId = newUser.getId();
 
                 Map<String, Object> map = new LinkedHashMap<>();
-                map.put("token", JwtHelper.createToken((long) userId));
+                map.put("access_token", JwtHelper.createAccessToken((long) userId));
+                map.put("refresh_token", JwtHelper.createRefreshToken((long) userId));
+                map.put("expired_time", JwtHelper.getExpiredTime());
                 map.put("username", username);
                 map.put("lang", lang);
                 map.put("userRights", 0);
@@ -95,7 +98,9 @@ public class UserController {
 
             } else if(user.getRegisterType() == 1) { // google login
                 Map<String, Object> map = new LinkedHashMap<>();
-                map.put("token", JwtHelper.createToken(user.getId().longValue()));
+                map.put("access_token", JwtHelper.createAccessToken(user.getId().longValue()));
+                map.put("refresh_token", JwtHelper.createRefreshToken(user.getId().longValue()));
+                map.put("expired_time", JwtHelper.getExpiredTime());
                 map.put("username", user.getUsername());
                 map.put("lang", user.getLang());
                 map.put("userRights", user.getUserRights());
@@ -469,5 +474,45 @@ public class UserController {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("sts", STSUtils.getSTS(id));
         return Result.ok(map);
+    }
+
+    @PostMapping("/refreshToken")
+    public Result<Object> refreshToken(@RequestBody String refresh_token) {
+
+        // a. check refresh_token exist
+        if(refresh_token != null && !refresh_token.isEmpty()) {
+
+            // b. check access_token expired
+            if(JwtHelper.notExpired(refresh_token)) {
+
+                // c. check access_token valid
+                Long userId = JwtHelper.getUserId(refresh_token);
+
+                // d. check userId exist (valid refresh_token should contain a valid userid)
+                if(userId != null) {
+                    Integer userIdInt = Math.toIntExact(userId);
+                    User user = userService.getUserById(userIdInt);
+
+                    // e. check user exist
+                    if(user != null) {
+
+                        Map<String, Object> map = new LinkedHashMap<>();
+                        map.put("access_token", JwtHelper.createAccessToken(user.getId().longValue()));
+                        map.put("expired_time", JwtHelper.getExpiredTime());
+                        map.put("sts", STSUtils.getSTS(user.getId()));
+                        return Result.ok(map);
+
+                    } else {
+                        return Result.error(ResultCodeEnum.NO_USER);
+                    }
+                } else {
+                    return Result.error(ResultCodeEnum.TOKEN_ERROR);
+                }
+            } else {
+                return Result.error(ResultCodeEnum.TOKEN_EXPIRED);
+            }
+        } else {
+            return Result.error(ResultCodeEnum.MISS_TOKEN);
+        }
     }
 }

@@ -20,6 +20,7 @@ public class AuthenticationPathHelper {
                 "/api/thesis/cite/{id}",
                 "/api/thesis/onlinePublishInfo/{id}",
                 "/api/thesis/categoryTheses/{catId}",
+                "/api/user/refreshToken", // user action, but unconditional release
         };
     }
 
