@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 
 @Data
 @NoArgsConstructor
-@TableName("categorylinks")
+@TableName("categoryLinks")
 public class CategoryLink {
 
     @TableId(value="id", type= IdType.AUTO)

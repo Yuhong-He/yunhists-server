@@ -13,7 +13,7 @@ import java.util.Date;
 
 @Data
 @NoArgsConstructor
-@TableName("share")
+@TableName("upload")
 public class Upload {
 
     @TableId(value="id", type= IdType.AUTO)
