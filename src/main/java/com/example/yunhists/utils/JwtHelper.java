@@ -16,12 +16,12 @@ import java.util.Properties;
 public class JwtHelper {
 
     public static String createAccessToken(Long userId) {
-        long tokenExpiration = 20 * 1000; // 50 minutes
+        long tokenExpiration = 50 * 60 * 1000; // 50 minutes
         return createToken(tokenExpiration, userId);
     }
 
     public static long getExpiredTime() {
-        long tokenExpiration = 20 * 1000; // 50 minutes
+        long tokenExpiration = 50 * 60 * 1000; // 50 minutes
         return System.currentTimeMillis() + tokenExpiration;
     }
 
