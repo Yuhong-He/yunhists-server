@@ -29,7 +29,7 @@ public class StatisticsTask {
     UserService userService;
 
     @Autowired
-    ShareService shareService;
+    UploadService uploadService;
 
     public static String filePath = "src/main/resources/statistics/";
 
@@ -47,7 +47,7 @@ public class StatisticsTask {
             }
         }
         result.put("userCount", userCount);
-        result.put("shareCount", shareService.count());
+        result.put("uploadCount", uploadService.count());
 
         ObjectMapper mapper = new ObjectMapper();
         String fileName = "general.json";

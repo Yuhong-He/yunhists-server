@@ -48,12 +48,12 @@ public enum ResultCodeEnum {
     THESIS_ID_NOT_EXIST(407, "Thesis id not exist"),
     THESIS_FILE_NOT_EXIST(408, "Thesis file not exist"),
 
-    // Share
-    SHARE_ID_NOT_EXIST(501, "Share id not exist"),
-    NOT_YOUR_SHARE(502, "This is not the thesis you shared"),
-    SHARE_CAN_NOT_UPDATE(503, "This sharing can not be change"),
-    SHARE_FILE_NOT_EXIST(504, "Shared thesis file not exist"),
-    MOVE_SHARE_FILE_FAIL(201, "Move shared thesis file failed"),
+    // Upload
+    UPLOAD_ID_NOT_EXIST(501, "Upload id not exist"),
+    NOT_YOUR_UPLOAD(502, "This is not the thesis you uploaded"),
+    UPLOAD_CAN_NOT_UPDATE(503, "This upload can not be change"),
+    UPLOAD_FILE_NOT_EXIST(504, "Uploaded thesis file not exist"),
+    MOVE_UPLOAD_FILE_FAIL(201, "Move uploaded thesis file failed"),
     REMOVE_FILE_FAIL(201, "Remove file failed"),
     ;
 

@@ -40,7 +40,7 @@ public class ThesisController {
     private DelThesisService delThesisService;
 
     @Autowired
-    private ShareService shareService;
+    private UploadService uploadService;
 
     @PostMapping("/add")
     public Result<Object> add(@RequestBody Thesis thesis,
@@ -94,10 +94,10 @@ public class ThesisController {
                         }
                     }
 
-                    // f. add share records
+                    // f. add upload records
                     String catOkStr = String.join(",", catOkList);
-                    Share share = new Share(thesis, userId, catOkStr);
-                    shareService.save(share);
+                    Upload upload = new Upload(thesis, userId, catOkStr);
+                    uploadService.save(upload);
 
                     // g. update user points
                     user.setPoints(user.getPoints() + 1);

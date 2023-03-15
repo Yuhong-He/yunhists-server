@@ -4,17 +4,17 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.yunhists.entity.Share;
-import com.example.yunhists.mapper.ShareMapper;
-import com.example.yunhists.service.ShareService;
+import com.example.yunhists.entity.Upload;
+import com.example.yunhists.mapper.UploadMapper;
+import com.example.yunhists.service.UploadService;
 import org.springframework.stereotype.Service;
 
-@Service("shareServiceImpl")
-public class ShareServiceImpl extends ServiceImpl<ShareMapper, Share> implements ShareService {
+@Service("uploadServiceImpl")
+public class UploadServiceImpl extends ServiceImpl<UploadMapper, Upload> implements UploadService {
 
     @Override
-    public IPage<Share> getShareBySearch(Page<Share> page, int userId, String title) {
-        QueryWrapper<Share> queryWrapper = new QueryWrapper<>();
+    public IPage<Upload> getUploadBySearch(Page<Upload> page, int userId, String title) {
+        QueryWrapper<Upload> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("uploader", userId);
         if(!title.isEmpty()) {
             if(title.contains(" ")) {
@@ -27,21 +27,21 @@ public class ShareServiceImpl extends ServiceImpl<ShareMapper, Share> implements
             queryWrapper.like("title", title);
         }
         queryWrapper.orderByDesc("upload_time");
-        queryWrapper.select(Share.class, info -> !info.getColumn().equals("approver")
+        queryWrapper.select(Upload.class, info -> !info.getColumn().equals("approver")
                 && !info.getColumn().equals("approve_time"));
         return baseMapper.selectPage(page, queryWrapper);
     }
 
     @Override
-    public Share getShareByFile(String file) {
-        QueryWrapper<Share> queryWrapper = new QueryWrapper<>();
+    public Upload getUploadByFile(String file) {
+        QueryWrapper<Upload> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("file_name", file);
         return baseMapper.selectOne(queryWrapper);
     }
 
     @Override
-    public IPage<Share> getAllShareBySearch(Page<Share> page, String title, String unapproved) {
-        QueryWrapper<Share> queryWrapper = new QueryWrapper<>();
+    public IPage<Upload> getAllUploadBySearch(Page<Upload> page, String title, String unapproved) {
+        QueryWrapper<Upload> queryWrapper = new QueryWrapper<>();
         if(!title.isEmpty()) {
             if(title.contains(" ")) {
                 while(title.contains(" ")) {

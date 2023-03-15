@@ -34,7 +34,7 @@ public class EmailContentHelper {
         }
     }
 
-    public static String getNewShareNotificationEmailSubject(String lang) {
+    public static String getNewUploadNotificationEmailSubject(String lang) {
         if(lang.equals("zh")) {
             return "新上传通知";
         } else {
@@ -42,7 +42,7 @@ public class EmailContentHelper {
         }
     }
 
-    public static String getShareApprovedNotificationEmailSubject(String lang) {
+    public static String getUploadApprovedNotificationEmailSubject(String lang) {
         if(lang.equals("zh")) {
             return "批准通知";
         } else {
@@ -50,7 +50,7 @@ public class EmailContentHelper {
         }
     }
 
-    public static String getShareRejectedNotificationEmailSubject(String lang) {
+    public static String getUploadRejectedNotificationEmailSubject(String lang) {
         if(lang.equals("zh")) {
             return "驳回通知";
         } else {
@@ -125,7 +125,7 @@ public class EmailContentHelper {
         }
     }
 
-    public static String getNewShareNotificationEmailBody(String lang) {
+    public static String getNewUploadNotificationEmailBody(String lang) {
         if(lang.equals("zh")) {
             return "<p>管理员您好，滇史论辑收到新的上传，请审批。</p>" +
                     "<p>滇史论辑 Yunhists</p>";
@@ -135,7 +135,7 @@ public class EmailContentHelper {
         }
     }
 
-    public static String getShareApprovedNotificationEmailBody(String lang, String username, String title) {
+    public static String getUploadApprovedNotificationEmailBody(String lang, String username, String title) {
         if(lang.equals("zh")) {
             return "<p>" + username + "您好，</p>" +
                     "<p>您上传的论文《" + title + "》已审批通过，非常感谢您的贡献！</p>" +
@@ -147,7 +147,7 @@ public class EmailContentHelper {
         }
     }
 
-    public static String getShareRejectedNotificationEmailBody(String lang, String username, String title, String reason) {
+    public static String getUploadRejectedNotificationEmailBody(String lang, String username, String title, String reason) {
         if(lang.equals("zh")) {
             reason = DeepL.translateToZh(reason);
             return "<p>" + username + "您好，</p>" +

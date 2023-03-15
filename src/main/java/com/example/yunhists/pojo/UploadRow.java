@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ShareRow {
+public class UploadRow {
 
     private Integer id;
     private String author;

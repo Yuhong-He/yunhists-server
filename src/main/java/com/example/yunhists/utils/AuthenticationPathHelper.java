@@ -35,7 +35,7 @@ public class AuthenticationPathHelper {
                 "/api/user/updateEmail",
                 "/api/user/updatePassword",
                 "/api/user/validateToken",
-                "/api/share/myList/{pageNo}",
+                "/api/upload/myList/{pageNo}",
         };
     }
 
@@ -45,11 +45,11 @@ public class AuthenticationPathHelper {
                 "/api/thesis/getDownloadNum",
                 "/api/thesis/file/{id}",
                 "/api/category/option/{catName}/{lang}",
-                "/api/share/add",
-                "/api/share/delete/{shareId}",
-                "/api/share/myShare/{shareId}",
-                "/api/share/deleteFile",
-                "/api/share/update/{shareId}",
+                "/api/upload/add",
+                "/api/upload/delete/{uploadId}",
+                "/api/upload/myUpload/{uploadId}",
+                "/api/upload/deleteFile",
+                "/api/upload/update/{uploadId}",
         };
     }
 
@@ -71,10 +71,10 @@ public class AuthenticationPathHelper {
                 "/api/thesis/delete/{thesisId}",
                 "/api/thesis/missingFile",
                 "/api/thesis/thesisWithoutCat",
-                "/api/share/listAll/{pageNo}",
-                "/api/share/id/{shareId}",
-                "/api/share/approve/{shareId}",
-                "/api/share/reject/{shareId}",
+                "/api/upload/listAll/{pageNo}",
+                "/api/upload/id/{uploadId}",
+                "/api/upload/approve/{uploadId}",
+                "/api/upload/reject/{uploadId}",
         };
     }
 

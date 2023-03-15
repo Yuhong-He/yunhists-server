@@ -74,23 +74,23 @@ public class Thesis {
     @TableField("approve_time")
     private Timestamp approveTime;
 
-    public Thesis(Share share, int uploaderId, int adminId) {
-        this.author = share.getAuthor();
-        this.title = share.getTitle();
-        this.publication = share.getPublication();
-        this.location = share.getLocation();
-        this.publisher = share.getPublisher();
-        this.year = share.getYear();
-        this.volume = share.getVolume();
-        this.issue = share.getIssue();
-        this.pages = share.getPages();
-        this.doi = share.getDoi();
-        this.isbn = share.getIsbn();
-        this.onlinePublisher = share.getOnlinePublisher();
-        this.onlinePublishUrl = share.getOnlinePublishUrl();
-        this.type = share.getType();
-        this.copyrightStatus = share.getCopyrightStatus();
-        this.fileName = share.getFileName();
+    public Thesis(Upload upload, int uploaderId, int adminId) {
+        this.author = upload.getAuthor();
+        this.title = upload.getTitle();
+        this.publication = upload.getPublication();
+        this.location = upload.getLocation();
+        this.publisher = upload.getPublisher();
+        this.year = upload.getYear();
+        this.volume = upload.getVolume();
+        this.issue = upload.getIssue();
+        this.pages = upload.getPages();
+        this.doi = upload.getDoi();
+        this.isbn = upload.getIsbn();
+        this.onlinePublisher = upload.getOnlinePublisher();
+        this.onlinePublishUrl = upload.getOnlinePublishUrl();
+        this.type = upload.getType();
+        this.copyrightStatus = upload.getCopyrightStatus();
+        this.fileName = upload.getFileName();
         this.uploader = uploaderId;
         this.approver = adminId;
     }

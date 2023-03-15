@@ -14,7 +14,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @TableName("share")
-public class Share {
+public class Upload {
 
     @TableId(value="id", type= IdType.AUTO)
     private Integer id;
@@ -88,7 +88,7 @@ public class Share {
     @TableField("approve_time")
     private Timestamp approveTime;
 
-    public Share(Thesis thesis, int userId, String categories) {
+    public Upload(Thesis thesis, int userId, String categories) {
         this.author = thesis.getAuthor();
         this.title = thesis.getTitle();
         this.publication = thesis.getPublication();

@@ -19,14 +19,14 @@ import java.util.*;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/share")
-public class ShareController {
+@RequestMapping("/api/upload")
+public class UploadController {
 
     @Autowired
     UserService userService;
 
     @Autowired
-    ShareService shareService;
+    UploadService uploadService;
 
     @Autowired
     ThesisService thesisService;
@@ -38,28 +38,28 @@ public class ShareController {
     CategoryLinkService categoryLinkService;
 
     @PostMapping("/add")
-    public Result<Object> add(@RequestBody Share share) {
+    public Result<Object> add(@RequestBody Upload upload) {
 
         // 1. get id
         int userId = Math.toIntExact(BaseContext.getCurrentId());
 
         // 2. check type valid
         List<Integer> validType = List.of(0,1,2,3);
-        if(validType.contains(share.getType())) {
+        if(validType.contains(upload.getType())) {
 
             // 3. check copyright valid
             List<Integer> validCopyright = List.of(0,1,2);
-            if(validCopyright.contains(share.getCopyrightStatus())) {
+            if(validCopyright.contains(upload.getCopyrightStatus())) {
 
                 // 4. set uploader & status
-                share.setUploader(userId);
-                share.setStatus(0);
+                upload.setUploader(userId);
+                upload.setStatus(0);
 
                 // a. check category exist
-                validatedCat(share);
+                validatedCat(upload);
 
                 // b. add thesis
-                shareService.save(share);
+                uploadService.save(upload);
 
                 // c. email notify admin
                 List<User> adminList = userService.getAllAdmin();
@@ -69,8 +69,8 @@ public class ShareController {
                         String email = admin.getEmail();
                         String lang = admin.getLang();
                         DirectMailUtils.sendEmail(email,
-                                EmailContentHelper.getNewShareNotificationEmailSubject(lang),
-                                EmailContentHelper.getNewShareNotificationEmailBody(lang));
+                                EmailContentHelper.getNewUploadNotificationEmailSubject(lang),
+                                EmailContentHelper.getNewUploadNotificationEmailBody(lang));
                     }
                 }
 
@@ -89,160 +89,160 @@ public class ShareController {
 
         int userId = Math.toIntExact(BaseContext.getCurrentId());
 
-        Page<Share> page = new Page<>(pageNo, 10);
-        IPage<Share> pageRs = shareService.getShareBySearch(page, userId, title);
-        List<Share> list = pageRs.getRecords();
-        List<ShareRow> newList = new ArrayList<>();
-        for(Share s : list) {
+        Page<Upload> page = new Page<>(pageNo, 10);
+        IPage<Upload> pageRs = uploadService.getUploadBySearch(page, userId, title);
+        List<Upload> list = pageRs.getRecords();
+        List<UploadRow> newList = new ArrayList<>();
+        for(Upload s : list) {
             ThesisIssue thesisIssue = new ThesisIssue(
                     s.getYear() == null ? "" : s.getYear().toString(),
                     s.getVolume() == null ? "" : s.getVolume().toString(),
                     s.getIssue() == null ? "" : s.getIssue()
             );
-            ShareRow shareWithUser = new ShareRow(
+            UploadRow uploadWithUser = new UploadRow(
                     s.getId(), s.getAuthor(), s.getTitle(), s.getPublication(), thesisIssue, "",
                     s.getStatus(), ""
             );
-            newList.add(shareWithUser);
+            newList.add(uploadWithUser);
         }
         CustomPage customPage = new CustomPage(newList, pageRs.getTotal(), pageRs.getSize(),
                 pageRs.getCurrent(), pageRs.getPages());
         return Result.ok(customPage);
     }
 
-    @DeleteMapping("/delete/{shareId}")
-    public Result<Object> deleteShare(@PathVariable("shareId") int shareId) {
+    @DeleteMapping("/delete/{uploadId}")
+    public Result<Object> deleteUpload(@PathVariable("uploadId") int uploadId) {
 
         // 1. get id
         int userId = Math.toIntExact(BaseContext.getCurrentId());
 
-        // 2. check share exist
-        Share share = shareService.getById(shareId);
-        if(share != null) {
+        // 2. check upload exist
+        Upload upload = uploadService.getById(uploadId);
+        if(upload != null) {
 
-            // 3. check this is my share
-            if(share.getUploader() == userId) {
+            // 3. check this is my upload
+            if(upload.getUploader() == userId) {
 
-                // 4. check share status unapproved
-                if(share.getStatus() == 0) {
+                // 4. check upload status unapproved
+                if(upload.getStatus() == 0) {
 
                     // a. delete oss file
-                    String file = share.getFileName();
+                    String file = upload.getFileName();
                     if (!file.isEmpty()) {
                         OSSUtils.deleteFile(file);
                     }
 
-                    // b. delete share
-                    shareService.removeById(share);
+                    // b. delete upload
+                    uploadService.removeById(upload);
 
                     return Result.ok();
                 } else {
-                    return Result.error(ResultCodeEnum.SHARE_CAN_NOT_UPDATE);
+                    return Result.error(ResultCodeEnum.UPLOAD_CAN_NOT_UPDATE);
                 }
             } else {
-                return Result.error(ResultCodeEnum.NOT_YOUR_SHARE);
+                return Result.error(ResultCodeEnum.NOT_YOUR_UPLOAD);
             }
         } else {
-            return Result.error(ResultCodeEnum.SHARE_ID_NOT_EXIST);
+            return Result.error(ResultCodeEnum.UPLOAD_ID_NOT_EXIST);
         }
     }
 
-    @GetMapping("/myShare/{shareId}")
-    public Result<Object> getMyShareById(@PathVariable("shareId") Integer id) {
+    @GetMapping("/myUpload/{uploadId}")
+    public Result<Object> getMyUploadById(@PathVariable("uploadId") Integer id) {
 
         // 1. get id
         int userId = Math.toIntExact(BaseContext.getCurrentId());
 
-        // 2. check share exist
-        Share share = shareService.getById(id);
-        if(share != null) {
+        // 2. check upload exist
+        Upload upload = uploadService.getById(id);
+        if(upload != null) {
 
-            // 3. check this is my share
-            if(userId == share.getUploader()) {
+            // 3. check this is my upload
+            if(userId == upload.getUploader()) {
 
-                // 4. check share status unapproved
-                if(share.getStatus() == 0) {
+                // 4. check upload status unapproved
+                if(upload.getStatus() == 0) {
 
-                    List<CategoryName> categories = getShareCat(share);
+                    List<CategoryName> categories = getUploadCat(upload);
                     Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("share", share);
+                    map.put("upload", upload);
                     map.put("categories", categories);
                     return Result.ok(map);
                 } else {
-                    return Result.error(ResultCodeEnum.SHARE_CAN_NOT_UPDATE);
+                    return Result.error(ResultCodeEnum.UPLOAD_CAN_NOT_UPDATE);
                 }
             } else {
-                return Result.error(ResultCodeEnum.NOT_YOUR_SHARE);
+                return Result.error(ResultCodeEnum.NOT_YOUR_UPLOAD);
             }
         } else {
-            return Result.error(ResultCodeEnum.SHARE_ID_NOT_EXIST);
+            return Result.error(ResultCodeEnum.UPLOAD_ID_NOT_EXIST);
         }
     }
 
     @DeleteMapping("/deleteFile")
-    public Result<Object> deleteFileOfShare(@RequestParam String file) {
+    public Result<Object> deleteFileOfUpload(@RequestParam String file) {
 
         // 1. get id
         int userId = Math.toIntExact(BaseContext.getCurrentId());
 
         // 2. check file exist
-        Share share = shareService.getShareByFile(file);
-        if(share != null) {
+        Upload upload = uploadService.getUploadByFile(file);
+        if(upload != null) {
 
-            // 3. check this is my share
-            if(userId == share.getUploader()) {
+            // 3. check this is my upload
+            if(userId == upload.getUploader()) {
 
-                // 4. check share status unapproved
-                if(share.getStatus() == 0) {
-                    share.setFileName("");
-                    shareService.saveOrUpdate(share);
+                // 4. check upload status unapproved
+                if(upload.getStatus() == 0) {
+                    upload.setFileName("");
+                    uploadService.saveOrUpdate(upload);
                     return Result.ok();
                 } else {
-                    return Result.error(ResultCodeEnum.SHARE_CAN_NOT_UPDATE);
+                    return Result.error(ResultCodeEnum.UPLOAD_CAN_NOT_UPDATE);
                 }
             } else {
-                return Result.error(ResultCodeEnum.NOT_YOUR_SHARE);
+                return Result.error(ResultCodeEnum.NOT_YOUR_UPLOAD);
             }
         } else {
-            return Result.error(ResultCodeEnum.SHARE_FILE_NOT_EXIST);
+            return Result.error(ResultCodeEnum.UPLOAD_FILE_NOT_EXIST);
         }
     }
 
-    @PutMapping("/update/{shareId}")
-    public Result<Object> update(@PathVariable("shareId") int shareId,
-                                 @RequestBody Share share) {
+    @PutMapping("/update/{uploadId}")
+    public Result<Object> update(@PathVariable("uploadId") int uploadId,
+                                 @RequestBody Upload upload) {
 
         // 1. get id
         int userId = Math.toIntExact(BaseContext.getCurrentId());
 
-        // 3. check shareId exist
-        Share targetShare = shareService.getById(shareId);
-        if(targetShare != null) {
+        // 3. check uploadId exist
+        Upload targetUpload = uploadService.getById(uploadId);
+        if(targetUpload != null) {
 
-            // 4. check this is my share
-            if(userId == targetShare.getUploader()) {
+            // 4. check this is my upload
+            if(userId == targetUpload.getUploader()) {
 
-                // 5. check share status unapproved
-                if(targetShare.getStatus() == 0) {
+                // 5. check upload status unapproved
+                if(targetUpload.getStatus() == 0) {
 
                     // 6. check type valid
                     List<Integer> validType = List.of(0,1,2,3);
-                    if(validType.contains(share.getType())) {
+                    if(validType.contains(upload.getType())) {
 
                         // 7. check copyright valid
                         List<Integer> validCopyright = List.of(0,1,2);
-                        if(validCopyright.contains(share.getCopyrightStatus())) {
+                        if(validCopyright.contains(upload.getCopyrightStatus())) {
 
                             // a. set id, uploader, status
-                            share.setId(shareId);
-                            share.setUploader(userId);
-                            share.setStatus(0);
+                            upload.setId(uploadId);
+                            upload.setUploader(userId);
+                            upload.setStatus(0);
 
                             // b. check category exist
-                            validatedCat(share);
+                            validatedCat(upload);
 
-                            // c. update share
-                            shareService.saveOrUpdate(share);
+                            // c. update upload
+                            uploadService.saveOrUpdate(upload);
 
                             return Result.ok();
                         } else {
@@ -252,13 +252,13 @@ public class ShareController {
                         return Result.error(ResultCodeEnum.INVALID_TYPE);
                     }
                 } else {
-                    return Result.error(ResultCodeEnum.SHARE_CAN_NOT_UPDATE);
+                    return Result.error(ResultCodeEnum.UPLOAD_CAN_NOT_UPDATE);
                 }
             } else {
-                return Result.error(ResultCodeEnum.NOT_YOUR_SHARE);
+                return Result.error(ResultCodeEnum.NOT_YOUR_UPLOAD);
             }
         } else {
-            return Result.error(ResultCodeEnum.SHARE_ID_NOT_EXIST);
+            return Result.error(ResultCodeEnum.UPLOAD_ID_NOT_EXIST);
         }
     }
 
@@ -267,11 +267,11 @@ public class ShareController {
                                   @RequestParam(required = false) String title,
                                   @RequestParam(required = false) String unapproved) {
 
-        Page<Share> page = new Page<>(pageNo, 10);
-        IPage<Share> pageRs = shareService.getAllShareBySearch(page, title, unapproved);
-        List<Share> list = pageRs.getRecords();
-        List<ShareRow> newList = new ArrayList<>();
-        for(Share s : list) {
+        Page<Upload> page = new Page<>(pageNo, 10);
+        IPage<Upload> pageRs = uploadService.getAllUploadBySearch(page, title, unapproved);
+        List<Upload> list = pageRs.getRecords();
+        List<UploadRow> newList = new ArrayList<>();
+        for(Upload s : list) {
             ThesisIssue thesisIssue = new ThesisIssue(
                     s.getYear() == null ? "" : s.getYear().toString(),
                     s.getVolume() == null ? "" : s.getVolume().toString(),
@@ -282,64 +282,64 @@ public class ShareController {
             if(s.getApprover() != null) {
                 approver = userService.getUserById(s.getApprover()).getUsername();
             }
-            ShareRow shareWithUser = new ShareRow(
+            UploadRow uploadWithUser = new UploadRow(
                     s.getId(), s.getAuthor(), s.getTitle(), s.getPublication(), thesisIssue, uploader,
                     s.getStatus(), approver
             );
-            newList.add(shareWithUser);
+            newList.add(uploadWithUser);
         }
         CustomPage customPage = new CustomPage(newList, pageRs.getTotal(), pageRs.getSize(),
                 pageRs.getCurrent(), pageRs.getPages());
         return Result.ok(customPage);
     }
 
-    @GetMapping("/id/{shareId}")
-    public Result<Object> getShareById(@PathVariable("shareId") Integer id) {
+    @GetMapping("/id/{uploadId}")
+    public Result<Object> getUploadById(@PathVariable("uploadId") Integer id) {
 
-        // 1. check share exist
-        Share share = shareService.getById(id);
-        if(share != null) {
+        // 1. check upload exist
+        Upload upload = uploadService.getById(id);
+        if(upload != null) {
 
-            // 2. check share status unapproved
-            if(share.getStatus() == 0) {
-                List<CategoryName> categories = getShareCat(share);
+            // 2. check upload status unapproved
+            if(upload.getStatus() == 0) {
+                List<CategoryName> categories = getUploadCat(upload);
                 Map<String, Object> map = new LinkedHashMap<>();
-                map.put("share", share);
+                map.put("upload", upload);
                 map.put("categories", categories);
                 return Result.ok(map);
             } else {
-                return Result.error(ResultCodeEnum.SHARE_CAN_NOT_UPDATE);
+                return Result.error(ResultCodeEnum.UPLOAD_CAN_NOT_UPDATE);
             }
         } else {
-            return Result.error(ResultCodeEnum.SHARE_ID_NOT_EXIST);
+            return Result.error(ResultCodeEnum.UPLOAD_ID_NOT_EXIST);
         }
     }
 
-    @PutMapping("/approve/{shareId}")
-    public Result<Object> approve(@PathVariable("shareId") int shareId,
-                                  @RequestBody Share share,
+    @PutMapping("/approve/{uploadId}")
+    public Result<Object> approve(@PathVariable("uploadId") int uploadId,
+                                  @RequestBody Upload upload,
                                   @RequestParam("category") int[] catIds) {
 
         // 1. get id
         int userId = Math.toIntExact(BaseContext.getCurrentId());
 
-        // 2. check share id exist
-        Share targetShare = shareService.getById(shareId);
-        if(targetShare != null) {
+        // 2. check upload id exist
+        Upload targetUpload = uploadService.getById(uploadId);
+        if(targetUpload != null) {
 
-            // 3. check share status unapproved
-            if(targetShare.getStatus() == 0) {
+            // 3. check upload status unapproved
+            if(targetUpload.getStatus() == 0) {
 
                 // 4. check type valid
                 List<Integer> validType = List.of(0,1,2,3);
-                if(validType.contains(share.getType())) {
+                if(validType.contains(upload.getType())) {
 
                     // 5. check copyright valid
                     List<Integer> validCopyright = List.of(0,1,2);
-                    if(validCopyright.contains(share.getCopyrightStatus())) {
+                    if(validCopyright.contains(upload.getCopyrightStatus())) {
 
                         // 6. check duplicate
-                        Thesis thesis = new Thesis(share, targetShare.getUploader(), userId);
+                        Thesis thesis = new Thesis(upload, targetUpload.getUploader(), userId);
                         if(thesisService.validateNotExist(thesis)) {
 
                             // a. move file
@@ -380,22 +380,22 @@ public class ShareController {
                                 }
                             }
 
-                            // g. update share records
-                            share.setId(targetShare.getId());
-                            share.setFileName(targetFile);
+                            // g. update upload records
+                            upload.setId(targetUpload.getId());
+                            upload.setFileName(targetFile);
                             String catOkStr = String.join(",", catOkList);
-                            share.setCategory(catOkStr);
-                            share.setUploader(targetShare.getUploader());
-                            share.setUploadTime(targetShare.getUploadTime());
-                            share.setStatus(1);
-                            share.setApprover(userId);
-                            share.setApproveTime(Timestamp.valueOf(
+                            upload.setCategory(catOkStr);
+                            upload.setUploader(targetUpload.getUploader());
+                            upload.setUploadTime(targetUpload.getUploadTime());
+                            upload.setStatus(1);
+                            upload.setApprover(userId);
+                            upload.setApproveTime(Timestamp.valueOf(
                                     new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(
                                             new Timestamp(new Date().getTime()))));
-                            shareService.saveOrUpdate(share);
+                            uploadService.saveOrUpdate(upload);
 
                             // h. update user points
-                            User uploader = userService.getUserById(share.getUploader());
+                            User uploader = userService.getUserById(upload.getUploader());
                             uploader.setPoints(uploader.getPoints() + 1);
                             userService.saveOrUpdate(uploader);
 
@@ -403,8 +403,8 @@ public class ShareController {
                             if(!uploader.getEmail().isEmpty()) {
                                 if(uploader.getSendEmail().equals("ON")) {
                                     DirectMailUtils.sendEmail(uploader.getEmail(),
-                                            EmailContentHelper.getShareApprovedNotificationEmailSubject(uploader.getLang()),
-                                            EmailContentHelper.getShareApprovedNotificationEmailBody(uploader.getLang(),
+                                            EmailContentHelper.getUploadApprovedNotificationEmailSubject(uploader.getLang()),
+                                            EmailContentHelper.getUploadApprovedNotificationEmailBody(uploader.getLang(),
                                                     uploader.getUsername(), thesis.getTitle()));
                                 }
                             }
@@ -427,64 +427,64 @@ public class ShareController {
                     return Result.error(ResultCodeEnum.INVALID_TYPE);
                 }
             } else {
-                return Result.error(ResultCodeEnum.SHARE_CAN_NOT_UPDATE);
+                return Result.error(ResultCodeEnum.UPLOAD_CAN_NOT_UPDATE);
             }
         } else {
-            return Result.error(ResultCodeEnum.SHARE_ID_NOT_EXIST);
+            return Result.error(ResultCodeEnum.UPLOAD_ID_NOT_EXIST);
         }
     }
 
-    @PutMapping("/reject/{shareId}")
-    public Result<Object> reject(@PathVariable("shareId") int shareId,
+    @PutMapping("/reject/{uploadId}")
+    public Result<Object> reject(@PathVariable("uploadId") int uploadId,
                                  @RequestParam("reason") String reason) {
 
         // 1. get id
         Integer userId = Math.toIntExact(BaseContext.getCurrentId());
 
-        // 2. check share id exist
-        Share share = shareService.getById(shareId);
-        if(share != null) {
+        // 2. check upload id exist
+        Upload upload = uploadService.getById(uploadId);
+        if(upload != null) {
 
-            // 3. check share status unapproved
-            if(share.getStatus() == 0) {
+            // 3. check upload status unapproved
+            if(upload.getStatus() == 0) {
 
                 // a. remove file
-                String file = share.getFileName();
+                String file = upload.getFileName();
                 if(file.startsWith("temp/")) {
                     OSSUtils.deleteFile(file);
                 }
 
-                // b. update share records
-                share.setFileName("");
-                share.setStatus(2);
-                share.setApprover(userId);
-                share.setApproveTime(Timestamp.valueOf(
+                // b. update upload records
+                upload.setFileName("");
+                upload.setStatus(2);
+                upload.setApprover(userId);
+                upload.setApproveTime(Timestamp.valueOf(
                         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(
                                 new Timestamp(new Date().getTime()))));
-                shareService.saveOrUpdate(share);
+                uploadService.saveOrUpdate(upload);
 
                 // c. email notify user
-                User uploader = userService.getUserById(share.getUploader());
+                User uploader = userService.getUserById(upload.getUploader());
                 if(!uploader.getEmail().isEmpty()) {
                     if(uploader.getSendEmail().equals("ON")) {
                         DirectMailUtils.sendEmail(uploader.getEmail(),
-                                EmailContentHelper.getShareRejectedNotificationEmailSubject(uploader.getLang()),
-                                EmailContentHelper.getShareRejectedNotificationEmailBody(uploader.getLang(),
-                                        uploader.getUsername(), share.getTitle(), reason));
+                                EmailContentHelper.getUploadRejectedNotificationEmailSubject(uploader.getLang()),
+                                EmailContentHelper.getUploadRejectedNotificationEmailBody(uploader.getLang(),
+                                        uploader.getUsername(), upload.getTitle(), reason));
                     }
                 }
 
                 return Result.ok();
             } else {
-                return Result.error(ResultCodeEnum.SHARE_CAN_NOT_UPDATE);
+                return Result.error(ResultCodeEnum.UPLOAD_CAN_NOT_UPDATE);
             }
         } else {
-            return Result.error(ResultCodeEnum.SHARE_ID_NOT_EXIST);
+            return Result.error(ResultCodeEnum.UPLOAD_ID_NOT_EXIST);
         }
     }
 
-    private List<CategoryName> getShareCat(Share share) {
-        String catStr = share.getCategory();
+    private List<CategoryName> getUploadCat(Upload upload) {
+        String catStr = upload.getCategory();
         List<CategoryName> categories = new ArrayList<>();
         if(!catStr.isEmpty()) {
             String[] catList = catStr.split(",");
@@ -498,8 +498,8 @@ public class ShareController {
         return categories;
     }
 
-    private void validatedCat(Share share) {
-        String catStr = share.getCategory();
+    private void validatedCat(Upload upload) {
+        String catStr = upload.getCategory();
         if(!catStr.isEmpty()) {
             String[] catList = catStr.split(",");
             List<String> catOkList = new ArrayList<>();
@@ -510,7 +510,7 @@ public class ShareController {
                 }
             }
             String catOkStr = String.join(",", catOkList);
-            share.setCategory(catOkStr);
+            upload.setCategory(catOkStr);
         }
     }
 }
