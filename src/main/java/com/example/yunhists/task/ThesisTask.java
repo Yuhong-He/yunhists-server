@@ -7,6 +7,7 @@ import com.example.yunhists.service.DelThesisService;
 import com.example.yunhists.service.UploadService;
 import com.example.yunhists.service.ThesisService;
 import com.example.yunhists.utils.OSSUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
+@Slf4j
 public class ThesisTask {
 
     @Autowired
@@ -33,6 +35,7 @@ public class ThesisTask {
             if(!thesis.getFileName().isEmpty()) {
                 assert fileList != null;
                 if(!fileList.contains(thesis.getFileName())) {
+                    log.info("Thesis " + thesis.getTitle() + " missing file: " + thesis.getFileName());
                     thesis.setFileName("");
                     thesisService.saveOrUpdate(thesis);
                 }
@@ -45,6 +48,7 @@ public class ThesisTask {
         List<String> fileList = OSSUtils.getAllFile();
         assert fileList != null;
         for(String file : fileList) {
+            log.info("OSS file " + file + " not recorded in database");
             if(file.startsWith("default/")) {
                 Thesis thesis = thesisService.getThesisByFile(file);
                 if(thesis == null) {
