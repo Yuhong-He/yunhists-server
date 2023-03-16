@@ -1,56 +1,54 @@
 package com.example.yunhists.service.impl;
 
 import com.example.yunhists.entity.EmailVerification;
+import com.example.yunhists.mapper.EmailVerificationMapper;
 import com.example.yunhists.service.EmailVerificationService;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Random;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class EmailVerificationServiceImplTest {
 
     @Autowired
     EmailVerificationService evService;
 
-    static EmailVerification testEv = new EmailVerification("test@gmail.com", null);
+    @Mock
+    private EmailVerificationMapper emailVerificationMapper;
 
-    @Order(1)
+    @InjectMocks
+    private EmailVerificationServiceImpl evService2;
+
     @Test
-    public void create_validEV_success() {
-        Random random = new Random();
-        StringBuilder verificationCode = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            verificationCode.append(random.nextInt(10));
-        }
-        testEv.setVerificationCode(String.valueOf(verificationCode));
-        int result = evService.create(testEv);
+    public void create() {
+        MockitoAnnotations.openMocks(this);
+        EmailVerification emailVerification = new EmailVerification();
+        emailVerification.setEmail("test@test.com");
+        when(emailVerificationMapper.insert(emailVerification)).thenReturn(1);
+        int result = evService2.create(emailVerification);
+        verify(emailVerificationMapper, times(1)).insert(emailVerification);
         assertEquals(1, result);
     }
 
-    @Order(2)
     @Test
-    public void read_emailExist_validEV() {
-        EmailVerification ev = evService.read(testEv.getEmail());
-        assertEquals(ev.getVerificationCode(), testEv.getVerificationCode());
-        testEv.setId(ev.getId());
+    public void read() {
+        assertNull(evService.read("aaa"));
     }
 
-    @Order(3)
     @Test
-    public void delete_emailExist_success() {
-        int row = evService.delete(testEv.getId());
-        assertEquals(1, row);
+    public void delete() {
+        int row = evService.delete(-1);
+        assertEquals(0, row);
     }
 
 }

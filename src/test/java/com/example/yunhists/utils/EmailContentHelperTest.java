@@ -42,4 +42,53 @@ public class EmailContentHelperTest {
         assertTrue(EmailContentHelper.getChangeEmailVerificationEmailBody("en", "tester", "123456").contains("Hello tester, this is your change email verification code"));
     }
 
+    @Test
+    public void getDeleteThesisNotificationEmailSubject() {
+        assertTrue(EmailContentHelper.getDeleteThesisNotificationEmailSubject("zh").contains("删除通知"));
+        assertTrue(EmailContentHelper.getDeleteThesisNotificationEmailSubject("en").contains("Delete Notification"));
+    }
+
+    @Test
+    public void getNewUploadNotificationEmailSubject() {
+        assertTrue(EmailContentHelper.getNewUploadNotificationEmailSubject("zh").contains("新上传通知"));
+        assertTrue(EmailContentHelper.getNewUploadNotificationEmailSubject("en").contains("New Upload Notification"));
+    }
+
+    @Test
+    public void getUploadApprovedNotificationEmailSubject() {
+        assertTrue(EmailContentHelper.getUploadApprovedNotificationEmailSubject("zh").contains("批准通知"));
+        assertTrue(EmailContentHelper.getUploadApprovedNotificationEmailSubject("en").contains("Approved Notification"));
+    }
+
+    @Test
+    public void getUploadRejectedNotificationEmailSubject() {
+        assertTrue(EmailContentHelper.getUploadRejectedNotificationEmailSubject("zh").contains("驳回通知"));
+        assertTrue(EmailContentHelper.getUploadRejectedNotificationEmailSubject("en").contains("Reject Notification"));
+    }
+
+    @Test
+    public void getDeleteThesisNotificationEmailBody() {
+        assertTrue(EmailContentHelper.getDeleteThesisNotificationEmailBody("zh", "user", "titleTest", "reasonTest", "admin").contains("user您好"));
+        assertTrue(EmailContentHelper.getDeleteThesisNotificationEmailBody("en", "user", "titleTest", "reasonTest", "admin").contains("Hello user"));
+        assertTrue(EmailContentHelper.getDeleteThesisNotificationEmailBody("en", "user", "titleTest", "", "admin").contains("<--- NULL --->"));
+    }
+
+    @Test
+    public void getNewUploadNotificationEmailBody() {
+        assertTrue(EmailContentHelper.getNewUploadNotificationEmailBody("zh").contains("管理员您好"));
+        assertTrue(EmailContentHelper.getNewUploadNotificationEmailBody("en").contains("Dear admin"));
+    }
+
+    @Test
+    public void getUploadApprovedNotificationEmailBody() {
+        assertTrue(EmailContentHelper.getUploadApprovedNotificationEmailBody("zh", "user", "testTitle").contains("user您好"));
+        assertTrue(EmailContentHelper.getUploadApprovedNotificationEmailBody("en", "user", "testTitle").contains("Dear user"));
+    }
+
+    @Test
+    public void getUploadRejectedNotificationEmailBody() {
+        assertTrue(EmailContentHelper.getUploadRejectedNotificationEmailBody("zh", "user", "testTitle", "testReason").contains("user您好"));
+        assertTrue(EmailContentHelper.getUploadRejectedNotificationEmailBody("en", "user", "testTitle", "testReason").contains("Dear user"));
+    }
+
 }

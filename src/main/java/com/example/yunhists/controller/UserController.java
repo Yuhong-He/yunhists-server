@@ -290,7 +290,9 @@ public class UserController {
         Integer id = Math.toIntExact(BaseContext.getCurrentId());
 
         if(UserUtils.validateLang(lang)) {
-            userService.updateLang(id, lang);
+            User user = userService.getUserById(id);
+            user.setLang(lang);
+            userService.saveOrUpdate(user);
             return Result.ok();
         } else {
             return Result.error(ResultCodeEnum.INVALID_LANG);
@@ -303,7 +305,9 @@ public class UserController {
         Integer id = Math.toIntExact(BaseContext.getCurrentId());
 
         if(List.of("ON", "OFF").contains(status)) {
-            userService.updateEmailNotification(id, status);
+            User user = userService.getUserById(id);
+            user.setSendEmail(status);
+            userService.saveOrUpdate(user);
             return Result.ok();
         } else {
             return Result.error(ResultCodeEnum.INVALID_PARAM);
@@ -314,8 +318,12 @@ public class UserController {
     public Result<Object> delete() {
 
         Integer id = Math.toIntExact(BaseContext.getCurrentId());
-
-        userService.updateUserToDeletedUser(id);
+        User user = userService.getUserById(id);
+        user.setUsername("Deleted User");
+        user.setEmail("");
+        user.setPassword("");
+        user.setUserRights(0);
+        userService.saveOrUpdate(user);
         return Result.ok();
     }
 
@@ -325,7 +333,9 @@ public class UserController {
         Integer id = Math.toIntExact(BaseContext.getCurrentId());
 
         if(UserUtils.validateUsername(username)) {
-            userService.updateUsername(id, username);
+            User user = userService.getUserById(id);
+            user.setUsername(username);
+            userService.saveOrUpdate(user);
             return Result.ok();
         } else {
             return Result.error(ResultCodeEnum.USERNAME_LENGTH);
@@ -411,7 +421,8 @@ public class UserController {
                         // 6. check verification code correct
                         if (code.equals(ev.getVerificationCode())) {
 
-                            userService.updateEmail(id, email);
+                            user.setEmail(email);
+                            userService.saveOrUpdate(user);
                             return Result.ok();
                         } else {
                             return Result.error(ResultCodeEnum.VERIFY_CODE_INCORRECT);

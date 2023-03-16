@@ -31,6 +31,7 @@ public class DirectMailUtils {
             request.setSubject(subject);
             request.setHtmlBody(emailBody);
             client.getAcsResponse(request);
+            log.info("Send email to: " + email);
         } catch (Exception e) {
             log.error("Email send fail: " + e.getMessage());
         }

@@ -99,7 +99,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     @Override
-    public int getCatIdByName(String catName, String lang) {
+    public Integer getCatIdByName(String catName, String lang) {
         QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
         if(lang.equals("zh")) {
             queryWrapper.eq("zh_name", catName);
@@ -107,7 +107,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             queryWrapper.eq("en_name", catName);
         }
         Category category = baseMapper.selectOne(queryWrapper);
-        return category.getId();
+        try {
+            return category.getId();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override

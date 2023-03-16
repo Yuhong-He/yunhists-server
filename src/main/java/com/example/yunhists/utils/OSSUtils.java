@@ -43,7 +43,7 @@ public class OSSUtils {
             }
             return fileList;
         } catch (Exception e) {
-            log.error("OSS move file error: " + e.getMessage());
+            log.error("Get all OSS file error: " + e.getMessage());
             return null;
         }
     }
@@ -53,7 +53,7 @@ public class OSSUtils {
             OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
             ossClient.deleteObject(bucketName, objectName);
         } catch (Exception e) {
-            log.error("OSS move file error: " + e.getMessage());
+            log.error("OSS delete file error: " + e.getMessage());
         }
     }
 

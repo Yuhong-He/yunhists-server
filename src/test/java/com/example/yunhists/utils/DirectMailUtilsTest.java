@@ -10,11 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class DirectMailUtilsTest {
 
     @Test
-    public void sendEmail() throws Exception {
+    public void sendEmail() {
         ByteArrayOutputStream outContent = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outContent));
-        DirectMailUtils.sendEmail("test@yunnanhistory.com", "DirectMailUtilsTest", "This is the test email from Junit test - DirectMailUtilsTest");
-        assertTrue(outContent.toString().contains("Send email: "));
+        DirectMailUtils.sendEmail("admin@yunnanhistory.com", "DirectMailUtilsTest", "This is the test email from Junit test - DirectMailUtilsTest");
+        assertTrue(outContent.toString().contains("Send email to: admin@yunnanhistory.com"));
     }
 
 }

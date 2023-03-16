@@ -1,49 +1,55 @@
 package com.example.yunhists.service.impl;
 
 import com.example.yunhists.entity.EmailTimer;
+import com.example.yunhists.mapper.EmailTimerMapper;
 import com.example.yunhists.service.EmailTimerService;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class EmailTimerServiceImplTest {
 
     @Autowired
     EmailTimerService emailTimerService;
 
-    static EmailTimer emailTimer = new EmailTimer("test@gmail.com", "resetPwd");
+    @Mock
+    private EmailTimerMapper emailTimerMapper;
 
-    @Order(1)
+    @InjectMocks
+    private EmailTimerServiceImpl emailTimerService2;
+
     @Test
-    public void create_validEmailTimer_success() {
-        int result = emailTimerService.create(emailTimer);
+    public void createTest() {
+        MockitoAnnotations.openMocks(this);
+        EmailTimer emailTimer = new EmailTimer();
+        emailTimer.setEmail("test@test.com");
+        when(emailTimerMapper.insert(emailTimer)).thenReturn(1);
+        int result = emailTimerService2.create(emailTimer);
+        verify(emailTimerMapper, times(1)).insert(emailTimer);
         assertEquals(1, result);
     }
 
-    @Order(2)
     @Test
-    public void read_emailAndActionExist_validEmailTimer() {
-        EmailTimer et = emailTimerService.read(emailTimer.getEmail(), emailTimer.getAction());
-        assertNotNull(et);
-        emailTimer.setId(et.getId());
+    public void read() {
+        assertNull(emailTimerService.read("aaa", "bbb"));
     }
 
-    @Order(3)
     @Test
-    public void delete_emailExist_success() {
-        int row = emailTimerService.delete(emailTimer.getId());
-        assertEquals(1, row);
+    public void delete() {
+        int row = emailTimerService.delete(-1);
+        assertEquals(0, row);
     }
 
 }

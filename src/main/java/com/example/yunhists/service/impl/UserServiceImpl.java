@@ -14,10 +14,10 @@ import java.util.List;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Override
-    public int register(User user) {
+    public void register(User user) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return baseMapper.insert(user);
+        baseMapper.insert(user);
     }
 
     @Override
@@ -32,8 +32,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public int googleRegister(User user) {
-        return baseMapper.insert(user);
+    public void googleRegister(User user) {
+        baseMapper.insert(user);
     }
 
     @Override
@@ -63,67 +63,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public int updateUsername(Integer id, String username) {
-        User user = this.getUserById(id);
-        user.setUsername(username);
-        return baseMapper.updateById(user);
-    }
-
-    @Override
-    public int updateEmail(Integer id, String email) {
-        User user = this.getUserById(id);
-        user.setEmail(email);
-        return baseMapper.updateById(user);
-    }
-
-    @Override
-    public int updatePassword(Integer id, String password) {
+    public void updatePassword(Integer id, String password) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User user = this.getUserById(id);
+        System.out.println(user);
         user.setPassword(passwordEncoder.encode(password));
-        return baseMapper.updateById(user);
-    }
-
-    @Override
-    public int updateUserRights(Integer id, Integer userRights) {
-        User user = this.getUserById(id);
-        user.setUserRights(userRights);
-        return baseMapper.updateById(user);
-    }
-
-    @Override
-    public int updateLang(Integer id, String lang) {
-        User user = this.getUserById(id);
-        user.setLang(lang);
-        return baseMapper.updateById(user);
-    }
-
-    @Override
-    public void updateEmailNotification(Integer id, String status) {
-        User user = this.getUserById(id);
-        user.setSendEmail(status);
         baseMapper.updateById(user);
-    }
-
-    @Override
-    public int addPoints(Integer id) {
-        User user = this.getUserById(id);
-        user.setPoints(user.getPoints() + 1);
-        return baseMapper.updateById(user);
-    }
-
-    @Override
-    public int updateUserToDeletedUser(Integer id) {
-        User user = this.getUserById(id);
-        user.setUsername("Deleted User");
-        user.setEmail("");
-        user.setPassword("");
-        user.setUserRights(0);
-        return baseMapper.updateById(user);
-    }
-
-    @Override
-    public int deleteUserById(Integer id) {
-        return baseMapper.deleteById(id);
     }
 }
