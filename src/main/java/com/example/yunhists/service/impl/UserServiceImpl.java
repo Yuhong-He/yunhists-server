@@ -66,7 +66,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void updatePassword(Integer id, String password) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User user = this.getUserById(id);
-        System.out.println(user);
         user.setPassword(passwordEncoder.encode(password));
         baseMapper.updateById(user);
     }

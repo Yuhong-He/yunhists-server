@@ -308,7 +308,7 @@ public class ThesisController {
                 Thesis targetThesis = thesisService.getById(thesisId);
                 if(targetThesis != null) {
 
-                    // 5. set uploader & approver $ approve_time
+                    // 5. set uploader & approver & approve_time
                     thesis.setId(thesisId);
                     thesis.setUploader(targetThesis.getUploader());
                     thesis.setApprover(targetThesis.getApprover());
