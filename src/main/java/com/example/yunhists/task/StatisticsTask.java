@@ -5,6 +5,8 @@ import com.example.yunhists.entity.Thesis;
 import com.example.yunhists.entity.User;
 import com.example.yunhists.service.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -31,7 +33,13 @@ public class StatisticsTask {
     @Autowired
     UploadService uploadService;
 
-    public static String filePath = "src/main/resources/statistics/";
+    private final ResourceLoader resourceLoader;
+
+    public StatisticsTask(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
+
+    private static final String filePath = "statistics/";
 
     @Scheduled(cron ="0 55 23 * * ?")
     public void generateGeneralStatistics() throws IOException {
@@ -51,7 +59,8 @@ public class StatisticsTask {
 
         ObjectMapper mapper = new ObjectMapper();
         String fileName = "general.json";
-        File file = new File(filePath + fileName);
+        Resource fileResource = resourceLoader.getResource("classpath:" + filePath + fileName);
+        File file = fileResource.getFile();
         mapper.writeValue(file, result);
     }
 
@@ -73,7 +82,8 @@ public class StatisticsTask {
 
         ObjectMapper mapper = new ObjectMapper();
         String fileName = "copyright.json";
-        File file = new File(filePath + fileName);
+        Resource fileResource = resourceLoader.getResource("classpath:" + filePath + fileName);
+        File file = fileResource.getFile();
         mapper.writeValue(file, result);
     }
 
@@ -99,7 +109,8 @@ public class StatisticsTask {
 
         ObjectMapper mapper = new ObjectMapper();
         String fileName = "thesisType.json";
-        File file = new File(filePath + fileName);
+        Resource fileResource = resourceLoader.getResource("classpath:" + filePath + fileName);
+        File file = fileResource.getFile();
         mapper.writeValue(file, result);
     }
 
@@ -140,7 +151,8 @@ public class StatisticsTask {
 
         ObjectMapper mapper = new ObjectMapper();
         String fileName = "year.json";
-        File file = new File(filePath + fileName);
+        Resource fileResource = resourceLoader.getResource("classpath:" + filePath + fileName);
+        File file = fileResource.getFile();
         mapper.writeValue(file, sortedMap);
     }
 
