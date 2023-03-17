@@ -34,13 +34,23 @@ public class OSSUtils {
 
     public static List<String> getAllFile() {
         try {
-            OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
-            ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName);
-            ObjectListing listing = ossClient.listObjects(listObjectsRequest);
             List<String> fileList = new ArrayList<>();
-            for (OSSObjectSummary objectSummary : listing.getObjectSummaries()) {
-                fileList.add(objectSummary.getKey());
-            }
+            int maxKeys = 100;
+            String nextMarker = null;
+            ObjectListing objectListing;
+            OSS ossClient = new OSSClientBuilder().build(endpoint, getAccessKey("id"), getAccessKey("secret"));
+
+            do {
+                objectListing = ossClient.listObjects(new ListObjectsRequest(bucketName).withMarker(nextMarker).withMaxKeys(maxKeys));
+
+                List<OSSObjectSummary> sums = objectListing.getObjectSummaries();
+                for (OSSObjectSummary s : sums) {
+                    fileList.add(s.getKey());
+                }
+
+                nextMarker = objectListing.getNextMarker();
+
+            } while (objectListing.isTruncated());
             return fileList;
         } catch (Exception e) {
             log.error("Get all OSS file error: " + e.getMessage());

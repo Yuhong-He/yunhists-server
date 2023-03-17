@@ -43,25 +43,27 @@ public class ThesisTask {
         }
     }
 
-    @Scheduled(cron ="0 0 0 * * mon")
+    @Scheduled(cron ="0 0 0 * * ?")
     public void checkThesisFileOSS() {
         List<String> fileList = OSSUtils.getAllFile();
         assert fileList != null;
         for(String file : fileList) {
-            log.info("OSS file " + file + " not recorded in database");
             if(file.startsWith("default/")) {
                 Thesis thesis = thesisService.getThesisByFile(file);
                 if(thesis == null) {
+                    log.info("OSS file " + file + " not recorded in database");
                     OSSUtils.deleteFile(file);
                 }
             } else if(file.startsWith("deleted/")) {
                 DelThesis delThesis = delThesisService.getThesisByFile(file);
                 if(delThesis == null) {
+                    log.info("OSS file " + file + " not recorded in database");
                     OSSUtils.deleteFile(file);
                 }
             } else if(file.startsWith("temp/")) {
                 Upload upload = uploadService.getUploadByFile(file);
                 if(upload == null) {
+                    log.info("OSS file " + file + " not recorded in database");
                     OSSUtils.deleteFile(file);
                 }
             }

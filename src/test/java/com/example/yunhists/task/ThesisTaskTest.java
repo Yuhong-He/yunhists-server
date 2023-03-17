@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ThesisTaskTest {
@@ -16,12 +14,12 @@ public class ThesisTaskTest {
     private ThesisTask thesisTask;
 
     @Test
-    public void testCheckThesisFileDatabaseRecords() throws IOException {
+    public void testCheckThesisFileDatabaseRecords() {
         thesisTask.checkThesisFileDatabaseRecords();
     }
 
     @Test
-    public void testCheckThesisFileOSS() throws IOException {
+    public void testCheckThesisFileOSS() {
         thesisTask.checkThesisFileOSS();
     }
 
