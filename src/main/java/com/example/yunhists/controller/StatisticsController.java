@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.TypeReference;
 import com.example.yunhists.enumeration.ResultCodeEnum;
 import com.example.yunhists.task.StatisticsTask;
 import com.example.yunhists.common.Result;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @RequestMapping("/api/statistics")
 public class StatisticsController {
 
@@ -40,6 +42,7 @@ public class StatisticsController {
             map.put("year", year);
             return Result.ok(map);
         } catch (IOException e) {
+            log.error(e.getMessage());
             return Result.error(ResultCodeEnum.FAIL);
         }
     }

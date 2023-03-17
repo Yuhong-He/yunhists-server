@@ -66,7 +66,7 @@ public class AuthenticationFilter implements Filter {
         if ("OPTIONS".equals(request.getMethod())) { // https://blog.csdn.net/wxw1997a/article/details/106472081
             filterChain.doFilter(request, servletResponse);
         } else {
-            String access_token = request.getHeader("access_token");
+            String access_token = request.getHeader("AccessToken");
 
             // a. check access_token exist
             if(access_token != null && !access_token.isEmpty()) {
