@@ -18,12 +18,19 @@ public class UserTask {
 
     @Scheduled(cron ="0 0 0 * * ?")
     public void resetTodayDownload() {
+
+        log.info("---------Start resetTodayDownload()---------");
+
         List<User> userList = userService.getAll();
         for(User user : userList) {
-            log.info("Reset today download for user: " + user.getId() + "(" + user.getUsername() + ")");
-            user.setTodayDownload(0);
-            userService.saveOrUpdate(user);
+            if(!user.getUsername().equals("Deleted User")) {
+                log.info("Reset today download for user: " + user.getId() + " (" + user.getUsername() + ")");
+                user.setTodayDownload(0);
+                userService.saveOrUpdate(user);
+            }
         }
+
+        log.info("---------End resetTodayDownload()---------");
     }
 
 }

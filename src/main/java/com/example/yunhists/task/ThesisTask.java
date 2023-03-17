@@ -29,6 +29,9 @@ public class ThesisTask {
 
     @Scheduled(cron ="0 0 0 * * ?")
     public void checkThesisFileDatabaseRecords() {
+
+        log.info("---------Start checkThesisFileDatabaseRecords()---------");
+
         List<String> fileList = OSSUtils.getAllFile();
         List<Thesis> thesisList = thesisService.getAll();
         for(Thesis thesis : thesisList) {
@@ -41,10 +44,16 @@ public class ThesisTask {
                 }
             }
         }
+
+        log.info("---------End checkThesisFileDatabaseRecords()---------");
+
     }
 
     @Scheduled(cron ="0 0 0 * * ?")
     public void checkThesisFileOSS() {
+
+        log.info("---------Start checkThesisFileOSS()---------");
+
         List<String> fileList = OSSUtils.getAllFile();
         assert fileList != null;
         for(String file : fileList) {
@@ -68,6 +77,9 @@ public class ThesisTask {
                 }
             }
         }
+
+        log.info("---------End checkThesisFileOSS()---------");
+
     }
 
 }

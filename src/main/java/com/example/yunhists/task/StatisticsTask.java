@@ -5,6 +5,7 @@ import com.example.yunhists.entity.Thesis;
 import com.example.yunhists.entity.User;
 import com.example.yunhists.service.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+@Slf4j
 @Component
 public class StatisticsTask {
 
@@ -35,6 +37,9 @@ public class StatisticsTask {
 
     @Scheduled(cron ="0 55 23 * * ?")
     public void generateGeneralStatistics() throws IOException {
+
+        log.info("---------Start generateGeneralStatistics()---------");
+
         Map<String, Long> result = new LinkedHashMap<>();
         result.put("thesisCount", thesisService.count());
         result.put("categoryCount", categoryService.count());
@@ -53,10 +58,16 @@ public class StatisticsTask {
         String fileName = "general.json";
         File file = new File(filePath + fileName);
         mapper.writeValue(file, result);
+
+        log.info("---------End generateGeneralStatistics()---------");
+
     }
 
     @Scheduled(cron ="0 55 23 * * ?")
     public void generateThesisCopyrightStatistics() throws IOException {
+
+        log.info("---------Start generateThesisCopyrightStatistics()---------");
+
         Map<String, Long> result = new LinkedHashMap<>();
 
         QueryWrapper<Thesis> queryWrapper0 = new QueryWrapper<>();
@@ -75,10 +86,16 @@ public class StatisticsTask {
         String fileName = "copyright.json";
         File file = new File(filePath + fileName);
         mapper.writeValue(file, result);
+
+        log.info("---------End generateThesisCopyrightStatistics()---------");
+
     }
 
     @Scheduled(cron ="0 55 23 * * ?")
     public void generateThesisTypeStatistics() throws IOException {
+
+        log.info("---------Start generateThesisTypeStatistics()---------");
+
         Map<String, Long> result = new LinkedHashMap<>();
 
         QueryWrapper<Thesis> queryWrapper0 = new QueryWrapper<>();
@@ -101,10 +118,15 @@ public class StatisticsTask {
         String fileName = "thesisType.json";
         File file = new File(filePath + fileName);
         mapper.writeValue(file, result);
+
+        log.info("---------End generateThesisTypeStatistics()---------");
+
     }
 
     @Scheduled(cron ="0 55 23 * * ?")
     public void generateThesisYearStatistics() throws IOException {
+
+        log.info("---------Start generateThesisYearStatistics()---------");
 
         // 1. Get all years
         HashSet<Integer> yearSet = new HashSet<>();
@@ -142,6 +164,9 @@ public class StatisticsTask {
         String fileName = "year.json";
         File file = new File(filePath + fileName);
         mapper.writeValue(file, sortedMap);
+
+        log.info("---------End generateThesisYearStatistics()---------");
+
     }
 
 }

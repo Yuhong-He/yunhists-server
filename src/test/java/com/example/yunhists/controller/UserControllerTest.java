@@ -103,7 +103,7 @@ public class UserControllerTest {
         MockHttpServletRequestBuilder postRequestBuilder = MockMvcRequestBuilders
                 .post("/api/user/getUserInfo")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("access_token", token);
+                .header("AccessToken", token);
 
         MvcResult response =  mockMvc.perform(postRequestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -135,7 +135,7 @@ public class UserControllerTest {
         MockHttpServletRequestBuilder postRequestBuilder = MockMvcRequestBuilders
                 .post("/api/user/getUserInfo")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("access_token", token);
+                .header("AccessToken", token);
 
         MvcResult response =  mockMvc.perform(postRequestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
