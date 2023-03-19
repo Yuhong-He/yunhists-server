@@ -11,7 +11,7 @@ public enum ResultCodeEnum {
 
     // User
     NO_PERMISSION(203, "No Authentication"),
-    INVALID_LANG(204, "Language nor support"),
+    INVALID_LANG(204, "Language not support"),
     NO_USER(205, "User Not Exist"),
     PASSWORD_INCORRECT(206, "Incorrect Password"),
     PASSWORD_NOT_MATCH(207, "Password not match"),

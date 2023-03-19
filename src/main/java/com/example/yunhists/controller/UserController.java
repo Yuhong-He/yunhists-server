@@ -6,6 +6,9 @@ import com.example.yunhists.entity.EmailTimer;
 import com.example.yunhists.entity.EmailVerification;
 import com.example.yunhists.entity.User;
 import com.example.yunhists.enumeration.ResultCodeEnum;
+import com.example.yunhists.pojo.GoogleLoginData;
+import com.example.yunhists.pojo.LoginData;
+import com.example.yunhists.pojo.RegisterData;
 import com.example.yunhists.service.EmailTimerService;
 import com.example.yunhists.service.EmailVerificationService;
 import com.example.yunhists.service.UserService;
@@ -31,9 +34,11 @@ public class UserController {
     @Autowired
     private EmailTimerService emailTimerService;
 
-    @GetMapping("/login")
-    public Result<Object> login(@RequestParam("email") String email,
-                                @RequestParam("password") String password) {
+    @PostMapping("/login")
+    public Result<Object> login(@RequestBody LoginData data) {
+
+        String email = data.getEmail();
+        String password = data.getPassword();
 
         // 1. Check user exist
         User u = userService.getUserByEmail(email);
@@ -68,50 +73,50 @@ public class UserController {
         }
     }
 
-    @GetMapping("/google")
-    public Result<Object> google(@RequestParam("email") String email,
-                                 @RequestParam("username") String username,
-                                 @RequestParam("lang") String lang) {
+    @PostMapping("/google")
+    public Result<Object> google(@RequestBody GoogleLoginData data) {
 
+        String lang = data.getLang();
+        String email = data.getEmail();
+        String username = data.getUsername();
 
-        // 4. check lang valid
-        if(UserUtils.validateLang(lang)) {
+        // 1. check lang valid
+        if(!lang.equals("en")) {
+            lang = "zh";
+        }
 
-            // 5. check email registered
-            User user = userService.getUserByEmail(email);
-            if (user == null) { // google register
+        // 2. check email registered
+        User user = userService.getUserByEmail(email);
+        if (user == null) { // google register
 
-                User newUser = new User(username, "", email, lang, 1);
-                userService.googleRegister(newUser);
-                int userId = newUser.getId();
+            User newUser = new User(username, "", email, lang, 1);
+            userService.googleRegister(newUser);
+            int userId = newUser.getId();
 
-                Map<String, Object> map = new LinkedHashMap<>();
-                map.put("access_token", JwtHelper.createAccessToken((long) userId));
-                map.put("refresh_token", JwtHelper.createRefreshToken((long) userId));
-                map.put("expired_time", JwtHelper.getExpiredTime());
-                map.put("username", username);
-                map.put("lang", lang);
-                map.put("userRights", 0);
-                map.put("sts", STSUtils.getSTS(userId));
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("access_token", JwtHelper.createAccessToken((long) userId));
+            map.put("refresh_token", JwtHelper.createRefreshToken((long) userId));
+            map.put("expired_time", JwtHelper.getExpiredTime());
+            map.put("username", username);
+            map.put("lang", lang);
+            map.put("userRights", 0);
+            map.put("sts", STSUtils.getSTS(userId));
 
-                return Result.ok(map);
+            return Result.ok(map);
 
-            } else if(user.getRegisterType() == 1) { // google login
-                Map<String, Object> map = new LinkedHashMap<>();
-                map.put("access_token", JwtHelper.createAccessToken(user.getId().longValue()));
-                map.put("refresh_token", JwtHelper.createRefreshToken(user.getId().longValue()));
-                map.put("expired_time", JwtHelper.getExpiredTime());
-                map.put("username", user.getUsername());
-                map.put("lang", user.getLang());
-                map.put("userRights", user.getUserRights());
-                map.put("sts", STSUtils.getSTS(user.getId()));
-                return Result.ok(map);
+        } else if(user.getRegisterType() == 1) { // google login
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("access_token", JwtHelper.createAccessToken(user.getId().longValue()));
+            map.put("refresh_token", JwtHelper.createRefreshToken(user.getId().longValue()));
+            map.put("expired_time", JwtHelper.getExpiredTime());
+            map.put("username", user.getUsername());
+            map.put("lang", user.getLang());
+            map.put("userRights", user.getUserRights());
+            map.put("sts", STSUtils.getSTS(user.getId()));
+            return Result.ok(map);
 
-            } else { // email registered user
-                return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
-            }
-        } else {
-            return Result.error(ResultCodeEnum.INVALID_LANG);
+        } else { // email registered user
+            return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
         }
     }
 
@@ -158,15 +163,20 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public Result<Object> register(
-            @RequestParam("lang") String lang,
-            @RequestParam("email") String email,
-            @RequestParam("username") String username,
-            @RequestParam("password") String pwd,
-            @RequestParam("password2") String pwd2,
-            @RequestParam("code") String code) {
+    public Result<Object> register(@RequestBody RegisterData data) {
+
+        String email = data.getEmail();
+        String lang = data.getLang();
+        String username = data.getUsername();
+        String pwd = data.getPassword();
+        String pwd2 = data.getPassword2();
+        String code = data.getCode();
 
         EmailVerification ev = evService.read(email);
+
+        if(!lang.equals("en")) {
+            lang = "zh";
+        }
 
         // 1. check username valid
         if (UserUtils.validateUsername(username)) {
@@ -177,37 +187,31 @@ public class UserController {
                 // 3. check password matches
                 if (pwd.equals(pwd2)) {
 
-                    // 4. check lang valid
-                    if(UserUtils.validateLang(lang)) {
+                    // 4. check email registered
+                    if (userService.getUserByEmail(email) == null) {
 
-                        // 5. check email registered
-                        if (userService.getUserByEmail(email) == null) {
+                        // 5. check email verification code send before
+                        if(ev != null) {
 
-                            // 6. check email verification code send before
-                            if(ev != null) {
+                            // 6. check verification code expiration
+                            if (!EmailVerificationUtils.isExpiration(ev)) {
 
-                                // 7. check verification code expiration
-                                if (!EmailVerificationUtils.isExpiration(ev)) {
-
-                                    // 8. check verification code correct
-                                    if (code.equals(ev.getVerificationCode())) {
-                                        User user = new User(username, pwd, email, lang, 0);
-                                        userService.register(user);
-                                        return Result.ok();
-                                    } else {
-                                        return Result.error(ResultCodeEnum.VERIFY_CODE_INCORRECT);
-                                    }
+                                // 7. check verification code correct
+                                if (code.equals(ev.getVerificationCode())) {
+                                    User user = new User(username, pwd, email, lang, 0);
+                                    userService.register(user);
+                                    return Result.ok();
                                 } else {
-                                    return Result.error(ResultCodeEnum.VERIFY_CODE_EXPIRED);
+                                    return Result.error(ResultCodeEnum.VERIFY_CODE_INCORRECT);
                                 }
                             } else {
-                                return Result.error(ResultCodeEnum.NO_VERIFICATION_CODE);
+                                return Result.error(ResultCodeEnum.VERIFY_CODE_EXPIRED);
                             }
                         } else {
-                            return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
+                            return Result.error(ResultCodeEnum.NO_VERIFICATION_CODE);
                         }
                     } else {
-                        return Result.error(ResultCodeEnum.INVALID_LANG);
+                        return Result.error(ResultCodeEnum.EMAIL_ALREADY_REGISTERED);
                     }
                 } else {
                     return Result.error(ResultCodeEnum.PASSWORD_NOT_MATCH);
