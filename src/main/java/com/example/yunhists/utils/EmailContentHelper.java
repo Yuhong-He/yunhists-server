@@ -76,12 +76,12 @@ public class EmailContentHelper {
         if(lang.equals("zh")) {
             return "<p>" + username + "您好，这是您的新密码：</p>" +
                     "<p style='text-align:center; font-weight: bold;'>" + password + "</p>" +
-                    "<p>请使用新密码登录，然后在<a href=\"https://www.yunnanhistory.com/profile\">您的用户页</a>修改密码，请不要将密码透露给他人。</p>" +
+                    "<p>请使用新密码登录，然后在<a href=\"https://beta.yunnanhistory.com/profile/UserInfo\">您的用户页</a>修改密码，请不要将密码透露给他人。</p>" +
                     "<p>滇史论辑 Yunhists</p>";
         } else {
             return "<p>Hello " + username + ", this is your new password: </p>" +
                     "<p style='text-align:center; font-weight: bold;'>" + password + "</p>" +
-                    "<p>Please login with the new password, then change password at <a href=\"https://www.yunnanhistory.com/profile\">your profile page</a>. Please do not disclose your password to others.</p>" +
+                    "<p>Please login with the new password, then change password at <a href=\"https://beta.yunnanhistory.com/profile/UserInfo\">your profile page</a>. Please do not disclose your password to others.</p>" +
                     "<p>滇史论辑 Yunhists</p>";
         }
     }

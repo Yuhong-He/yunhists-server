@@ -29,11 +29,12 @@ public class STSUtils {
                 sts.put("accessKeySecret", assumeRoleResponse.getCredentials().getAccessKeySecret());
                 sts.put("stsToken", assumeRoleResponse.getCredentials().getSecurityToken());
             } else {
+                log.error("Alibaba Cloud STS Error for user " + userId);
                 sts.put("msg", "Alibaba Cloud STS Error");
             }
             return sts;
         } catch (Exception e) {
-            log.error("Jwt error: " + e.getMessage());
+            log.error("STS token error: " + e.getMessage());
             return null;
         }
     }
