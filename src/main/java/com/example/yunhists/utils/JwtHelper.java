@@ -26,7 +26,7 @@ public class JwtHelper {
     }
 
     public static String createRefreshToken(Long userId) {
-        long tokenExpiration = 365L * 24 * 60 * 60 * 1000; // 1 year
+        long tokenExpiration = 24 * 60 * 60 * 1000; // 24 hours
         return createToken(tokenExpiration, userId);
     }
 
