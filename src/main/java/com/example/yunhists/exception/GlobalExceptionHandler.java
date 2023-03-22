@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(value =Exception.class)
+    @ExceptionHandler(value = Exception.class)
     @ResponseBody
     public Result<Object> exceptionHandler(Exception e){
         log.error("Unexpected error: " + e.getMessage());
         for(StackTraceElement s : e.getStackTrace()) {
-            System.out.println("\t" + s);
+            log.info("\t" + s);
         }
         return Result.error(e.getMessage(), ResultCodeEnum.FAIL);
     }

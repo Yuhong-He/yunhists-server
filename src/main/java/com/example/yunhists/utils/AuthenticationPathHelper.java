@@ -20,6 +20,7 @@ public class AuthenticationPathHelper {
                 "/api/thesis/cite/{id}",
                 "/api/thesis/onlinePublishInfo/{id}",
                 "/api/thesis/categoryTheses/{catId}",
+                "/api/user/refreshSTS", // user action, but unconditional release
                 "/api/user/refreshToken", // user action, but unconditional release
         };
     }
@@ -41,7 +42,6 @@ public class AuthenticationPathHelper {
 
     public static String[] user() {
         return new String[]{
-                "/api/user/refreshSTS",
                 "/api/thesis/getDownloadNum",
                 "/api/thesis/file/{id}",
                 "/api/category/option/{catName}/{lang}",

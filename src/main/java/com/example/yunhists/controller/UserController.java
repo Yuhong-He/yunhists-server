@@ -481,14 +481,42 @@ public class UserController {
         }
     }
 
-    @GetMapping("/refreshSTS")
-    public Result<Object> refreshSTS() {
+    @PostMapping("/refreshSTS")
+    public Result<Object> refreshSTS(@RequestBody String refresh_token) {
 
-        Integer id = Math.toIntExact(BaseContext.getCurrentId());
+        // a. check refresh_token exist
+        if(refresh_token != null && !refresh_token.isEmpty()) {
 
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("sts", STSUtils.getSTS(id));
-        return Result.ok(map);
+            refresh_token = refresh_token.substring(1, refresh_token.length() - 1);
+
+            // b. check refresh_token expired
+            if(JwtHelper.notExpired(refresh_token)) {
+
+                // c. check refresh_token valid
+                Long userId = JwtHelper.getUserId(refresh_token);
+
+                // d. check userId exist (valid refresh_token should contain a valid userid)
+                if(userId != null) {
+                    Integer userIdInt = Math.toIntExact(userId);
+                    User user = userService.getUserById(userIdInt);
+
+                    // e. check user exist
+                    if(user != null) {
+                        Map<String, Object> map = new LinkedHashMap<>();
+                        map.put("sts", STSUtils.getSTS(userIdInt));
+                        return Result.ok(map);
+                    } else {
+                        return Result.error(ResultCodeEnum.NO_USER);
+                    }
+                } else {
+                    return Result.error(ResultCodeEnum.TOKEN_ERROR);
+                }
+            } else {
+                return Result.error(ResultCodeEnum.TOKEN_EXPIRED);
+            }
+        } else {
+            return Result.error(ResultCodeEnum.MISS_TOKEN);
+        }
     }
 
     @PostMapping("/refreshToken")
@@ -497,10 +525,10 @@ public class UserController {
         // a. check refresh_token exist
         if(refresh_token != null && !refresh_token.isEmpty()) {
 
-            // b. check access_token expired
+            // b. check refresh_token expired
             if(JwtHelper.notExpired(refresh_token)) {
 
-                // c. check access_token valid
+                // c. check refresh_token valid
                 Long userId = JwtHelper.getUserId(refresh_token);
 
                 // d. check userId exist (valid refresh_token should contain a valid userid)
