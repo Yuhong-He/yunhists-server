@@ -6,7 +6,7 @@ import com.example.yunhists.common.BaseContext;
 import com.example.yunhists.entity.*;
 import com.example.yunhists.enumeration.CategoryEnum;
 import com.example.yunhists.enumeration.ResultCodeEnum;
-import com.example.yunhists.pojo.*;
+import com.example.yunhists.dto.*;
 import com.example.yunhists.service.CategoryLinkService;
 import com.example.yunhists.service.CategoryService;
 import com.example.yunhists.service.ThesisService;

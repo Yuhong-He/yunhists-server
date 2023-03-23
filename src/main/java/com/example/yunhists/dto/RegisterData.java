@@ -1,4 +1,4 @@
-package com.example.yunhists.pojo;
+package com.example.yunhists.dto;
 
 import lombok.Data;
 

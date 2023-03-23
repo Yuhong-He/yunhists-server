@@ -6,7 +6,7 @@ import com.example.yunhists.common.Result;
 import com.example.yunhists.entity.User;
 import com.example.yunhists.enumeration.ResultCodeEnum;
 import com.example.yunhists.service.UserService;
-import com.example.yunhists.utils.AuthenticationPathHelper;
+import com.example.yunhists.utils.PermissionHelper;
 import com.example.yunhists.utils.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
@@ -33,18 +33,19 @@ public class AuthenticationFilter implements Filter {
     public static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
 
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        // 1. Get request url and auth path
+        // 1. Get request url and permission path
         String requestURI = request.getRequestURI();
         // unregisteredRights < bannedRights < userRights < adminRights
-        String[] unregisteredRights = AuthenticationPathHelper.unregistered();
-        String[] bannedRights = AuthenticationPathHelper.banned();
-        String[] userRights = AuthenticationPathHelper.user();
-        String[] adminRights = AuthenticationPathHelper.admin();
+        String[] unregisteredRights = PermissionHelper.unregistered();
+        String[] bannedRights = PermissionHelper.banned();
+        String[] userRights = PermissionHelper.user();
+        String[] adminRights = PermissionHelper.admin();
 
         // 2. If the request is for unregistered user
         if(match(unregisteredRights, requestURI)){
@@ -52,7 +53,7 @@ public class AuthenticationFilter implements Filter {
             return;
         }
 
-        // 3. Check the request belonging which user rights group
+        // 3. Check the request belonging to which user rights group
         String rights = "";
         if(match(bannedRights, requestURI)) {
             rights = "Banned";
@@ -63,7 +64,7 @@ public class AuthenticationFilter implements Filter {
         }
 
         // 4. Check login and authentication
-        if ("OPTIONS".equals(request.getMethod())) { // https://blog.csdn.net/wxw1997a/article/details/106472081
+        if ("OPTIONS".equals(request.getMethod())) {
             filterChain.doFilter(request, servletResponse);
         } else {
             String access_token = request.getHeader("AccessToken");

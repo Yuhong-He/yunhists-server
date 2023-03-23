@@ -1,6 +1,6 @@
 package com.example.yunhists.utils;
 
-public class AuthenticationPathHelper {
+public class PermissionHelper {
 
     public static String[] unregistered() {
         return new String[]{

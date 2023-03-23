@@ -7,7 +7,7 @@ import com.example.yunhists.common.Result;
 import com.example.yunhists.entity.*;
 import com.example.yunhists.enumeration.CategoryEnum;
 import com.example.yunhists.enumeration.ResultCodeEnum;
-import com.example.yunhists.pojo.*;
+import com.example.yunhists.dto.*;
 import com.example.yunhists.service.*;
 import com.example.yunhists.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;

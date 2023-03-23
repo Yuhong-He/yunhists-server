@@ -10,7 +10,7 @@ public enum ResultCodeEnum {
     NOT_REGISTERED_API(202, "Not Registered API"),
 
     // User
-    NO_PERMISSION(203, "No Authentication"),
+    NO_PERMISSION(203, "No Permission"),
     INVALID_LANG(204, "Language not support"),
     NO_USER(205, "User Not Exist"),
     PASSWORD_INCORRECT(206, "Incorrect Password"),
