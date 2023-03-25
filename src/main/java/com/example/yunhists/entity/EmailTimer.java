@@ -1,33 +1,22 @@
 package com.example.yunhists.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
-
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @TableName("emailTimer")
-public class EmailTimer {
-
-    @TableId(value="id", type= IdType.AUTO)
-    private Integer id;
-
-    @TableField("email")
-    private String email;
+public class EmailTimer extends Email {
 
     @TableField("action")
     private String action;
 
-    @TableField("timestamp")
-    private Timestamp timestamp;
-
     public EmailTimer(String email, String action) {
-        this.email = email;
+        super(email);
         this.action = action;
     }
 
