@@ -34,7 +34,6 @@ public class Result<T> {
     }
 
     public static<T> Result<T> ok(T data){
-        build(data);
         return build(data, ResultCodeEnum.SUCCESS);
     }
 
@@ -43,7 +42,6 @@ public class Result<T> {
     }
 
     public static<T> Result<T> error(T data, ResultCodeEnum resultCodeEnum){
-        build(data);
         return build(data, resultCodeEnum);
     }
 

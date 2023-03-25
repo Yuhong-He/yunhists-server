@@ -94,4 +94,30 @@ public class Thesis {
         this.uploader = uploaderId;
         this.approver = adminId;
     }
+
+    public Thesis(String author, String title, String publication, String location, String publisher, Integer year,
+                  Integer volume, String issue, String pages, String doi, String isbn, String onlinePublisher,
+                  String onlinePublishUrl, Integer type, Integer copyrightStatus, String file, Integer uploader,
+                  Integer approver, Timestamp approveTime) {
+
+        this.author = author;
+        this.title = title;
+        this.publication = publication;
+        this.location = location;
+        this.publisher = publisher;
+        this.year = year;
+        this.volume = volume;
+        this.issue = issue;
+        this.pages = pages;
+        this.doi = doi;
+        this.isbn = isbn;
+        this.onlinePublisher = onlinePublisher;
+        this.onlinePublishUrl = onlinePublishUrl;
+        this.type = type;
+        this.copyrightStatus = copyrightStatus;
+        this.fileName = file;
+        this.uploader = uploader;
+        this.approver = approver;
+        this.approveTime = approveTime;
+    }
 }
