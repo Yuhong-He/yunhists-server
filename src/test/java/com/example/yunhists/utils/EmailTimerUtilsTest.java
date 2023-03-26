@@ -1,14 +1,11 @@
 package com.example.yunhists.utils;
 
 import com.example.yunhists.entity.EmailTimer;
-import com.example.yunhists.entity.EmailVerification;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static java.lang.Thread.sleep;

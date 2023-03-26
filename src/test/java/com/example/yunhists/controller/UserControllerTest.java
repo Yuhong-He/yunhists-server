@@ -2,6 +2,7 @@ package com.example.yunhists.controller;
 
 import com.example.yunhists.YunhistsServerApplication;
 import com.example.yunhists.utils.JwtHelper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,11 +47,15 @@ public class UserControllerTest {
     @Transactional
     @Test
     public void login_invalidUser_208EmailNotRegistered() throws Exception {
+        Map<String, String> map = new HashMap<>();
+        map.put("email", "test@email.com");
+        map.put("password", "123456");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(map);
         MockHttpServletRequestBuilder postRequestBuilder = MockMvcRequestBuilders
-                .get("/api/user/login")
+                .post("/api/user/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("email", "test@email.com")
-                .param("password", "123456");
+                .content(requestBody);
 
         MvcResult response =  mockMvc.perform(postRequestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -60,12 +68,16 @@ public class UserControllerTest {
     @Transactional
     @Test
     public void google_notRegistered_success() throws Exception {
+        Map<String, String> map = new HashMap<>();
+        map.put("email", "test@email.com");
+        map.put("username", "test_user");
+        map.put("lang", "zh");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(map);
         MockHttpServletRequestBuilder postRequestBuilder = MockMvcRequestBuilders
-                .get("/api/user/google")
+                .post("/api/user/google")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("email", "test@email.com")
-                .param("username", "test_user")
-                .param("lang", "zh");
+                .content(requestBody);
 
         MvcResult response =  mockMvc.perform(postRequestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -78,15 +90,19 @@ public class UserControllerTest {
     @Transactional
     @Test
     public void register_notSendEmailBefore_218NoVerificationCode() throws Exception {
+        Map<String, String> map = new HashMap<>();
+        map.put("lang", "zh");
+        map.put("email", "test@email.com");
+        map.put("username", "test_user");
+        map.put("password", "123456");
+        map.put("password2", "123456");
+        map.put("code", "123456");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(map);
         MockHttpServletRequestBuilder postRequestBuilder = MockMvcRequestBuilders
                 .post("/api/user/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("lang", "zh")
-                .param("email", "test@email.com")
-                .param("username", "test_user")
-                .param("password", "123456")
-                .param("password2", "123456")
-                .param("code", "123456");
+                .content(requestBody);
 
         MvcResult response =  mockMvc.perform(postRequestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
