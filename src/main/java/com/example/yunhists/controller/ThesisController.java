@@ -637,8 +637,7 @@ public class ThesisController {
         return level - todayDownload;
     }
 
-    private static String decodeUrl(String url)
-    {
+    private static String decodeUrl(String url) {
         String prevURL = "";
         String decodeURL = url;
         while(!prevURL.equals(decodeURL)) {
