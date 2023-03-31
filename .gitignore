@@ -38,3 +38,5 @@ build/
 
 src/main/resources/securityKey.properties
 statistics/
+/src/main/resources/sql/yunhists_with_data.sql
+/src/main/resources/sql/SQL_Readme.md
